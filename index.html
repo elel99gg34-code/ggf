@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0b0e16">
+<title>계란을 훔치다 · Steal an Egg</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='26'>🥚</text></svg>">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div id="app">
+  <canvas id="game"></canvas>
+
+  <!-- ===== HUD ===== -->
+  <div id="hud">
+    <div class="top-left">
+      <div class="pill money"><span class="ic">💰</span><b id="money">0</b><span class="unit">원</span></div>
+      <div class="pill rate"><span class="ic">📈</span><b id="rate">0/초</b></div>
+      <div class="pill bag"><span class="ic">🥚</span><b id="bag">0/1</b></div>
+      <div class="pill pet"><span class="ic">🐣</span><b id="pets">0</b></div>
+      <div class="pill tm"><span class="ic">🏃</span><b id="tmCount">0/1</b></div>
+    </div>
+
+    <div class="top-right">
+      <div class="mini-wrap">
+        <div id="zoneName" class="zone-name">🏠 내 기지</div>
+        <canvas id="minimap"></canvas>
+      </div>
+    </div>
+
+    <div id="bossbar"></div>
+    <div id="toasts"></div>
+
+    <div id="tut" class="tut"></div>
+
+    <div class="btnbar">
+      <button id="btnShop" class="hb primary">🛒 상점 <kbd>B</kbd></button>
+      <button id="btnPets" class="hb">🐣 내 펫 <kbd>I</kbd></button>
+      <button id="btnAuto" class="hb">⚡ 자동 배치</button>
+      <button id="btnHelp" class="hb sm">❓</button>
+      <button id="btnMute" class="hb sm">🔊</button>
+    </div>
+
+    <!-- 모바일 -->
+    <div id="touchLeft"></div>
+    <div id="stick"><div id="knob"></div></div>
+    <button id="abtn">E</button>
+  </div>
+
+  <!-- ===== 모달 ===== -->
+  <div id="modal">
+    <div class="sheet">
+      <div class="sheet-head">
+        <div class="sheet-title">🥚 계란을 훔치다</div>
+        <button id="modalClose" class="x">✕</button>
+      </div>
+      <div id="modalTabs" class="tabs"></div>
+      <div id="modalBody" class="sheet-body"></div>
+    </div>
+  </div>
+
+  <!-- ===== 부화 연출 ===== -->
+  <div id="reveal">
+    <div class="rev-rays"></div>
+    <div class="rev-card">
+      <div id="revTier" class="rev-tier">일반</div>
+      <div id="revEn" class="rev-en">COMMON</div>
+      <canvas id="revealCanvas" width="600" height="520"></canvas>
+      <div id="revName" class="rev-name">병아리</div>
+      <div id="revInc" class="rev-inc">1 / 초</div>
+      <div id="revMeta" class="rev-meta"></div>
+      <button id="revealClose" class="rev-btn">확인</button>
+    </div>
+  </div>
+
+  <!-- ===== 스플래시 ===== -->
+  <div id="splash">
+    <div class="sp-inner">
+      <div class="sp-egg">🥚</div>
+      <h1 class="sp-title">계란을 훔치다</h1>
+      <div class="sp-sub">STEAL AN EGG</div>
+      <ul class="sp-list">
+        <li><b>7개 구역</b> — 농장 🐔 → 오리 연못 🦆 → 사막 🦂 → 정글 🐯 → 바다 🐋 → 공룡 계곡 🦖 → 우주 💀</li>
+        <li><b>7개 등급</b> — 일반 · 레어 알 · 에픽 · 시크릿 · 디바인 · 코스믹 · 영원한 + 아우라 변형</li>
+        <li><b>보스는 다르다</b> — 예고가 짧고, 쳐다볼 땐 <u>완전히 멈춰야</u> 하고, 걸리면 돌진해온다</li>
+      </ul>
+      <button id="startBtn" class="sp-btn">게임 시작</button>
+      <div class="sp-tip">WASD 이동 · E 꾹 눌러 훔치기 · B 상점</div>
+    </div>
+  </div>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/util.js"></script>
+<script src="js/render.js"></script>
+<script src="js/world.js"></script>
+<script src="js/sfx.js"></script>
+<script src="js/input.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/game.js"></script>
+<script>Game.init(document.getElementById('game'));</script>
+</body>
+</html>
