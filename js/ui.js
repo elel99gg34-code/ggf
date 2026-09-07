@@ -1,22 +1,24 @@
 /* =========================================================
- *  ui.js - HUD / 모달 / 튜토리얼 / 토스트
+ *  ui.js - HUD / 알림 / 도감 / 부화 연출
+ *  (상점 없음 — 러닝머신과 울타리 확장은 월드 안 설비로 처리)
  * ========================================================= */
 const UI = {
   shakeAmt: 0,
-  toasts: [],
   reveal: null,
-  modalTab: 'zone',
+  modalTab: 'pets',
+  announceQ: [],
+  announceT: 0,
+  feed: [],
 
   init(game) {
     this.g = game;
     this.$ = id => document.getElementById(id);
     this.minimap = this.$('minimap');
-    this.minimap.width = 260; this.minimap.height = 74;
+    this.minimap.width = 260; this.minimap.height = 62;
 
-    this.$('btnShop').onclick = () => this.openShop('zone');
-    this.$('btnPets').onclick = () => this.openPets();
-    this.$('btnAuto').onclick = () => Game.autoPlace();
-    this.$('btnHelp').onclick = () => this.openHelp();
+    this.$('btnPets').onclick = () => this.open('pets');
+    this.$('btnDex').onclick  = () => this.open('dex');
+    this.$('btnHelp').onclick = () => this.open('help');
     this.$('btnMute').onclick = e => {
       Sfx.muted = !Sfx.muted;
       e.currentTarget.textContent = Sfx.muted ? '🔇' : '🔊';
@@ -25,62 +27,95 @@ const UI = {
     this.$('modalClose').onclick = () => this.closeModal();
     this.$('modal').addEventListener('click', e => { if (e.target.id === 'modal') this.closeModal(); });
     this.$('revealClose').onclick = () => this.closeReveal();
-    this.$('startBtn').onclick = () => {
-      this.$('splash').classList.add('gone');
-      Sfx.ensure();
-    };
+    this.$('startBtn').onclick = () => { this.$('splash').classList.add('gone'); Sfx.ensure(); };
     this.rc = this.$('revealCanvas');
     this.refresh();
   },
 
-  /* ---------------- 상단 HUD ---------------- */
+  /* ---------------- 매 프레임 ---------------- */
   fastRefresh() {
     const g = this.g;
     this.$('money').textContent = fmtMoney(g.money);
     this.$('rate').textContent = fmtMoney(g.income()) + '/초';
-    this.$('bag').textContent = `${g.carrying.length}/${g.carryMax()}`;
+    this.$('spd').textContent = Math.round(g.speed());
+    this.$('spdLv').textContent = 'Lv.' + g.speedLv;
+    this.$('pen').textContent = `${g.penUsed()}/${g.penSlots}`;
     const z = World.zoneAt(g.player.x, g.player.y);
-    this.$('zoneName').textContent = z ? (z.id === 'base' ? '🏠 내 기지' : (ZONE_BY_ID[z.id].emoji + ' ' + z.name)) : '🛣️ 이동 중';
-    this.bossBar();
+    this.$('zoneName').textContent = z
+      ? (z.id === 'base' ? '🏠 내 기지' : ZONE_BY_ID[z.id].emoji + ' ' + z.name)
+      : '🌱 들판';
+
+    /* 들고 있는 알 */
+    const eggEl = this.$('carry');
+    if (g.carrying) {
+      const r = RARITY_BY_ID[g.carrying.rarity];
+      eggEl.classList.add('on');
+      eggEl.style.borderColor = r.glow;
+      eggEl.innerHTML = `<span class="ic">🥚</span><b style="color:${r.glow}">${r.name}</b>`;
+    } else {
+      eggEl.classList.remove('on');
+      eggEl.style.borderColor = '';
+      eggEl.innerHTML = `<span class="ic">🥚</span><b>없음</b>`;
+    }
+
+    /* 추격 경고 */
+    const cw = this.$('chase');
+    if (g.chasers > 0) {
+      cw.classList.add('on');
+      cw.innerHTML = `🏃 <b>도망쳐!</b> ${g.chasers}마리 추격 중` +
+        (g.carrying ? ' — <span class="risk">잡히면 알을 뺏긴다</span>' : '');
+    } else cw.classList.remove('on');
+
     this.drawReveal();
   },
 
   refresh() {
     const g = this.g;
-    this.$('pets').textContent = g.pets.length;
-    this.$('tmCount').textContent = `${World.treadmills.filter(t => t.i < g.treadmillSlots && t.pet).length}/${g.treadmillSlots}`;
-    /* 튜토리얼 */
+    this.$('pen').textContent = `${g.penUsed()}/${g.penSlots}`;
     const step = TUTORIAL[g.tutorial];
     const box = this.$('tut');
-    if (!step) { box.classList.add('done'); box.innerHTML = `<div class="tut-h">✅ 튜토리얼 완료</div><div class="tut-b">이제 자유롭게 제국을 키워봐. [H] 도움말</div>`; }
-    else {
+    if (!step) {
+      box.classList.add('done');
+      box.innerHTML = `<div class="tut-h">✅ 튜토리얼 완료</div>
+        <div class="tut-b">구역은 전부 자유롭게 갈 수 있어. 파수꾼이 빠른 곳일수록 좋은 알이 나와 — 속도를 올리고 도전해봐. [H] 도움말</div>`;
+    } else {
       box.classList.remove('done');
-      box.innerHTML =
-        `<div class="tut-h"><span class="tut-n">${g.tutorial + 1}/${TUTORIAL.length}</span> ${step.title}</div>
-         <div class="tut-b">${step.body}</div>`;
+      box.innerHTML = `<div class="tut-h"><span class="tut-n">${g.tutorial + 1}/${TUTORIAL.length}</span> ${step.title}</div>
+        <div class="tut-b">${step.body}</div>`;
     }
     if (this.$('modal').classList.contains('open')) this.renderModal();
   },
 
-  bossBar() {
-    const b = Game.nearestBoss();
-    const el = this.$('bossbar');
-    if (!b) { el.classList.remove('on'); return; }
-    el.classList.add('on');
-    const c = b.cfg;
-    if (b.cooldownT > 0) {
-      el.innerHTML = `<div class="bb-name" style="color:${c.glow}">${c.name}</div>
-        <div class="bb-sub">재등장까지 ${fmtTime(b.cooldownT)}</div>`;
+  /* ---------------- 시크릿 이상 전광판 ---------------- */
+  announce(egg, verb) {
+    const r = RARITY_BY_ID[egg.rarity];
+    const v = VARIANT_BY_ID[egg.variant];
+    const sp = SPECIES[egg.species];
+    this.announceQ.push({
+      html: `<div class="an-top">🚨 ${r.name} 등급 ${verb}!</div>
+             <div class="an-main">${v.name ? v.name + ' ' : ''}${sp.name}의 ${r.name} 알</div>
+             <div class="an-sub">아우라 · ${r.auraName}${v.name ? ' + ' + v.name + ' x' + v.mult : ''}</div>`,
+      glow: r.glow, c1: r.c1
+    });
+    this.feed.unshift({ t: Date.now(), name: `${v.name ? v.name + ' ' : ''}${sp.name} · ${r.name}`, glow: r.glow, verb });
+    if (this.feed.length > 12) this.feed.pop();
+    Sfx.play('alert');
+  },
+
+  pumpAnnounce(dt) {
+    const el = this.$('announce');
+    if (this.announceT > 0) {
+      this.announceT -= dt;
+      if (this.announceT <= 0) el.classList.remove('on');
       return;
     }
-    const eggs = '🥚'.repeat(b.eggsLeft) + '<span class="dim">' + '🥚'.repeat(c.eggs - b.eggsLeft) + '</span>';
-    const rule = b.state === 'look'
-      ? '<span class="danger">쳐다보는 중 — 완전히 멈춰!</span>'
-      : b.state === 'warn'
-        ? '<span class="warn">❗ 돌아본다!</span>'
-        : `최소 <b style="color:${RARITIES[c.minTier].glow}">${RARITIES[c.minTier].name}</b> 확정 · 분노 ${b.rage}`;
-    el.innerHTML = `<div class="bb-name" style="color:${c.glow}">👑 ${c.name} <span class="bb-t">${c.title}</span></div>
-      <div class="bb-eggs">${eggs}</div><div class="bb-sub">${rule}</div>`;
+    if (!this.announceQ.length) return;
+    const a = this.announceQ.shift();
+    el.style.setProperty('--g', a.glow);
+    el.style.setProperty('--c1', a.c1);
+    el.innerHTML = a.html;
+    el.classList.add('on');
+    this.announceT = 3.4;
   },
 
   /* ---------------- 토스트 ---------------- */
@@ -95,164 +130,102 @@ const UI = {
   },
 
   shake(a) { this.shakeAmt = Math.max(this.shakeAmt, a); },
-  tick(dt) { this.shakeAmt = Math.max(0, this.shakeAmt - dt * 1.8); if (this.reveal) this.reveal.t += dt; },
+  tick(dt) {
+    this.shakeAmt = Math.max(0, this.shakeAmt - dt * 1.8);
+    if (this.reveal) this.reveal.t += dt;
+    this.pumpAnnounce(dt);
+  },
 
-  /* ---------------- 모달 ---------------- */
-  openShop(tab) { this.modalTab = tab || 'zone'; this.$('modal').classList.add('open'); Game.paused = false; this.renderModal(); Sfx.play('tick'); },
-  openPets() { this.modalTab = 'pets'; this.$('modal').classList.add('open'); this.renderModal(); Sfx.play('tick'); },
-  openHelp() { this.modalTab = 'help'; this.$('modal').classList.add('open'); this.renderModal(); Sfx.play('tick'); },
+  /* ---------------- 정보 패널 ---------------- */
+  open(tab) { this.modalTab = tab; this.$('modal').classList.add('open'); this.renderModal(); Sfx.play('tick'); },
   closeModal() { this.$('modal').classList.remove('open'); },
 
   renderModal() {
-    const g = this.g;
-    const tabs = [
-      ['zone', '🗺️ 구역'], ['gear', '🏃 러닝머신'], ['fac', '🏗️ 시설'],
-      ['pets', '🐣 내 펫'], ['dex', '📖 등급표'], ['help', '❓ 도움말']
-    ];
+    const tabs = [['pets', '🐣 내 펫'], ['dex', '📖 등급표'], ['log', '🚨 발견 기록'], ['help', '❓ 도움말']];
     this.$('modalTabs').innerHTML = tabs.map(([id, l]) =>
       `<button class="tab ${this.modalTab === id ? 'on' : ''}" data-tab="${id}">${l}</button>`).join('');
     this.$('modalTabs').querySelectorAll('.tab').forEach(b =>
       b.onclick = () => { this.modalTab = b.dataset.tab; this.renderModal(); });
-
-    const body = this.$('modalBody');
-    const F = {
-      zone: () => this.viewZones(), gear: () => this.viewGear(), fac: () => this.viewFac(),
-      pets: () => this.viewPets(), dex: () => this.viewDex(), help: () => this.viewHelp()
-    };
-    body.innerHTML = (F[this.modalTab] || F.zone)();
-    body.querySelectorAll('[data-buy]').forEach(b => b.onclick = () => {
-      const [k, v] = b.dataset.buy.split(':');
-      if (k === 'zone') Game.buyZone(v);
-      else if (k === 'tm') Game.buyTreadmillSlot();
-      else if (k === 'inc') Game.buyIncubatorSlot();
-      else if (k === 'bag') Game.buyBackpack();
-      else if (k === 'up') Game.upgradeTreadmill(v);
-      this.renderModal();
-    });
-    body.querySelectorAll('[data-sell]').forEach(b => b.onclick = () => {
-      const uid = +b.dataset.sell;
-      const i = Game.pets.findIndex(p => p.uid === uid);
-      if (i < 0) return;
-      const pet = Game.pets[i];
-      const price = Math.floor(petIncome(pet) * 45);
-      World.treadmills.forEach(t => { if (t.pet && t.pet.uid === uid) t.pet = null; });
-      Game.pets.splice(i, 1);
-      Game.money += price;
-      this.toast(`${petFullName(pet)} 판매 +${fmtMoney(price)}원`, '#39ff9a');
-      Sfx.play('buy'); this.refresh(); this.renderModal();
-    });
-  },
-
-  card(title, sub, right, cls = '') {
-    return `<div class="row ${cls}"><div class="row-l"><div class="row-t">${title}</div><div class="row-s">${sub}</div></div><div class="row-r">${right}</div></div>`;
-  },
-  btn(label, key, ok) {
-    return `<button class="buy ${ok ? '' : 'no'}" data-buy="${key}">${label}</button>`;
-  },
-
-  viewZones() {
-    const g = this.g;
-    let h = `<p class="hint">구역마다 알 주인이 다르고 <b>권장속도(초당 수익 기준값)</b>가 다르다. 각 구역엔 <b>보스</b>가 하나씩 있어.</p>`;
-    ZONES.forEach((z, i) => {
-      const un = g.unlocked[z.id];
-      const prev = i > 0 ? g.unlocked[ZONES[i - 1].id] : true;
-      const boss = BOSS_BY_ZONE[z.id];
-      const mobs = z.mobs.map(m => `${SPECIES[m].name}(${fmtMoney(SPECIES[m].base)})`).join(' · ');
-      const right = un ? `<span class="ok">해금됨</span>`
-        : prev ? this.btn(fmtMoney(z.cost) + '원', 'zone:' + z.id, g.money >= z.cost)
-          : `<span class="lock">앞 구역 먼저</span>`;
-      h += this.card(
-        `${z.emoji} ${z.name} <span class="spd">속도 ${fmtMoney(z.speed)}/초</span>`,
-        `${mobs}<br><span class="boss">👑 보스 ${boss.name} — 최소 ${RARITIES[boss.minTier].name} 확정</span>`,
-        right, un ? 'on' : '');
-    });
-    return h;
-  },
-
-  viewGear() {
-    const g = this.g;
-    let h = `<p class="hint">러닝머신 슬롯을 늘리고 등급을 올려. 수익 = <b>생물 속도 × 등급배수 × 아우라배수 × 러닝머신배수</b></p>`;
-    const canSlot = g.treadmillSlots < CONFIG.treadmillSlots.max;
-    const sc = CONFIG.treadmillSlots.cost(g.treadmillSlots);
-    h += this.card('러닝머신 슬롯 추가', `현재 ${g.treadmillSlots} / ${CONFIG.treadmillSlots.max}`,
-      canSlot ? this.btn(fmtMoney(sc) + '원', 'tm:1', g.money >= sc) : `<span class="ok">MAX</span>`);
-    TREADMILLS.forEach(t => {
-      if (t.cost === 0) return;
-      const n = World.treadmills.filter(q => q.i < g.treadmillSlots && q.kind === t.id).length;
-      h += this.card(`${t.name} <span class="spd">x${t.mult}</span>`,
-        `보유 ${n}대 — 가장 낮은 슬롯 1개를 업그레이드`,
-        this.btn(fmtMoney(t.cost) + '원', 'up:' + t.id, g.money >= t.cost));
-    });
-    return h;
-  },
-
-  viewFac() {
-    const g = this.g;
-    let h = `<p class="hint">부화기를 늘리면 알을 동시에 키우고, 가방을 키우면 한 번에 여러 개를 훔칠 수 있어.</p>`;
-    const ic = g.incubatorSlots < CONFIG.incubator.maxSlots;
-    const icc = CONFIG.incubator.slotCost[g.incubatorSlots];
-    h += this.card('부화기 추가', `현재 ${g.incubatorSlots} / ${CONFIG.incubator.maxSlots}`,
-      ic ? this.btn(fmtMoney(icc) + '원', 'inc:1', g.money >= icc) : `<span class="ok">MAX</span>`);
-    const bl = g.backpackLv < CONFIG.backpack.levels.length - 1;
-    const bc = CONFIG.backpack.cost[g.backpackLv + 1];
-    h += this.card('가방 확장', `한 번에 알 ${g.carryMax()}개 → ${bl ? CONFIG.backpack.levels[g.backpackLv + 1] : '-'}개`,
-      bl ? this.btn(fmtMoney(bc) + '원', 'bag:1', g.money >= bc) : `<span class="ok">MAX</span>`);
-    h += `<div class="stats">
-      <div><b>${fmtMoney(g.totalEarned)}</b><span>총 수익</span></div>
-      <div><b>${g.stolen}</b><span>훔친 알</span></div>
-      <div><b>${g.hatched}</b><span>부화</span></div>
-      <div><b>${g.bossKills}</b><span>보스 격파</span></div>
-      <div><b>${g.best !== null ? RARITIES[g.best].name : '-'}</b><span>최고 등급</span></div>
-    </div>
-    <button class="danger-btn" onclick="if(confirm('정말 처음부터 다시 할래? 저장이 지워져.'))Game.reset()">저장 초기화</button>`;
-    return h;
+    const F = { pets: () => this.viewPets(), dex: () => this.viewDex(), log: () => this.viewLog(), help: () => this.viewHelp() };
+    this.$('modalBody').innerHTML = (F[this.modalTab] || F.pets)();
   },
 
   viewPets() {
     const g = this.g;
-    if (!g.pets.length) return `<p class="hint">아직 펫이 없어. 알을 훔쳐서 부화시켜봐!</p>`;
-    const placed = new Set(World.treadmills.filter(t => t.pet).map(t => t.pet.uid));
-    const sorted = g.pets.slice().sort((a, b) => petIncome(b) - petIncome(a));
-    let h = `<p class="hint">총 ${g.pets.length}마리 · 가동 중 ${placed.size}마리 · <b>[자동 배치]</b>로 최고 수익 펫만 올릴 수 있어.</p><div class="petgrid">`;
-    for (const p of sorted) {
-      const r = RARITY_BY_ID[p.rarity], v = VARIANT_BY_ID[p.variant], sp = SPECIES[p.species];
-      h += `<div class="petcard" style="--c1:${r.c1};--c2:${r.c2};--g:${r.glow}">
-        <div class="pc-rar">${r.name}${v.name ? ' · ' + v.name : ''}</div>
-        <div class="pc-name">${sp.pet}</div>
-        <div class="pc-inc">${fmtMoney(petIncome(p))}/초</div>
-        <div class="pc-foot">${placed.has(p.uid) ? '<span class="run">가동중</span>' : '<span class="idle">대기</span>'}
-          <button class="sell" data-sell="${p.uid}">판매 ${fmtMoney(Math.floor(petIncome(p) * 45))}</button></div>
-      </div>`;
+    let h = `<div class="stats">
+      <div><b>${Math.round(g.speed())}</b><span>내 속도 (Lv.${g.speedLv})</span></div>
+      <div><b>${fmtMoney(g.income())}</b><span>초당 수익</span></div>
+      <div><b>${g.penUsed()}/${g.penSlots}</b><span>울타리</span></div>
+      <div><b>${g.stolen}</b><span>훔친 알</span></div>
+      <div><b>${g.caught}</b><span>잡힌 횟수</span></div>
+      <div><b>${g.best !== null ? RARITIES[g.best].name : '-'}</b><span>최고 등급</span></div>
+    </div>`;
+    if (!g.penPets.length && !g.penEggs.length)
+      return h + `<p class="hint">울타리가 비었어. 둥지에서 알을 훔쳐다 넣어봐!</p>`;
+    if (g.penEggs.length) {
+      h += `<h3 class="sec">부화 중 (${g.penEggs.length})</h3><div class="petgrid">`;
+      for (const e of g.penEggs) {
+        const r = RARITY_BY_ID[e.egg.rarity];
+        const pct = Math.round(clamp(e.t / CONFIG.hatch.time, 0, 1) * 100);
+        h += `<div class="petcard" style="--c1:${r.c1};--c2:${r.c2};--g:${r.glow}">
+          <div class="pc-rar">${r.name}</div><div class="pc-name">알 · ${SPECIES[e.egg.species].name}</div>
+          <div class="pc-inc">부화 ${pct}%</div></div>`;
+      }
+      h += '</div>';
     }
-    return h + '</div>';
+    if (g.penPets.length) {
+      h += `<h3 class="sec">울타리 안 펫 (${g.penPets.length})</h3><div class="petgrid">`;
+      for (const q of g.penPets.slice().sort((a, b) => petIncome(b.pet) - petIncome(a.pet))) {
+        const p = q.pet, r = RARITY_BY_ID[p.rarity], v = VARIANT_BY_ID[p.variant], sp = SPECIES[p.species];
+        h += `<div class="petcard" style="--c1:${r.c1};--c2:${r.c2};--g:${r.glow}">
+          <div class="pc-rar">${r.name}${v.name ? ' · ' + v.name : ''}</div>
+          <div class="pc-name">${sp.pet}</div>
+          <div class="pc-inc">${fmtMoney(petIncome(p))}/초</div></div>`;
+      }
+      h += '</div>';
+    }
+    return h + `<button class="danger-btn" onclick="if(confirm('정말 처음부터 다시 할래? 저장이 지워져.'))Game.reset()">저장 초기화</button>`;
   },
 
   viewDex() {
-    let h = `<p class="hint">등급이 높을수록 수익 배수가 커진다. <b>아우라 변형</b>은 등급 위에 한 번 더 곱해져.</p><div class="rargrid">`;
+    let h = `<p class="hint">등급이 높을수록 펫 수익 배수가 크다. <b>시크릿</b> 이상이 나오면 화면에 알림이 뜬다.</p><div class="rargrid">`;
     const total = RARITIES.reduce((a, r) => a + r.weight, 0);
     for (const r of RARITIES) {
       h += `<div class="rarcard" style="--c1:${r.c1};--c2:${r.c2};--g:${r.glow}">
-        <div class="rc-name">${r.name}</div>
+        <div class="rc-name">${r.name}${r.tier >= ANNOUNCE_TIER ? ' 🚨' : ''}</div>
         <div class="rc-en">${r.en}</div>
         <div class="rc-m">수익 x${r.mult}</div>
         <div class="rc-p">기본 확률 ${(r.weight / total * 100).toFixed(r.weight < 50 ? 3 : 1)}%</div>
-        <div class="rc-a">아우라 · ${r.auraName}</div>
-      </div>`;
+        <div class="rc-a">아우라 · ${r.auraName}</div></div>`;
     }
     h += `</div><h3 class="sec">아우라 변형</h3><div class="rargrid">`;
     const vt = VARIANTS.reduce((a, v) => a + v.weight, 0);
     for (const v of VARIANTS) {
-      h += `<div class="rarcard var">
-        <div class="rc-name">${v.name || '기본'}</div>
-        <div class="rc-m">수익 x${v.mult}</div>
-        <div class="rc-p">${(v.weight / vt * 100).toFixed(1)}%</div>
-      </div>`;
+      h += `<div class="rarcard var"><div class="rc-name">${v.name || '기본'}</div>
+        <div class="rc-m">수익 x${v.mult}</div><div class="rc-p">${(v.weight / vt * 100).toFixed(1)}%</div></div>`;
     }
-    h += `</div><h3 class="sec">생물 권장속도</h3><div class="spdlist">`;
+    h += `</div><h3 class="sec">구역 — 전부 자유롭게 갈 수 있다</h3>
+      <p class="hint">잠금은 없다. 다만 파수꾼이 빠른 구역은 <b>내 속도가 낮으면 무조건 잡힌다.</b></p><div class="spdlist">`;
+    const my = Math.round(Game.speed());
     for (const z of ZONES) {
-      h += `<div class="spdrow"><b>${z.emoji} ${z.name}</b>` +
-        z.mobs.map(m => `<span>${SPECIES[m].name} <em>${fmtMoney(SPECIES[m].base)}</em></span>`).join('') +
-        `<span class="bossrow">👑 ${BOSS_BY_ZONE[z.id].name} <em>최소 ${RARITIES[BOSS_BY_ZONE[z.id].minTier].name}</em></span></div>`;
+      const ok = my >= z.need;
+      h += `<div class="spdrow ${ok ? '' : 'no'}"><b>${z.emoji} ${z.name}</b>` +
+        z.mobs.map(m => `<span>${SPECIES[m].name} <em>추격 ${SPECIES[m].chase}</em></span>`).join('') +
+        `<span>펫 수익 <em>${fmtMoney(z.speed)}/초</em></span>
+         <span class="req">권장 속도 <em>${z.need}</em> ${ok ? '✔' : '⚠ 부족'}</span></div>`;
+    }
+    return h + `</div>`;
+  },
+
+  viewLog() {
+    if (!this.feed.length) return `<p class="hint">아직 시크릿 이상 등급을 발견한 적이 없어.</p>`;
+    let h = `<p class="hint">시크릿 이상 등급을 찾으면 여기에 쌓인다.</p><div class="logs">`;
+    for (const f of this.feed) {
+      const d = new Date(f.t);
+      h += `<div class="logrow" style="--g:${f.glow}">
+        <span class="lg-t">${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}</span>
+        <span class="lg-n" style="color:${f.glow}">${f.name}</span>
+        <span class="lg-v">${f.verb}</span></div>`;
     }
     return h + '</div>';
   },
@@ -262,25 +235,31 @@ const UI = {
     <h3 class="sec">조작</h3>
     <div class="keys">
       <div><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> 이동 (모바일: 왼쪽 화면 드래그)</div>
-      <div><kbd>E</kbd> 꾹 누르기 — 알 훔치기 / 부화 / 설치</div>
-      <div><kbd>B</kbd> 상점 · <kbd>I</kbd> 내 펫 · <kbd>H</kbd> 도움말 · <kbd>ESC</kbd> 닫기</div>
+      <div><kbd>E</kbd> <b>꾹</b> — 알 훔치기 / 울타리에 넣기 / 러닝머신 달리기 / 울타리 확장</div>
+      <div><kbd>I</kbd> 내 펫 · <kbd>H</kbd> 도움말 · <kbd>ESC</kbd> 닫기</div>
     </div>
-    <h3 class="sec">알 훔치기</h3>
-    <p class="hint">알을 품은 생물 옆에서 <b>E를 꾹</b> 누르면 게이지가 찬다.
-    머리 위에 <b style="color:#ffd54a">❗</b> 가 뜨면 곧 뒤돌아본다는 신호 —
-    <b style="color:#ff4d4d">즉시 손을 떼</b>. 눈이 빨개졌을 때 계속 잡고 있으면 들켜서 기절한다.</p>
-    <h3 class="sec">보스는 규칙이 다르다 👑</h3>
-    <p class="hint">
-    구역마다 보스가 하나씩 있고 알을 <b>3개</b> 품고 있어. 보스는:<br>
-    • 예고(❗)가 <b>훨씬 짧고</b>, 알을 뺏길 때마다 <b>분노</b>해서 더 짧아진다<br>
-    • <b style="color:#ff4d4d">무궁화꽃이 피었습니다</b> 룰 — 쳐다볼 땐 E를 떼는 것뿐 아니라 <b>완전히 멈춰야</b> 한다<br>
-    • 걸리면 <b>돌진</b>해서 날려버리고, 가방에 있던 알 1개를 떨어뜨린다<br>
-    • 대신 <b>등급 하한이 보장</b>되고, 3개를 다 털면 격파 — 일정 시간 뒤 부활한다</p>
-    <h3 class="sec">수익 공식</h3>
-    <p class="hint"><b>생물 권장속도 × 등급 배수 × 아우라 변형 배수 × 러닝머신 배수</b><br>
-    예) 고래(500K) × 코스믹(x350) × 무지개(x5) × 터보(x5) = 초당 4.4조</p>
-    <h3 class="sec">기타</h3>
-    <p class="hint">진행상황은 자동 저장돼. 껐다 켜면 최대 2시간치 오프라인 수익(50%)을 받아.</p>`;
+    <h3 class="sec">1. 알 훔치기</h3>
+    <p class="hint">구역마다 <b>둥지</b>가 있고 그 옆에서 파수꾼이 자고 있다(💤).
+    둥지 옆에서 <b>E를 꾹</b> 누르면 알을 들어올린다. 알을 드는 순간 <b>파수꾼이 깨어나 쫓아온다.</b></p>
+    <h3 class="sec">2. 도망치기</h3>
+    <p class="hint">잡히면 <b>알을 뺏기고</b> 튕겨나간다. 알은 원래 둥지로 돌아간다.
+    파수꾼은 일정 시간이 지나거나 충분히 멀어지면 포기하고 둥지로 돌아가 다시 잠든다.
+    알을 들면 살짝 느려지니 주의.</p>
+    <h3 class="sec">3. 울타리에 넣기</h3>
+    <p class="hint">기지 울타리 아래쪽 <b>알 넣는 곳</b>에서 <b>E</b>. 알은 울타리 안에서 자라다 부화하고,
+    부화한 펫은 울타리를 돌아다니며 <b>초당 돈을 벌어준다.</b>
+    칸이 부족하면 <b>울타리 확장 패드</b>를 밟고 <b>E</b>.</p>
+    <h3 class="sec">4. 러닝머신 = 내 속도</h3>
+    <p class="hint">러닝머신은 펫이 아니라 <b>내가 타는 것</b>이다. 올라서서 <b>E를 꾹</b> 누르면
+    돈을 쓰면서 달리고, 게이지가 차면 <b>속도 레벨이 오른다</b>. 레벨당 +10%.</p>
+    <h3 class="sec">5. 난이도</h3>
+    <p class="hint">구역은 <b>전부 자유롭게</b> 갈 수 있다. 잠금은 없다.
+    대신 뒤쪽 구역일수록 파수꾼의 <b>추격 속도</b>가 빨라서, 내 속도가 그보다 낮으면 절대 못 도망친다.
+    좋은 알 → 좋은 펫 → 더 많은 돈 → 더 높은 속도 → 더 먼 구역, 이게 성장 루프.</p>
+    <h3 class="sec">6. 알림</h3>
+    <p class="hint"><b>시크릿</b> 이상 등급을 발견하거나 부화시키면 화면 위에 <b>전광판 알림</b>이 뜬다.
+    둥지에 그 등급이 놓여 있으면 미니맵에도 크게 표시된다.</p>
+    <p class="hint">진행상황은 자동 저장. 껐다 켜면 최대 2시간치 오프라인 수익(50%)을 받는다.</p>`;
   },
 
   /* ---------------- 부화 연출 ---------------- */
@@ -300,7 +279,7 @@ const UI = {
     this.$('revMeta').innerHTML =
       `<span>${sp.name} 계열</span><span>아우라 · ${r.auraName}</span>` +
       (v.name ? `<span class="vtag">${v.name} x${v.mult}</span>` : '');
-    el.classList.toggle('big', r.tier >= 3);
+    el.classList.toggle('big', r.tier >= ANNOUNCE_TIER);
     this.rc.width = 300 * 2; this.rc.height = 260 * 2;
   },
   closeReveal() { this.reveal = null; this.$('reveal').classList.remove('open'); },
@@ -312,21 +291,7 @@ const UI = {
     c.clearRect(0, 0, this.rc.width, this.rc.height);
     c.setTransform(2, 0, 0, 2, 0, 0);
     const cx = 150, cy = 170;
-    if (t < 0.9) {
-      const sh = Math.sin(t * 40) * (2 + t * 9);
-      Draw.egg(c, cx + sh, cy - 26, 72, pet.rarity, pet.variant, t, true);
-    } else {
-      const p = Math.min(1, (t - 0.9) / 0.35);
-      c.save();
-      c.translate(cx, cy);
-      c.scale(0.9 + p * 0.25, 0.9 + p * 0.25);
-      c.translate(-cx, -cy);
-      Draw.pet(c, cx, cy + 16, pet, t, 3.0, false);
-      c.restore();
-    }
-  },
-
-  offlineModal(gain, secs) {
-    this.toast(`오프라인 ${fmtTime(secs)} 동안 +${fmtMoney(gain)}원 벌었어! 💤`, '#39ff9a');
+    if (t < 0.9) Draw.egg(c, cx + Math.sin(t * 40) * (2 + t * 9), cy - 26, 72, pet.rarity, pet.variant, t, true);
+    else Draw.pet(c, cx, cy + 16, pet, t, 3.0, false);
   }
 };

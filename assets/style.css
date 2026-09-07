@@ -30,7 +30,7 @@ kbd{display:inline-block;padding:1px 6px;margin-left:5px;border-radius:6px;
 
 /* ---------- 상단 좌측 스탯 ---------- */
 .top-left{position:absolute;top:12px;left:12px;display:flex;flex-wrap:wrap;gap:8px;max-width:60vw}
-.pill{display:flex;align-items:center;gap:7px;padding:8px 14px;border-radius:999px;
+.pill{white-space:nowrap;display:flex;align-items:center;gap:7px;padding:8px 14px;border-radius:999px;
   background:linear-gradient(180deg,var(--panel2),var(--panel));
   border:2px solid var(--line);box-shadow:var(--shadow);font-size:15px;line-height:1}
 .pill .ic{font-size:16px}
@@ -38,9 +38,10 @@ kbd{display:inline-block;padding:1px 6px;margin-left:5px;border-radius:6px;
 .pill.money{border-color:rgba(255,213,74,.55)}
 .pill.money b{color:var(--gold)}
 .pill.rate b{color:var(--green)}
-.pill.bag b{color:#8ed2ff}
-.pill.pet b{color:var(--purple)}
-.pill.tm b{color:#ff9f43}
+.pill.spd b{color:#8ef0ff}
+.pill.pen b{color:var(--purple)}
+.pill.carry b{color:var(--dim)}
+.pill.carry.on{box-shadow:var(--shadow),0 0 18px currentColor}
 
 /* ---------- 미니맵 ---------- */
 .top-right{position:absolute;top:12px;right:12px}
@@ -49,22 +50,32 @@ kbd{display:inline-block;padding:1px 6px;margin-left:5px;border-radius:6px;
 .zone-name{font-size:13px;margin-bottom:6px;text-align:center;color:var(--gold);letter-spacing:.01em}
 #minimap{display:block;width:260px;height:74px;border-radius:8px;background:#0b0e16}
 
-/* ---------- 보스 바 ---------- */
-#bossbar{position:absolute;top:14px;left:50%;transform:translate(-50%,-140%);
-  min-width:300px;max-width:min(560px,86vw);padding:12px 20px;text-align:center;
-  background:linear-gradient(180deg,rgba(40,14,20,.96),rgba(18,8,12,.96));
-  border:2px solid rgba(255,80,80,.55);border-radius:var(--r);
-  box-shadow:0 0 34px rgba(255,60,60,.30),var(--shadow);
-  transition:transform .32s cubic-bezier(.2,1.4,.4,1),opacity .25s;opacity:0}
-#bossbar.on{transform:translate(-50%,0);opacity:1}
-.bb-name{font-size:19px;font-weight:900;letter-spacing:.01em}
-.bb-t{font-size:12px;color:var(--dim);font-weight:800;margin-left:6px}
-.bb-eggs{font-size:19px;letter-spacing:4px;margin:4px 0 2px}
-.bb-eggs .dim{opacity:.25}
-.bb-sub{font-size:13px;color:#e8d8dc}
-.bb-sub .danger{color:#ff5e6e;animation:blink .45s infinite alternate}
-.bb-sub .warn{color:var(--gold)}
+/* ---------- 상단 중앙 스택 (전광판 · 추격 · 토스트) ---------- */
+#topStack{position:absolute;top:14px;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:9px;
+  width:max-content;max-width:92vw;pointer-events:none;z-index:5}
+
+/* 시크릿 전광판 */
+#announce{display:none;width:min(560px,90vw);padding:15px 22px;text-align:center;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--c1,#333) 65%,#0d1017),#0d1017);
+  border:3px solid var(--g,#ffd54a);border-radius:16px;
+  box-shadow:0 0 40px color-mix(in srgb,var(--g,#ffd54a) 50%,transparent),var(--shadow)}
+#announce.on{display:block;animation:dropIn .42s cubic-bezier(.2,1.5,.4,1)}
+@keyframes dropIn{from{transform:translateY(-26px) scale(.94);opacity:0}}
+.an-top{font-size:13px;font-weight:900;letter-spacing:.06em;color:var(--g,#ffd54a);
+  animation:blink .5s infinite alternate}
+.an-main{font-size:24px;font-weight:900;margin:3px 0;color:#fff;
+  text-shadow:0 0 22px var(--g,#ffd54a)}
+.an-sub{font-size:12px;color:#c3cddc;font-weight:700}
 @keyframes blink{to{opacity:.35}}
+
+/* 추격 경고 */
+#chase{display:none;padding:10px 22px;border-radius:999px;font-size:16px;font-weight:900;
+  background:rgba(40,8,12,.94);border:3px solid #ff4d5e;color:#ffd9dd;
+  box-shadow:0 0 16px rgba(255,60,80,.4);white-space:nowrap}
+#chase.on{display:block;animation:pulse .5s infinite alternate}
+#chase .risk{color:#ff9aa5}
+@keyframes pulse{to{box-shadow:0 0 28px rgba(255,60,80,.7)}}
 
 /* ---------- 튜토리얼 ---------- */
 .tut{position:absolute;left:12px;bottom:96px;max-width:min(360px,72vw);
@@ -89,8 +100,7 @@ kbd{display:inline-block;padding:1px 6px;margin-left:5px;border-radius:6px;
 .hb.off{opacity:.5}
 
 /* ---------- 토스트 ---------- */
-#toasts{position:absolute;top:96px;left:50%;transform:translateX(-50%);
-  display:flex;flex-direction:column;gap:8px;align-items:center;width:max-content;max-width:90vw}
+#toasts{display:flex;flex-direction:column;gap:8px;align-items:center;width:max-content;max-width:90vw}
 .toast{padding:10px 18px;border-radius:999px;font-size:14px;font-weight:800;
   background:rgba(12,15,22,.95);border:2px solid var(--gold);box-shadow:var(--shadow);
   opacity:0;transform:translateY(-12px) scale(.94);transition:.28s cubic-bezier(.2,1.4,.4,1)}
@@ -252,3 +262,15 @@ kbd{display:inline-block;padding:1px 6px;margin-left:5px;border-radius:6px;
   box-shadow:0 7px 0 rgba(0,0,0,.5)}
 .sp-btn:active{transform:translateY(5px);box-shadow:0 2px 0 rgba(0,0,0,.5)}
 .sp-tip{margin-top:13px;font-size:12px;color:var(--dim)}
+
+/* ---------- 발견 기록 ---------- */
+.logs{display:flex;flex-direction:column;gap:7px}
+.logrow{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:11px;
+  background:rgba(255,255,255,.05);border:2px solid var(--g);font-size:13px}
+.lg-t{color:var(--dim);font-size:11px;min-width:38px}
+.lg-n{font-weight:900;flex:1}
+.lg-v{font-size:11px;color:var(--dim);background:rgba(255,255,255,.08);
+  border-radius:999px;padding:3px 10px}
+.spdrow.no{border-color:rgba(255,159,67,.45)}
+.spdrow .req em{color:#ff9f43}
+.spdrow.no .req{color:#ff9f43}

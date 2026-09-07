@@ -12,9 +12,8 @@ const Input = {
       this.keys[k] = true;
       if ([' ', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(k)) e.preventDefault();
       if (k === 'e' || k === ' ') { this.action = true; Game.interact(); }
-      if (k === 'b') UI.openShop('zone');
-      if (k === 'i' || k === 'tab') { e.preventDefault(); UI.openPets(); }
-      if (k === 'h' || k === '?' || k === '/') UI.openHelp();
+      if (k === 'i' || k === 'tab') { e.preventDefault(); UI.open('pets'); }
+      if (k === 'h' || k === '?' || k === '/') UI.open('help');
       if (k === 'escape') UI.closeModal();
     });
     addEventListener('keyup', e => {

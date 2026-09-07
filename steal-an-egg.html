@@ -39,7 +39,7 @@ kbd{display:inline-block;padding:1px 6px;margin-left:5px;border-radius:6px;
 
 /* ---------- 상단 좌측 스탯 ---------- */
 .top-left{position:absolute;top:12px;left:12px;display:flex;flex-wrap:wrap;gap:8px;max-width:60vw}
-.pill{display:flex;align-items:center;gap:7px;padding:8px 14px;border-radius:999px;
+.pill{white-space:nowrap;display:flex;align-items:center;gap:7px;padding:8px 14px;border-radius:999px;
   background:linear-gradient(180deg,var(--panel2),var(--panel));
   border:2px solid var(--line);box-shadow:var(--shadow);font-size:15px;line-height:1}
 .pill .ic{font-size:16px}
@@ -47,9 +47,10 @@ kbd{display:inline-block;padding:1px 6px;margin-left:5px;border-radius:6px;
 .pill.money{border-color:rgba(255,213,74,.55)}
 .pill.money b{color:var(--gold)}
 .pill.rate b{color:var(--green)}
-.pill.bag b{color:#8ed2ff}
-.pill.pet b{color:var(--purple)}
-.pill.tm b{color:#ff9f43}
+.pill.spd b{color:#8ef0ff}
+.pill.pen b{color:var(--purple)}
+.pill.carry b{color:var(--dim)}
+.pill.carry.on{box-shadow:var(--shadow),0 0 18px currentColor}
 
 /* ---------- 미니맵 ---------- */
 .top-right{position:absolute;top:12px;right:12px}
@@ -58,22 +59,32 @@ kbd{display:inline-block;padding:1px 6px;margin-left:5px;border-radius:6px;
 .zone-name{font-size:13px;margin-bottom:6px;text-align:center;color:var(--gold);letter-spacing:.01em}
 #minimap{display:block;width:260px;height:74px;border-radius:8px;background:#0b0e16}
 
-/* ---------- 보스 바 ---------- */
-#bossbar{position:absolute;top:14px;left:50%;transform:translate(-50%,-140%);
-  min-width:300px;max-width:min(560px,86vw);padding:12px 20px;text-align:center;
-  background:linear-gradient(180deg,rgba(40,14,20,.96),rgba(18,8,12,.96));
-  border:2px solid rgba(255,80,80,.55);border-radius:var(--r);
-  box-shadow:0 0 34px rgba(255,60,60,.30),var(--shadow);
-  transition:transform .32s cubic-bezier(.2,1.4,.4,1),opacity .25s;opacity:0}
-#bossbar.on{transform:translate(-50%,0);opacity:1}
-.bb-name{font-size:19px;font-weight:900;letter-spacing:.01em}
-.bb-t{font-size:12px;color:var(--dim);font-weight:800;margin-left:6px}
-.bb-eggs{font-size:19px;letter-spacing:4px;margin:4px 0 2px}
-.bb-eggs .dim{opacity:.25}
-.bb-sub{font-size:13px;color:#e8d8dc}
-.bb-sub .danger{color:#ff5e6e;animation:blink .45s infinite alternate}
-.bb-sub .warn{color:var(--gold)}
+/* ---------- 상단 중앙 스택 (전광판 · 추격 · 토스트) ---------- */
+#topStack{position:absolute;top:14px;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:9px;
+  width:max-content;max-width:92vw;pointer-events:none;z-index:5}
+
+/* 시크릿 전광판 */
+#announce{display:none;width:min(560px,90vw);padding:15px 22px;text-align:center;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--c1,#333) 65%,#0d1017),#0d1017);
+  border:3px solid var(--g,#ffd54a);border-radius:16px;
+  box-shadow:0 0 40px color-mix(in srgb,var(--g,#ffd54a) 50%,transparent),var(--shadow)}
+#announce.on{display:block;animation:dropIn .42s cubic-bezier(.2,1.5,.4,1)}
+@keyframes dropIn{from{transform:translateY(-26px) scale(.94);opacity:0}}
+.an-top{font-size:13px;font-weight:900;letter-spacing:.06em;color:var(--g,#ffd54a);
+  animation:blink .5s infinite alternate}
+.an-main{font-size:24px;font-weight:900;margin:3px 0;color:#fff;
+  text-shadow:0 0 22px var(--g,#ffd54a)}
+.an-sub{font-size:12px;color:#c3cddc;font-weight:700}
 @keyframes blink{to{opacity:.35}}
+
+/* 추격 경고 */
+#chase{display:none;padding:10px 22px;border-radius:999px;font-size:16px;font-weight:900;
+  background:rgba(40,8,12,.94);border:3px solid #ff4d5e;color:#ffd9dd;
+  box-shadow:0 0 16px rgba(255,60,80,.4);white-space:nowrap}
+#chase.on{display:block;animation:pulse .5s infinite alternate}
+#chase .risk{color:#ff9aa5}
+@keyframes pulse{to{box-shadow:0 0 28px rgba(255,60,80,.7)}}
 
 /* ---------- 튜토리얼 ---------- */
 .tut{position:absolute;left:12px;bottom:96px;max-width:min(360px,72vw);
@@ -98,8 +109,7 @@ kbd{display:inline-block;padding:1px 6px;margin-left:5px;border-radius:6px;
 .hb.off{opacity:.5}
 
 /* ---------- 토스트 ---------- */
-#toasts{position:absolute;top:96px;left:50%;transform:translateX(-50%);
-  display:flex;flex-direction:column;gap:8px;align-items:center;width:max-content;max-width:90vw}
+#toasts{display:flex;flex-direction:column;gap:8px;align-items:center;width:max-content;max-width:90vw}
 .toast{padding:10px 18px;border-radius:999px;font-size:14px;font-weight:800;
   background:rgba(12,15,22,.95);border:2px solid var(--gold);box-shadow:var(--shadow);
   opacity:0;transform:translateY(-12px) scale(.94);transition:.28s cubic-bezier(.2,1.4,.4,1)}
@@ -262,6 +272,18 @@ kbd{display:inline-block;padding:1px 6px;margin-left:5px;border-radius:6px;
 .sp-btn:active{transform:translateY(5px);box-shadow:0 2px 0 rgba(0,0,0,.5)}
 .sp-tip{margin-top:13px;font-size:12px;color:var(--dim)}
 
+/* ---------- 발견 기록 ---------- */
+.logs{display:flex;flex-direction:column;gap:7px}
+.logrow{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:11px;
+  background:rgba(255,255,255,.05);border:2px solid var(--g);font-size:13px}
+.lg-t{color:var(--dim);font-size:11px;min-width:38px}
+.lg-n{font-weight:900;flex:1}
+.lg-v{font-size:11px;color:var(--dim);background:rgba(255,255,255,.08);
+  border-radius:999px;padding:3px 10px}
+.spdrow.no{border-color:rgba(255,159,67,.45)}
+.spdrow .req em{color:#ff9f43}
+.spdrow.no .req{color:#ff9f43}
+
 </style>
 </head>
 <body>
@@ -273,9 +295,9 @@ kbd{display:inline-block;padding:1px 6px;margin-left:5px;border-radius:6px;
     <div class="top-left">
       <div class="pill money"><span class="ic">💰</span><b id="money">0</b><span class="unit">원</span></div>
       <div class="pill rate"><span class="ic">📈</span><b id="rate">0/초</b></div>
-      <div class="pill bag"><span class="ic">🥚</span><b id="bag">0/1</b></div>
-      <div class="pill pet"><span class="ic">🐣</span><b id="pets">0</b></div>
-      <div class="pill tm"><span class="ic">🏃</span><b id="tmCount">0/1</b></div>
+      <div class="pill spd"><span class="ic">⚡</span><b id="spd">230</b><span class="unit" id="spdLv">Lv.0</span></div>
+      <div class="pill carry" id="carry"><span class="ic">🥚</span><b>없음</b></div>
+      <div class="pill pen"><span class="ic">🐣</span><b id="pen">0/4</b></div>
     </div>
 
     <div class="top-right">
@@ -285,15 +307,17 @@ kbd{display:inline-block;padding:1px 6px;margin-left:5px;border-radius:6px;
       </div>
     </div>
 
-    <div id="bossbar"></div>
-    <div id="toasts"></div>
+    <div id="topStack">
+      <div id="announce"></div>
+      <div id="chase"></div>
+      <div id="toasts"></div>
+    </div>
 
     <div id="tut" class="tut"></div>
 
     <div class="btnbar">
-      <button id="btnShop" class="hb primary">🛒 상점 <kbd>B</kbd></button>
-      <button id="btnPets" class="hb">🐣 내 펫 <kbd>I</kbd></button>
-      <button id="btnAuto" class="hb">⚡ 자동 배치</button>
+      <button id="btnPets" class="hb primary">🐣 내 펫 <kbd>I</kbd></button>
+      <button id="btnDex" class="hb">📖 등급표</button>
       <button id="btnHelp" class="hb sm">❓</button>
       <button id="btnMute" class="hb sm">🔊</button>
     </div>
@@ -337,12 +361,14 @@ kbd{display:inline-block;padding:1px 6px;margin-left:5px;border-radius:6px;
       <h1 class="sp-title">계란을 훔치다</h1>
       <div class="sp-sub">STEAL AN EGG</div>
       <ul class="sp-list">
-        <li><b>7개 구역</b> — 농장 🐔 → 오리 연못 🦆 → 사막 🦂 → 정글 🐯 → 바다 🐋 → 공룡 계곡 🦖 → 우주 💀</li>
-        <li><b>7개 등급</b> — 일반 · 레어 알 · 에픽 · 시크릿 · 디바인 · 코스믹 · 영원한 + 아우라 변형</li>
-        <li><b>보스는 다르다</b> — 예고가 짧고, 쳐다볼 땐 <u>완전히 멈춰야</u> 하고, 걸리면 돌진해온다</li>
+        <li><b>자는 파수꾼 옆 둥지</b>에서 알을 훔친다 → 깨어나서 <u>쫓아온다</u> → 도망쳐라</li>
+        <li>기지 <b>울타리</b>에 넣으면 부화하고, 그 펫이 초당 돈을 벌어준다</li>
+        <li><b>러닝머신은 내가 탄다</b> — 돈을 써서 달리면 내 이동 속도가 오른다</li>
+        <li>구역 7개는 <b>전부 자유 이동</b>. 뒤로 갈수록 파수꾼이 빨라 속도가 없으면 못 도망친다</li>
+        <li><b>시크릿</b> 이상 등급을 찾으면 화면에 <u>알림</u>이 뜬다</li>
       </ul>
       <button id="startBtn" class="sp-btn">게임 시작</button>
-      <div class="sp-tip">WASD 이동 · E 꾹 눌러 훔치기 · B 상점</div>
+      <div class="sp-tip">WASD 이동 · E 꾹 눌러 훔치기 · I 내 펫</div>
     </div>
   </div>
 </div>
@@ -350,258 +376,165 @@ kbd{display:inline-block;padding:1px 6px;margin-left:5px;border-radius:6px;
 <script>
 /* =========================================================
  *  계란을 훔치다 (Steal an Egg)
- *  config.js - 등급 / 아우라 / 생물 / 보스 / 밸런스
+ *  config.js - 등급 / 아우라 / 생물 / 구역 / 밸런스
  *
- *  최종 수익 = 생물 기본속도 × 등급 배수 × 아우라 변형 배수 × 러닝머신 배수
+ *  루프 : 자는 파수꾼 옆 둥지에서 알을 훔친다 → 깨서 쫓아온다 →
+ *         도망쳐 기지로 → 울타리에 넣어 부화 → 펫이 돈을 번다 →
+ *         러닝머신을 타서 내 속도를 올린다 → 더 빠른 구역에 도전
  * ========================================================= */
 
-/* ---------- 등급 (낮음 -> 높음) ---------- */
+/* ---------- 등급 ---------- */
 const RARITIES = [
-  {
-    id: 'common', name: '일반', en: 'COMMON', tier: 0,
-    weight: 5000, mult: 1,
-    c1: '#8d99ab', c2: '#e4ebf4', glow: '#aab6c6',
-    aura: 'none', auraName: '없음'
-  },
-  {
-    id: 'rare', name: '레어 알', en: 'RARE', tier: 1,
-    weight: 2400, mult: 3,
-    c1: '#1257d6', c2: '#8ed2ff', glow: '#3d9bff',
-    aura: 'bubble', auraName: '물결'
-  },
-  {
-    id: 'epic', name: '에픽', en: 'EPIC', tier: 2,
-    weight: 1100, mult: 9,
-    c1: '#6d1fd0', c2: '#e3b0ff', glow: '#b45cff',
-    aura: 'spark', auraName: '자수정'
-  },
-  {
-    id: 'secret', name: '시크릿', en: 'SECRET', tier: 3,
-    weight: 340, mult: 30,
-    c1: '#3a0713', c2: '#ff2b52', glow: '#ff2b4d',
-    aura: 'shadow', auraName: '그림자'
-  },
-  {
-    id: 'divine', name: '디바인', en: 'DIVINE', tier: 4,
-    weight: 110, mult: 100,
-    c1: '#c48a00', c2: '#fff3ae', glow: '#ffd447',
-    aura: 'halo', auraName: '후광'
-  },
-  {
-    id: 'cosmic', name: '코스믹', en: 'COSMIC', tier: 5,
-    weight: 34, mult: 350,
-    c1: '#2b1b7a', c2: '#43e8ff', glow: '#7a5cff',
-    aura: 'nebula', auraName: '성운'
-  },
-  {
-    id: 'eternal', name: '영원한', en: 'ETERNAL', tier: 6,
-    weight: 6, mult: 1600,
-    c1: '#ff5fbe', c2: '#7dffe0', glow: '#ffffff',
-    aura: 'eternal', auraName: '무한'
-  }
+  { id:'common',  name:'일반',    en:'COMMON',  tier:0, weight:5000, mult:1,
+    c1:'#8d99ab', c2:'#e4ebf4', glow:'#aab6c6', aura:'none',    auraName:'없음' },
+  { id:'rare',    name:'레어 알', en:'RARE',    tier:1, weight:2400, mult:3,
+    c1:'#1257d6', c2:'#8ed2ff', glow:'#3d9bff', aura:'bubble',  auraName:'물결' },
+  { id:'epic',    name:'에픽',    en:'EPIC',    tier:2, weight:1100, mult:9,
+    c1:'#6d1fd0', c2:'#e3b0ff', glow:'#b45cff', aura:'spark',   auraName:'자수정' },
+  { id:'secret',  name:'시크릿',  en:'SECRET',  tier:3, weight:340,  mult:30,
+    c1:'#3a0713', c2:'#ff2b52', glow:'#ff2b4d', aura:'shadow',  auraName:'그림자' },
+  { id:'divine',  name:'디바인',  en:'DIVINE',  tier:4, weight:110,  mult:100,
+    c1:'#c48a00', c2:'#fff3ae', glow:'#ffd447', aura:'halo',    auraName:'후광' },
+  { id:'cosmic',  name:'코스믹',  en:'COSMIC',  tier:5, weight:34,   mult:350,
+    c1:'#2b1b7a', c2:'#43e8ff', glow:'#7a5cff', aura:'nebula',  auraName:'성운' },
+  { id:'eternal', name:'영원한',  en:'ETERNAL', tier:6, weight:6,    mult:1600,
+    c1:'#ff5fbe', c2:'#7dffe0', glow:'#ffffff', aura:'eternal', auraName:'무한' }
 ];
 const RARITY_BY_ID = {};
 RARITIES.forEach(r => { RARITY_BY_ID[r.id] = r; });
 
-/* ---------- 아우라 변형 (희귀 오버레이) ---------- */
+/* 이 등급 이상이면 전광판 알림이 뜬다 */
+const ANNOUNCE_TIER = 3;   // 시크릿
+
+/* ---------- 아우라 변형 ---------- */
 const VARIANTS = [
-  { id: 'normal',  name: '',       weight: 870, mult: 1, tag: '' },
-  { id: 'shiny',   name: '빛나는', weight: 105, mult: 2, tag: 'SHINY' },
-  { id: 'rainbow', name: '무지개', weight: 25,  mult: 5, tag: 'RAINBOW' }
+  { id:'normal',  name:'',       weight:870, mult:1, tag:'' },
+  { id:'shiny',   name:'빛나는', weight:105, mult:2, tag:'SHINY' },
+  { id:'rainbow', name:'무지개', weight:25,  mult:5, tag:'RAINBOW' }
 ];
 const VARIANT_BY_ID = {};
 VARIANTS.forEach(v => { VARIANT_BY_ID[v.id] = v; });
 
-/* ---------- 알을 품은 생물 ----------
- *  base  : 권장속도 (초당 수익의 기준값)
- *  luck  : 등급 가중치에 luck^tier 로 곱해짐
- *  alert : 경계 주기 배수 (높을수록 자주 뒤돌아봄)
+/* ---------- 둥지를 지키는 생물 ----------
+ *  base   : 권장속도 (부화한 펫의 초당 수익 기준값)
+ *  luck   : 등급 가중치에 luck^tier 로 곱해짐
+ *  chase  : 깨어났을 때 추격 속도 (px/s) — 내 속도가 이보다 낮으면 잡힌다
+ *  wake   : 알을 들어올리는 데 걸리는 시간(초). 짧을수록 쉽다
+ *  rage   : 추격 지속 시간(초)
  */
 const SPECIES = {
-  chicken: { id:'chicken', name:'닭',      pet:'병아리',     zone:'farm',   base:1,       luck:1.00, alert:1.00, spd:[42,66],   scale:1.00, form:'chicken',
-             body:'#ffffff', body2:'#d7dde6', accent:'#ff4d4d', beak:'#ffa726' },
-  hen:     { id:'hen',     name:'갈색 닭', pet:'꼬꼬',       zone:'farm',   base:2.5,     luck:1.25, alert:1.15, spd:[46,72],   scale:1.02, form:'chicken',
-             body:'#d29055', body2:'#a56b38', accent:'#ff4d4d', beak:'#ffb74d' },
+  chicken:  { id:'chicken',  name:'닭',      pet:'병아리',     zone:'farm',   base:1,
+              luck:1.00, chase:165, wake:1.6, rage:5.0,  scale:1.00, form:'chicken',
+              body:'#ffffff', body2:'#d7dde6', accent:'#ff4d4d', beak:'#ffa726' },
+  hen:      { id:'hen',      name:'갈색 닭', pet:'꼬꼬',       zone:'farm',   base:2.5,
+              luck:1.25, chase:190, wake:1.5, rage:5.5,  scale:1.02, form:'chicken',
+              body:'#d29055', body2:'#a56b38', accent:'#ff4d4d', beak:'#ffb74d' },
 
-  duck:    { id:'duck',    name:'오리',    pet:'새끼오리',   zone:'pond',   base:150,     luck:1.45, alert:1.30, spd:[86,124],  scale:0.98, form:'duck',
-             body:'#f3f6fb', body2:'#c3cddc', accent:'#ffd54a', beak:'#ffb300',
-             trait:'헤엄치듯 빠르게 도망친다' },
-  swan:    { id:'swan',    name:'백조',    pet:'새끼백조',   zone:'pond',   base:380,     luck:1.65, alert:1.45, spd:[92,132],  scale:1.16, form:'duck',
-             body:'#ffffff', body2:'#dfe7f5', accent:'#111111', beak:'#ff7043',
-             trait:'목이 길어 멀리서도 눈치챈다', warnMul:0.8 },
+  duck:     { id:'duck',     name:'오리',    pet:'새끼오리',   zone:'pond',   base:150,
+              luck:1.45, chase:215, wake:1.5, rage:6.0,  scale:0.98, form:'duck',
+              body:'#f3f6fb', body2:'#c3cddc', accent:'#ffd54a', beak:'#ffb300' },
+  swan:     { id:'swan',     name:'백조',    pet:'새끼백조',   zone:'pond',   base:380,
+              luck:1.65, chase:240, wake:1.4, rage:6.5,  scale:1.16, form:'duck',
+              body:'#ffffff', body2:'#dfe7f5', accent:'#111111', beak:'#ff7043' },
 
-  scorpion:{ id:'scorpion',name:'전갈',    pet:'새끼전갈',   zone:'desert', base:1000,    luck:1.85, alert:1.55, spd:[74,108],  scale:1.05, form:'scorpion',
-             body:'#c8763a', body2:'#8c4a1e', accent:'#ffcf6b', beak:'#3a2416',
-             trait:'모래 속에 숨었다가 갑자기 튀어나온다', burrow:true },
-  kingScorpion:{ id:'kingScorpion', name:'킹 전갈', pet:'전갈왕 새끼', zone:'desert', base:2600, luck:2.05, alert:1.70, spd:[80,116], scale:1.28, form:'scorpion',
-             body:'#4b3b6b', body2:'#2b2244', accent:'#b98bff', beak:'#1b1226',
-             trait:'독침 경고가 거의 없다', warnMul:0.6, burrow:true },
+  scorpion: { id:'scorpion', name:'전갈',    pet:'새끼전갈',   zone:'desert', base:1000,
+              luck:1.85, chase:275, wake:1.4, rage:7.0,  scale:1.05, form:'scorpion',
+              body:'#c8763a', body2:'#8c4a1e', accent:'#ffcf6b', beak:'#3a2416' },
+  kingScorpion:{ id:'kingScorpion', name:'킹 전갈', pet:'전갈왕 새끼', zone:'desert', base:2600,
+              luck:2.05, chase:300, wake:1.3, rage:7.5,  scale:1.28, form:'scorpion',
+              body:'#4b3b6b', body2:'#2b2244', accent:'#b98bff', beak:'#1b1226' },
 
-  tiger:   { id:'tiger',   name:'호랑이',  pet:'아기호랑이', zone:'jungle', base:10000,   luck:2.25, alert:1.80, spd:[110,158], scale:1.34, form:'tiger',
-             body:'#ff9f2e', body2:'#c96c00', accent:'#1b1b1b', beak:'#ffe0b2',
-             trait:'들키면 짧게 달려든다', pounce:true },
-  whiteTiger:{ id:'whiteTiger', name:'백호', pet:'아기백호',  zone:'jungle', base:26000,  luck:2.45, alert:1.95, spd:[118,168], scale:1.40, form:'tiger',
-             body:'#eef3fb', body2:'#b9c6d8', accent:'#1b1b1b', beak:'#dceaff',
-             trait:'소리 없이 접근을 감지한다', warnMul:0.65, pounce:true },
+  tiger:    { id:'tiger',    name:'호랑이',  pet:'아기호랑이', zone:'jungle', base:10000,
+              luck:2.25, chase:340, wake:1.3, rage:8.0,  scale:1.34, form:'tiger',
+              body:'#ff9f2e', body2:'#c96c00', accent:'#1b1b1b', beak:'#ffe0b2' },
+  whiteTiger:{ id:'whiteTiger', name:'백호', pet:'아기백호',   zone:'jungle', base:26000,
+              luck:2.45, chase:365, wake:1.2, rage:8.5,  scale:1.40, form:'tiger',
+              body:'#eef3fb', body2:'#b9c6d8', accent:'#1b1b1b', beak:'#dceaff' },
 
-  whale:   { id:'whale',   name:'고래',    pet:'새끼고래',   zone:'ocean',  base:500000,  luck:2.65, alert:2.00, spd:[58,92],   scale:1.75, form:'whale',
-             body:'#3f7fd4', body2:'#22508f', accent:'#bfe4ff', beak:'#0f2a4d',
-             trait:'물보라를 뿜어 시야를 가린다', spout:true },
-  orca:    { id:'orca',    name:'범고래',  pet:'새끼범고래', zone:'ocean',  base:1300000, luck:2.85, alert:2.15, spd:[66,104],  scale:1.85, form:'whale',
-             body:'#1b1f2a', body2:'#0d1016', accent:'#ffffff', beak:'#0a0d12',
-             trait:'무리 지어 경계한다', warnMul:0.6, spout:true },
+  whale:    { id:'whale',    name:'고래',    pet:'새끼고래',   zone:'ocean',  base:500000,
+              luck:2.65, chase:375, wake:1.3, rage:9.0,  scale:1.75, form:'whale',
+              body:'#3f7fd4', body2:'#22508f', accent:'#bfe4ff', beak:'#0f2a4d' },
+  orca:     { id:'orca',     name:'범고래',  pet:'새끼범고래', zone:'ocean',  base:1300000,
+              luck:2.85, chase:400, wake:1.2, rage:9.5,  scale:1.85, form:'whale',
+              body:'#1b1f2a', body2:'#0d1016', accent:'#ffffff', beak:'#0a0d12' },
 
-  dino:    { id:'dino',    name:'공룡',    pet:'아기공룡',   zone:'dino',   base:1800000,  luck:3.00, alert:2.25, spd:[92,132],  scale:1.9,  form:'dino',
-             body:'#5fbf5a', body2:'#2f7a3a', accent:'#ffd54a', beak:'#f5f1e0',
-             trait:'발소리로 땅이 흔들린다 — 화면이 진동', quake:true },
-  trex:    { id:'trex',    name:'티라노',  pet:'아기티라노', zone:'dino',   base:4500000,  luck:3.15, alert:2.4,  spd:[104,150], scale:2.05, form:'dino',
-             body:'#a8452f', body2:'#6d2617', accent:'#ffe066', beak:'#fff6e0',
-             trait:'포효하면 예고 없이 돌아본다', warnMul:0.5, quake:true },
+  dino:     { id:'dino',     name:'공룡',    pet:'아기공룡',   zone:'dino',   base:1800000,
+              luck:3.00, chase:430, wake:1.2, rage:10.0, scale:1.90, form:'dino',
+              body:'#5fbf5a', body2:'#2f7a3a', accent:'#ffd54a', beak:'#f5f1e0', quake:true },
+  trex:     { id:'trex',     name:'티라노',  pet:'아기티라노', zone:'dino',   base:4500000,
+              luck:3.15, chase:460, wake:1.1, rage:11.0, scale:2.05, form:'dino',
+              body:'#a8452f', body2:'#6d2617', accent:'#ffe066', beak:'#fff6e0', quake:true },
 
-  skeleton:{ id:'skeleton',name:'해골장군',pet:'꼬마해골',   zone:'space',  base:18000000, luck:3.30, alert:2.5,  spd:[88,126],  scale:1.55, form:'skeleton',
-             body:'#e9edf5', body2:'#aeb6c6', accent:'#8affe0', beak:'#5a6376',
-             trait:'무중력에서 순간이동하듯 움직인다', blink:true },
-  skullKing:{id:'skullKing',name:'해골왕', pet:'꼬마해골왕', zone:'space',  base:45000000, luck:3.5,  alert:2.65, spd:[96,138],  scale:1.72, form:'skeleton',
-             body:'#2a2f45', body2:'#12162a', accent:'#ff4d8d', beak:'#6b5cff',
-             trait:'검을 휘두르면 예고가 사라진다', warnMul:0.42, blink:true }
+  skeleton: { id:'skeleton', name:'해골장군',pet:'꼬마해골',   zone:'space',  base:18000000,
+              luck:3.30, chase:500, wake:1.1, rage:12.0, scale:1.55, form:'skeleton',
+              body:'#e9edf5', body2:'#aeb6c6', accent:'#8affe0', beak:'#5a6376' },
+  skullKing:{ id:'skullKing',name:'해골왕',  pet:'꼬마해골왕', zone:'space',  base:45000000,
+              luck:3.50, chase:545, wake:1.0, rage:13.0, scale:1.72, form:'skeleton',
+              body:'#2a2f45', body2:'#12162a', accent:'#ff4d8d', beak:'#6b5cff' }
 };
-const SPECIES_LIST = Object.values(SPECIES);
 const CHICKEN_TYPES = SPECIES;   // 하위 호환
 
-/* ---------- 보스 (일반 몹과 규칙이 다르다) ----------
- *  · 알을 여러 개 품고 있고 하나 훔칠 때마다 분노 단계 상승 (예고가 더 짧아짐)
- *  · 예고(❗)가 아주 짧고 뒤돌아보는 시간이 길다
- *  · 들키면 "돌진" — 넉백 + 긴 기절 + 가방의 알 1개 손실
- *  · 등급 하한이 보장된다
- */
-const BOSSES = [
-  {
-    id:'kkoko', zone:'farm', name:'꼬꼬대왕', title:'앞마당의 폭군', form:'rooster',
-    species:'hen', eggs:3, minTier:2, luck:2.6, base:8,
-    fillTime:3.6, warn:0.32, look:1.45, calm:[1.1,2.1],
-    chargeSpeed:420, chargeTime:1.05, stun:2.0, cooldown:100, scale:2.15, roam:150,
-    body:'#e8e8ee', body2:'#b9bfcc', accent:'#ff2b4d', beak:'#ffb300', glow:'#ff8a5c'
-  },
-  {
-    id:'motherduck', zone:'pond', name:'마더덕', title:'연못의 지배자', form:'duck',
-    species:'swan', eggs:3, minTier:2, luck:2.9, base:900,
-    fillTime:3.9, warn:0.30, look:1.55, calm:[1.0,2.0],
-    chargeSpeed:470, chargeTime:1.1, stun:2.1, cooldown:130, scale:2.25, roam:160,
-    body:'#fff6d8', body2:'#e6c46a', accent:'#ff9800', beak:'#ff8f00', glow:'#ffd447'
-  },
-  {
-    id:'scorpionking', zone:'desert', name:'스콜피온 킹', title:'모래폭풍의 왕', form:'scorpion',
-    species:'kingScorpion', eggs:3, minTier:3, luck:3.1, base:6000,
-    fillTime:4.2, warn:0.26, look:1.65, calm:[0.95,1.9],
-    chargeSpeed:500, chargeTime:1.15, stun:2.3, cooldown:170, scale:2.3, roam:170,
-    body:'#7a2f2f', body2:'#3f1414', accent:'#ffc14d', beak:'#1b0d0d', glow:'#ff6b3d'
-  },
-  {
-    id:'junglelord', zone:'jungle', name:'정글 군주', title:'초록 어둠의 포식자', form:'tiger',
-    species:'whiteTiger', eggs:3, minTier:4, luck:3.4, base:60000,
-    fillTime:4.5, warn:0.23, look:1.75, calm:[0.9,1.8],
-    chargeSpeed:560, chargeTime:1.2, stun:2.5, cooldown:210, scale:2.4, roam:180,
-    body:'#1f2a22', body2:'#0f1712', accent:'#7dff8a', beak:'#c9ffd4', glow:'#7dff8a'
-  },
-  {
-    id:'leviathan', zone:'ocean', name:'리바이어던', title:'심해의 신화', form:'whale',
-    species:'orca', eggs:3, minTier:5, luck:3.8, base:3000000,
-    fillTime:5.0, warn:0.20, look:1.95, calm:[0.85,1.7],
-    chargeSpeed:620, chargeTime:1.3, stun:2.8, cooldown:280, scale:2.6, roam:190,
-    body:'#123a5c', body2:'#061a2c', accent:'#43e8ff', beak:'#9fe8ff', glow:'#43e8ff'
-  },
-  {
-    id:'volcano', zone:'dino', name:'화산의 폭군', title:'멸종을 부른 자', form:'dino',
-    species:'trex', eggs:3, minTier:5, luck:4.1, base:11000000,
-    fillTime:5.3, warn:0.18, look:2.05, calm:[0.8,1.6],
-    chargeSpeed:660, chargeTime:1.35, stun:3.0, cooldown:320, scale:2.9, roam:200,
-    body:'#c4442a', body2:'#61190f', accent:'#ffb300', beak:'#fff1c9', glow:'#ff6a2a'
-  },
-  {
-    id:'skullgeneral', zone:'space', name:'해골 대장군', title:'우주의 끝을 지키는 자', form:'skeleton',
-    species:'skullKing', eggs:3, minTier:6, luck:5.0, base:110000000,
-    fillTime:5.8, warn:0.15, look:2.2, calm:[0.75,1.5],
-    chargeSpeed:720, chargeTime:1.4, stun:3.2, cooldown:400, scale:3.0, roam:210,
-    body:'#f1f4fb', body2:'#8d95a8', accent:'#ff2b6b', beak:'#6b5cff', glow:'#ff2b6b'
-  }
-];
-const BOSS_BY_ZONE = {};
-BOSSES.forEach(b => { BOSS_BY_ZONE[b.zone] = b; });
-
-/* ---------- 구역 ---------- */
+/* ---------- 구역 (전부 자유 이동 · 잠금 없음) ---------- */
 const ZONES = [
-  { id:'farm',   name:'농장',        cost:0,        emoji:'🐔', speed:1,      mobs:['chicken','hen'],            boss:'kkoko' },
-  { id:'pond',   name:'오리 연못',   cost:2500,     emoji:'🦆', speed:150,    mobs:['duck','swan'],              boss:'motherduck' },
-  { id:'desert', name:'사막',        cost:250000,   emoji:'🦂', speed:1000,   mobs:['scorpion','kingScorpion'],  boss:'scorpionking' },
-  { id:'jungle', name:'정글',        cost:3000000,  emoji:'🐯', speed:10000,  mobs:['tiger','whiteTiger'],       boss:'junglelord' },
-  { id:'ocean',  name:'바다',        cost:60000000, emoji:'🐋', speed:500000, mobs:['whale','orca'],             boss:'leviathan' },
-  { id:'dino',   name:'공룡 계곡',   cost:800000000,   emoji:'🦖', speed:1800000,  mobs:['dino','trex'],            boss:'volcano' },
-  { id:'space',  name:'우주',        cost:15000000000, emoji:'💀', speed:18000000, mobs:['skeleton','skullKing'],   boss:'skullgeneral' }
+  { id:'farm',   name:'농장',      emoji:'🐔', speed:1,        mobs:['chicken','hen'],           need:0   },
+  { id:'pond',   name:'오리 연못', emoji:'🦆', speed:150,      mobs:['duck','swan'],             need:240 },
+  { id:'desert', name:'사막',      emoji:'🦂', speed:1000,     mobs:['scorpion','kingScorpion'], need:300 },
+  { id:'jungle', name:'정글',      emoji:'🐯', speed:10000,    mobs:['tiger','whiteTiger'],      need:365 },
+  { id:'ocean',  name:'바다',      emoji:'🐋', speed:500000,   mobs:['whale','orca'],            need:400 },
+  { id:'dino',   name:'공룡 계곡', emoji:'🦖', speed:1800000,  mobs:['dino','trex'],             need:460 },
+  { id:'space',  name:'우주',      emoji:'💀', speed:18000000, mobs:['skeleton','skullKing'],    need:545 }
 ];
 const ZONE_BY_ID = {};
 ZONES.forEach(z => { ZONE_BY_ID[z.id] = z; });
 
-/* ---------- 러닝머신 ---------- */
-const TREADMILLS = [
-  { id:'basic',   name:'기본 러닝머신',  mult:1,   cost:0,         belt:'#4a5262', frame:'#8e9bb0' },
-  { id:'pro',     name:'프로 러닝머신',  mult:2.2, cost:8000,      belt:'#1f3a5f', frame:'#3d8bff' },
-  { id:'turbo',   name:'터보 러닝머신',  mult:5,   cost:400000,    belt:'#4a1230', frame:'#ff4d8d' },
-  { id:'quantum', name:'퀀텀 러닝머신',  mult:12,  cost:25000000,  belt:'#132b2b', frame:'#00e5c0' }
-];
-const TREADMILL_BY_ID = {};
-TREADMILLS.forEach(t => { TREADMILL_BY_ID[t.id] = t; });
-
 /* ---------- 밸런스 ---------- */
 const CONFIG = {
-  player: { speed: 250, radius: 16 },
+  player: {
+    baseSpeed: 230,      // 속도 레벨 0 일 때
+    perLevel: 0.10,      // 레벨당 +10%
+    radius: 16,
+    carryPenalty: 0.92   // 알을 들면 살짝 느려진다
+  },
+
+  /* 러닝머신 — 플레이어가 직접 타서 속도를 올린다 */
+  treadmill: {
+    maxLevel: 40,
+    fillTime: 3.2,                                    // 한 레벨 올리는 데 달려야 하는 시간
+    cost: lv => Math.floor(250 * Math.pow(2.9, lv))   // 다음 레벨 비용
+  },
+
+  /* 울타리 — 부화한 펫이 여기서 돈을 번다 */
+  pen: {
+    baseSlots: 4,
+    maxSlots: 24,
+    cost: n => Math.floor(400 * Math.pow(1.9, n - 4))
+  },
 
   steal: {
-    range: 82,
-    fillTime: 2.6,
-    warnTime: 0.62,
-    lookTime: 1.05,
-    calmMin: 1.5,
-    calmMax: 3.4,
-    stunTime: 1.1,
-    respawn: 9
+    startle: 0.75,      // 깨어나서 벌떡 일어나기까지 — 이 틈에 도망쳐야 한다
+    reach: 74,          // 둥지에 손이 닿는 거리
+    catchDist: 46,      // 파수꾼에게 잡히는 거리
+    stun: 1.0,
+    respawn: 12,        // 털린 둥지에 새 알이 생기기까지
+    sleepAgain: 3.5     // 추격 포기 후 다시 잠들기까지
   },
 
-  incubator: {
-    baseSlots: 1,
-    maxSlots: 3,
-    slotCost: [0, 5000, 400000],
-    growTime: 20,
-    petBonus: 0.9
-  },
-
-  treadmillSlots: {
-    base: 1,
-    max: 8,
-    cost: n => Math.floor(600 * Math.pow(3.4, n - 1))
-  },
-
-  backpack: {
-    levels: [1, 2, 4, 7],
-    cost: [0, 3000, 120000, 5000000]
-  },
+  hatch: { time: 14 },  // 울타리에 넣은 알이 부화하기까지(초)
 
   offline: { capHours: 2, rate: 0.5 },
-
-  world: { w: 6800, h: 1520 },
-
-  save: { key: 'steal_an_egg_save_v2', interval: 5 }
+  world: { w: 6400, h: 1400 },
+  save: { key: 'steal_an_egg_save_v3', interval: 5 }
 };
 
 /* ---------- 튜토리얼 ---------- */
 const TUTORIAL = [
-  { id:'move',    title:'움직여보기',    body:'WASD / 방향키로 움직여봐. (모바일은 왼쪽 조이스틱)' },
-  { id:'goFarm',  title:'농장으로!',     body:'오른쪽 농장으로 가. 노란 화살표가 길을 알려줄게.' },
-  { id:'steal',   title:'알 훔치기',     body:'닭 근처에서 [E] 를 꾹! 머리 위에 ❗ 뜨면 즉시 손 떼야 해.' },
-  { id:'deliver', title:'부화기에 넣기', body:'기지로 돌아가 부화기 위에서 [E] 로 알을 넣어.' },
-  { id:'hatch',   title:'성장 & 부화',   body:'알이 다 자라면 [E] 로 부화! 등급이 공개된다.' },
-  { id:'place',   title:'러닝머신 가동', body:'러닝머신 위에서 [E] 로 펫을 올려. 돈이 자동으로 들어와!' },
-  { id:'buy',     title:'확장하기',      body:'[B] 상점에서 러닝머신 슬롯과 다음 구역을 사자.' },
-  { id:'boss',    title:'보스 도전',     body:'구역마다 보스가 있어. 예고가 짧고 들키면 돌진해온다 — 대신 등급 하한 보장!' }
+  { id:'move',   title:'움직여보기',     body:'WASD / 방향키로 움직여. (모바일은 왼쪽 화면 드래그)' },
+  { id:'goFarm', title:'농장 둥지로',    body:'오른쪽 농장에 닭이 자고 있어. 노란 화살표를 따라가.' },
+  { id:'steal',  title:'알 훔치기',      body:'둥지 옆에서 [E] 를 꾹! 알을 들면 닭이 깨서 쫓아온다.' },
+  { id:'escape', title:'도망쳐!',        body:'잡히면 알을 떨어뜨려. 기지 쪽으로 도망가서 따돌려.' },
+  { id:'pen',    title:'울타리에 넣기',  body:'기지 울타리 앞에서 [E]. 알이 부화하면 펫이 돈을 벌어줘.' },
+  { id:'run',    title:'러닝머신 타기',  body:'러닝머신 위에서 [E] 를 꾹 눌러 달려. 돈을 써서 내 속도를 올린다.' },
+  { id:'far',    title:'더 먼 구역으로', body:'구역마다 파수꾼이 더 빨라. 속도를 올려야 도망칠 수 있어!' }
 ];
 
 </script>
@@ -881,97 +814,144 @@ avatar(ctx, a) {
 },
 
 /* ---------------------------------------------------------
- *  생물 (일반 몹 + 보스 공용)
- *  c = {x,y,sp,faceX,phase,moving,state,scale,boss,hasEgg,eggRarity,eggVariant}
+ *  둥지 — 알이 들어있으면 등급 아우라가 보인다
  * ------------------------------------------------------- */
-creature(ctx, c, t) {
-  const sp = c.sp;
-  const dir = c.faceX < 0 ? -1 : 1;
-  const s = (c.scale || 1) * (sp.scale || 1);
-  const float = sp.form === 'whale' || sp.form === 'skeleton';
-  const bob = c.moving ? Math.abs(Math.sin(c.phase)) * 2.6 : Math.sin(t * (float ? 1.5 : 2) + c.seed) * (float ? 3.2 : 1.1);
-
-  /* 알 — 몸 뒤 둥지 */
-  if (c.hasEgg) {
-    const ex = c.x - 22 * dir * Math.min(1.9, s);
-    const ey = c.y - 6 - 12 * Math.max(0, s - 1);
-    this.egg(ctx, ex, ey, 11 * Math.min(1.7, s), c.eggRarity, c.eggVariant, t, true);
+nest(ctx, n, t) {
+  const x = n.x, y = n.y;
+  ctx.save();
+  shadowEllipse(ctx, x, y + 4, 30, 10, 0.26);
+  // 짚
+  ctx.fillStyle = '#b9873f';
+  ctx.beginPath(); ctx.ellipse(x, y, 30, 15, 0, 0, 7); ctx.fill();
+  ctx.strokeStyle = 'rgba(0,0,0,0.32)'; ctx.lineWidth = 2; ctx.stroke();
+  ctx.fillStyle = '#8f6626';
+  ctx.beginPath(); ctx.ellipse(x, y + 1, 21, 9, 0, 0, 7); ctx.fill();
+  ctx.strokeStyle = '#d3a05a'; ctx.lineWidth = 2.4; ctx.lineCap = 'round';
+  for (let i = 0; i < 9; i++) {
+    const a1 = i * 0.7 + 0.2;
+    ctx.beginPath();
+    ctx.moveTo(x + Math.cos(a1) * 12, y + Math.sin(a1) * 6);
+    ctx.lineTo(x + Math.cos(a1 + 0.5) * 31, y + Math.sin(a1 + 0.5) * 15);
+    ctx.stroke();
   }
+  ctx.restore();
+
+  if (n.egg) {
+    this.egg(ctx, x, y - 10 + Math.sin(t * 1.6 + n.i) * 1.2, 24, n.egg.rarity, n.egg.variant, t, true);
+    const r = RARITY_BY_ID[n.egg.rarity];
+    if (r.tier >= ANNOUNCE_TIER) {
+      ctx.save();
+      ctx.globalAlpha = 0.55 + Math.sin(t * 4 + n.i) * 0.45;
+      outlineText(ctx, r.name + '!', x, y - 48, 14, r.glow, '#000');
+      ctx.restore();
+    }
+  } else {
+    ctx.save();
+    ctx.globalAlpha = 0.45;
+    outlineText(ctx, Math.ceil(n.respawn) + '초', x, y - 16, 13, '#e6ecf5', '#000');
+    ctx.restore();
+  }
+},
+
+/* ---------------------------------------------------------
+ *  파수꾼 — 자거나(💤) 쫓아온다(!)
+ * ------------------------------------------------------- */
+guardian(ctx, n, t) {
+  const g = n.guard, sp = n.sp;
+  const dir = g.faceX < 0 ? -1 : 1;
+  const s = sp.scale || 1;
+  const asleep = g.state === 'sleep';
+  const chase = g.state === 'chase';
+  const breathe = asleep ? Math.sin(t * 1.5 + g.seed) * 1.6 : 0;
+  const bob = g.startle > 0
+    ? Math.abs(Math.sin(t * 26)) * 9
+    : (g.moving ? Math.abs(Math.sin(g.phase)) * 3.2 : breathe);
 
   ctx.save();
-  ctx.translate(c.x, c.y);
+  ctx.translate(g.x, g.y);
   shadowEllipse(ctx, 0, 0, 19 * s, 7 * s, 0.26);
   ctx.scale(s * dir, s);
   ctx.translate(0, -bob);
+  if (asleep) ctx.rotate(0.10);
 
-  // 종족 오라
-  if (c.boss || sp.glowAura) this.mobGlow(ctx, c.boss ? sp.glow : sp.accent, c.boss ? 62 : 40, t);
-  else if (sp.id === 'skeleton' || sp.id === 'skullKing') this.mobGlow(ctx, sp.accent, 38, t);
+  if (chase) {
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.globalAlpha = 0.22 + Math.sin(t * 9) * 0.10;
+    const gr = ctx.createRadialGradient(0, -26, 3, 0, -26, 54);
+    gr.addColorStop(0, '#ff4d4d'); gr.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = gr;
+    ctx.beginPath(); ctx.ellipse(0, -26, 54, 44, 0, 0, 7); ctx.fill();
+    ctx.restore();
+  }
 
+  const fake = { moving: g.moving, phase: g.phase, seed: g.seed, state: g.state };
   const F = this['form_' + sp.form] || this.form_chicken;
-  F.call(this, ctx, c, sp, t);
-
+  F.call(this, ctx, fake, sp, t);
   ctx.restore();
 
-  /* 경고 */
-  if (c.state === 'warn' || c.state === 'look') {
-    const looking = c.state === 'look';
+  const top = g.y - (24 + 46 * s);
+  if (asleep) {
     ctx.save();
-    ctx.globalAlpha = looking ? 1 : (0.5 + Math.sin(t * 30) * 0.5);
-    outlineText(ctx, '❗', c.x, c.y - (26 + 52 * s), 26 + 14 * (c.boss ? 1 : 0),
-      looking ? '#ff2b4d' : '#ffd54a', '#000');
+    for (let i = 0; i < 3; i++) {
+      const q = ((t * 0.55 + i * 0.33) % 1);
+      ctx.globalAlpha = (1 - q) * 0.9;
+      outlineText(ctx, '💤', g.x + 22 + q * 20, top - q * 26, 13 + q * 8, '#bfe4ff', '#0b2033');
+    }
     ctx.restore();
   }
-
-  /* 보스 표식 */
-  if (c.boss) this.bossPlate(ctx, c, t);
 },
 
-mobGlow(ctx, color, r, t) {
+/* 추격 표시는 캐릭터에 가리지 않도록 마지막에 따로 그린다 */
+guardianTag(ctx, n, t) {
+  const g = n.guard;
+  if (g.state !== 'chase') return;
+  const top = g.y - (24 + 46 * (n.sp.scale || 1));
+  const waking = g.startle > 0;
   ctx.save();
-  ctx.globalCompositeOperation = 'lighter';
-  const a = 0.34 + Math.sin(t * 2.4) * 0.08;
-  const g = ctx.createRadialGradient(0, -r * 0.55, r * 0.08, 0, -r * 0.55, r);
-  g.addColorStop(0, color);
-  g.addColorStop(0.45, color);
-  g.addColorStop(1, 'rgba(0,0,0,0)');
-  ctx.globalAlpha = a;
-  ctx.fillStyle = g;
-  ctx.beginPath(); ctx.ellipse(0, -r * 0.55, r, r * 0.8, 0, 0, 7); ctx.fill();
+  ctx.globalAlpha = 0.6 + Math.sin(t * 18) * 0.4;
+  outlineText(ctx, '❗', g.x, top, waking ? 40 : 30, '#ff2b4d', '#000');
+  ctx.restore();
+  outlineText(ctx, waking ? '깼다! 도망쳐!' : n.sp.name + ' 추격!',
+    g.x, top + (waking ? 30 : 22), waking ? 16 : 13, waking ? '#ffd54a' : '#ff8b96', '#000');
+},
+
+/* ---------------------------------------------------------
+ *  울타리 / 울타리 안의 알
+ * ------------------------------------------------------- */
+penFence(ctx, p, t) {
+  const post = (x, y) => {
+    block(ctx, x - 5, y - 40, 10, 44, '#c9a06a', { outline: true });
+  };
+  const rail = (x, y, w) => {
+    ctx.fillStyle = '#b08b57';
+    ctx.fillRect(x, y - 30, w, 7); ctx.fillRect(x, y - 17, w, 7);
+  };
+  // 위/아래 가로
+  rail(p.x, p.y, p.w);
+  ctx.fillStyle = '#b08b57';
+  ctx.fillRect(p.x, p.y + p.h - 30, p.gapX - p.x, 7);
+  ctx.fillRect(p.x, p.y + p.h - 17, p.gapX - p.x, 7);
+  ctx.fillRect(p.gapX + p.gapW, p.y + p.h - 30, p.x + p.w - p.gapX - p.gapW, 7);
+  ctx.fillRect(p.gapX + p.gapW, p.y + p.h - 17, p.x + p.w - p.gapX - p.gapW, 7);
+  for (let x = p.x; x <= p.x + p.w; x += 46) {
+    post(x, p.y);
+    if (x < p.gapX - 10 || x > p.gapX + p.gapW + 10) post(x, p.y + p.h);
+  }
+  // 세로
+  for (let y = p.y; y <= p.y + p.h; y += 46) { post(p.x, y); post(p.x + p.w, y); }
+  // 게이트 표지
+  ctx.save();
+  ctx.globalAlpha = 0.5 + Math.sin(t * 3) * 0.2;
+  outlineText(ctx, '▼ 알 넣는 곳', p.gapX + p.gapW / 2, p.y + p.h + 26, 14, '#8ed2ff', '#000');
   ctx.restore();
 },
 
-bossPlate(ctx, c, t) {
-  const sp = c.sp;
-  const S = (c.scale || 1) * (sp.scale || 1);
-  const a = c.y - 60 * S - 26;          // 머리 위 기준선
-
-  ctx.save();
-  ctx.translate(c.x, a - 66);
-  ctx.fillStyle = '#ffd54a'; ctx.strokeStyle = '#000'; ctx.lineWidth = 2.6; ctx.lineJoin = 'round';
-  ctx.beginPath();
-  ctx.moveTo(-18, 7); ctx.lineTo(-18, -7); ctx.lineTo(-9, 1); ctx.lineTo(0, -11);
-  ctx.lineTo(9, 1); ctx.lineTo(18, -7); ctx.lineTo(18, 7);
-  ctx.closePath(); ctx.fill(); ctx.stroke();
-  ctx.restore();
-
-  outlineText(ctx, sp.name, c.x, a - 42, 19, '#fff', '#000', 900);
-  outlineText(ctx, sp.title, c.x, a - 22, 12, sp.glow, '#000', 800);
-
-  const total = sp.eggs, left = c.eggsLeft;
-  const bw = 17, gap = 5, W = total * bw + (total - 1) * gap;
-  for (let i = 0; i < total; i++) {
-    ctx.save();
-    ctx.globalAlpha = i < left ? 1 : 0.22;
-    outlineText(ctx, '🥚', c.x - W / 2 + i * (bw + gap) + bw / 2, a - 1, 17, '#fff', '#000');
-    ctx.restore();
-  }
-  if (c.rage > 0) {
-    ctx.save();
-    ctx.globalAlpha = 0.65 + Math.sin(t * 9) * 0.35;
-    outlineText(ctx, '분노 ' + '🔥'.repeat(c.rage), c.x, a + 20, 13, '#ff6b3d', '#000');
-    ctx.restore();
-  }
+penEgg(ctx, e, t) {
+  const p = clamp(e.t / CONFIG.hatch.time, 0, 1);
+  const shake = Math.sin(t * (3 + p * 14)) * (0.8 + p * 2.4);
+  this.egg(ctx, e.x + shake, e.y - 12, 22, e.egg.rarity, e.egg.variant, t, true);
+  this.bar(ctx, e.x, e.y - 48, 46, 7, p, '#ffd54a');
 },
 
 /* ============ 종족별 실루엣 ============ */
@@ -1200,14 +1180,25 @@ form_skeleton(ctx, c, sp, t) {
 },
 
 eyes(ctx, c, x, y, sz, color) {
-  const looking = c.state === 'look', warn = c.state === 'warn';
-  if (looking) {
+  if (c.state === 'sleep') {                       // 감은 눈
+    ctx.strokeStyle = '#1b1b1b';
+    ctx.lineWidth = Math.max(1.6, sz * 0.5);
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(x - 0.5, y + sz * 0.5);
+    ctx.lineTo(x + sz + 1, y + sz * 0.5);
+    ctx.stroke();
+    return;
+  }
+  if (c.state === 'chase') {                       // 분노
     ctx.fillStyle = '#fff'; ctx.fillRect(x - 1, y - 1, sz + 3, sz + 3);
     ctx.fillStyle = '#e01f3d'; ctx.fillRect(x + 0.6, y + 0.6, sz, sz);
-  } else {
-    ctx.fillStyle = warn ? '#ffd54a' : (color || '#1b1b1b');
-    ctx.fillRect(x, y, sz, sz);
+    ctx.strokeStyle = '#1b1b1b'; ctx.lineWidth = 2; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(x - 2, y - 3); ctx.lineTo(x + sz + 2, y + 1); ctx.stroke();
+    return;
   }
+  ctx.fillStyle = color || '#1b1b1b';
+  ctx.fillRect(x, y, sz, sz);
 },
 
 /* ---------------------------------------------------------
@@ -1554,9 +1545,9 @@ bar(ctx, x, y, w, h, p, color) {
  * ------------------------------------------------------- */
 prop(ctx, p, t) {
   const T = p.type;
-  if (T === 'fenceLine') return this.fenceLine(ctx, p);
   if (T === 'sign')      return this.sign(ctx, p, t);
-  if (T === 'shop')      return this.shop(ctx, p, t);
+  if (T === 'treadmill') return this.gym(ctx, p, t);
+  if (T === 'penPad')    return this.padPlate(ctx, p, t);
 
   const s = p.s || 1;
   ctx.save(); ctx.translate(p.x, p.y); ctx.scale(s, s);
@@ -1638,49 +1629,75 @@ prop(ctx, p, t) {
 sign(ctx, p, t) {
   const z = ZONE_BY_ID[p.zone];
   if (!z) return;
-  const unlocked = Game.unlocked[p.zone];
+  const ok = Game.speed() >= z.need;
   ctx.save(); ctx.translate(p.x, p.y);
   shadowEllipse(ctx, 0, 0, 22, 7, 0.25);
   block(ctx, -5, -54, 10, 54, '#7a5230', { outline: true });
-  block(ctx, -62, -102, 124, 52, unlocked ? '#3a4152' : '#2a2130', { outline: true });
-  ctx.strokeStyle = unlocked ? 'rgba(255,255,255,0.35)' : '#ff5a5a';
-  ctx.lineWidth = 3; ctx.strokeRect(-62, -102, 124, 52);
-  outlineText(ctx, z.emoji + ' ' + z.name, 0, -84, 17, unlocked ? '#fff' : '#ff9a9a', '#000');
-  outlineText(ctx, unlocked ? ('속도 ' + fmtMoney(z.speed) + '/초') : ('🔒 ' + fmtMoney(z.cost) + '원'),
-    0, -64, 13, unlocked ? '#39ff9a' : '#ffd54a', '#000');
+  block(ctx, -70, -108, 140, 56, '#3a4152', { outline: true });
+  ctx.strokeStyle = ok ? 'rgba(57,255,154,0.7)' : '#ff9f43';
+  ctx.lineWidth = 3; ctx.strokeRect(-70, -108, 140, 56);
+  outlineText(ctx, z.emoji + ' ' + z.name, 0, -90, 17, '#fff', '#000');
+  outlineText(ctx, '펫 수익 ' + fmtMoney(z.speed) + '/초', 0, -71, 12, '#39ff9a', '#000');
+  outlineText(ctx, '권장 속도 ' + z.need + (ok ? ' ✔' : ' ⚠'), 0, -56, 12, ok ? '#8ed2ff' : '#ff9f43', '#000');
   ctx.restore();
 },
 
-shop(ctx, p, t) {
-  ctx.save(); ctx.translate(p.x, p.y);
-  shadowEllipse(ctx, 0, 0, 60, 16, 0.28);
-  block(ctx, -54, -58, 108, 58, '#3a4152', { outline: true });
-  for (let i = 0; i < 6; i++) {
-    ctx.fillStyle = i % 2 ? '#ff5a5a' : '#ffffff';
-    ctx.fillRect(-60 + i * 20, -72, 20, 16);
-  }
-  ctx.strokeStyle = 'rgba(0,0,0,0.35)'; ctx.lineWidth = 2; ctx.strokeRect(-60, -72, 120, 16);
-  block(ctx, -42, -40, 84, 30, '#222834', { outline: true });
-  outlineText(ctx, '상점', 0, -25, 18, '#ffd54a', '#000');
-  ctx.save(); ctx.globalAlpha = 0.6 + Math.sin(t * 3) * 0.4;
-  outlineText(ctx, '[B]', 0, -88, 15, '#fff', '#000');
+gym(ctx, p, t) {
+  const x = p.x, y = p.y;
+  const on = Game.running;
+  ctx.save();
+  ctx.translate(x, y);
+  shadowEllipse(ctx, 0, 30, 74, 19, 0.28);
+  // 데크 (플레이어가 올라선다)
+  block(ctx, -66, -10, 132, 50, '#39404f', { outline: true });
+  ctx.save();
+  ctx.beginPath(); ctx.rect(-64, -8, 128, 46); ctx.clip();
+  ctx.fillStyle = 'rgba(255,255,255,0.14)';
+  const off = on ? (t * 240) % 22 : 0;
+  for (let i = -1; i < 9; i++) ctx.fillRect(-64 + i * 22 + off, -8, 10, 46);
   ctx.restore();
-  ctx.restore();
-},
-
-fenceLine(ctx, p) {
-  const inGap = o => p.gaps.some(([at, len]) => o >= at - 8 && o <= at + len + 4);
-  for (let o = 0; o < p.len; o += 34) {
-    if (inGap(o)) continue;
-    if (p.horiz) {
-      block(ctx, p.x + o, p.y - 34, 9, 40, '#c9a06a');
-      ctx.fillStyle = '#b08b57';
-      ctx.fillRect(p.x + o, p.y - 26, 34, 6); ctx.fillRect(p.x + o, p.y - 14, 34, 6);
-    } else {
-      block(ctx, p.x - 5, p.y + o, 9, 40, '#c9a06a');
-      ctx.fillStyle = '#b08b57'; ctx.fillRect(p.x - 12, p.y + o + 10, 24, 6);
+  // 레일
+  block(ctx, -76, -20, 13, 66, '#8e9bb0', { outline: true });
+  block(ctx, 63, -20, 13, 66, '#8e9bb0', { outline: true });
+  // 콘솔
+  block(ctx, -34, -86, 68, 32, '#8e9bb0', { outline: true });
+  block(ctx, -9, -56, 18, 40, '#6d7a8d', { outline: true });
+  ctx.fillStyle = on ? '#0d2c1e' : '#1b1f27';
+  ctx.fillRect(-25, -79, 50, 19);
+  outlineText(ctx, on ? Math.round(Game.speed()) + ' px/s' : 'READY',
+    0, -69.5, on ? 12 : 11, on ? '#39ff9a' : '#5b6472', '#06140d', 900);
+  outlineText(ctx, '🏃 러닝머신', 0, -156, 17, '#ffd54a', '#000');
+  // 속도선
+  if (on) {
+    ctx.save();
+    ctx.strokeStyle = '#8ef0ff'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+    for (let i = 0; i < 5; i++) {
+      const q = ((t * 2.2 + i * 0.2) % 1);
+      ctx.globalAlpha = 1 - q;
+      const yy = -40 + i * 11;
+      ctx.beginPath(); ctx.moveTo(38 - q * 74, yy); ctx.lineTo(64 - q * 74, yy); ctx.stroke();
     }
+    ctx.restore();
   }
+  ctx.restore();
+},
+
+padPlate(ctx, p, t) {
+  const x = p.x, y = p.y;
+  const can = Game.penSlots < CONFIG.pen.maxSlots;
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.globalAlpha = 0.55 + Math.sin(t * 2.4) * 0.18;
+  ctx.fillStyle = can ? '#39ff9a' : '#5b6472';
+  roundRect(ctx, -52, -44, 104, 88, 12); ctx.fill();
+  ctx.globalAlpha = 1;
+  ctx.strokeStyle = can ? '#a9ffd2' : '#5b6472'; ctx.lineWidth = 3;
+  roundRect(ctx, -52, -44, 104, 88, 12); ctx.stroke();
+  outlineText(ctx, '울타리 확장', 0, -62, 14, '#fff', '#000');
+  outlineText(ctx, can ? fmtMoney(Game.nextPenCost()) + '원' : 'MAX',
+    0, 0, 17, can ? '#0b2018' : '#cfd6e0', can ? '#a9ffd2' : '#000');
+  outlineText(ctx, `${Game.penUsed()} / ${Game.penSlots} 칸`, 0, 60, 13, '#cfd6e0', '#000');
+  ctx.restore();
 }
 
 };
@@ -1712,41 +1729,41 @@ function star(ctx, x, y, r, color) {
 <script>
 /* =========================================================
  *  world.js - 맵 레이아웃 / 충돌 / 지면 프리렌더
- *  기지 -> 농장 -> 오리 연못 -> 사막 -> 정글 -> 바다 -> 공룡 계곡 -> 우주
+ *
+ *  기지(울타리 · 러닝머신 · 확장 패드) 왼쪽,
+ *  그 오른쪽으로 구역 7개가 벽 없이 이어진다. 어디든 자유롭게 갈 수 있다.
  * ========================================================= */
 
 const ZONE_THEME = {
-  farm:   { floor:'#7cc054', floor2:'#6bab48', fog:null,                    prop:'tree'    },
-  pond:   { floor:'#5fb8d8', floor2:'#4aa3c6', fog:'rgba(60,180,220,0.10)', prop:'reed'    },
-  desert: { floor:'#e6c98a', floor2:'#d8b872', fog:'rgba(255,220,150,0.10)',prop:'cactus'  },
-  jungle: { floor:'#2f6b3a', floor2:'#255a30', fog:'rgba(20,90,40,0.18)',   prop:'jungle'  },
-  ocean:  { floor:'#1d4e86', floor2:'#173f6e', fog:'rgba(30,110,190,0.22)', prop:'coral'   },
-  dino:   { floor:'#6b4230', floor2:'#57351f', fog:'rgba(180,60,20,0.14)',  prop:'volcano' },
-  space:  { floor:'#181334', floor2:'#110e26', fog:'rgba(70,40,160,0.20)',  prop:'crystal' }
+  farm:   { floor:'#7cc054', floor2:'#6bab48', fog:null,                     prop:'tree'    },
+  pond:   { floor:'#5fb8d8', floor2:'#4aa3c6', fog:'rgba(60,180,220,0.10)',  prop:'reed'    },
+  desert: { floor:'#e6c98a', floor2:'#d8b872', fog:'rgba(255,220,150,0.10)', prop:'cactus'  },
+  jungle: { floor:'#2f6b3a', floor2:'#255a30', fog:'rgba(20,90,40,0.18)',    prop:'jungle'  },
+  ocean:  { floor:'#1d4e86', floor2:'#173f6e', fog:'rgba(30,110,190,0.22)',  prop:'coral'   },
+  dino:   { floor:'#6b4230', floor2:'#57351f', fog:'rgba(180,60,20,0.14)',   prop:'volcano' },
+  space:  { floor:'#181334', floor2:'#110e26', fog:'rgba(70,40,160,0.20)',   prop:'crystal' }
 };
 
 const World = {
   w: CONFIG.world.w,
   h: CONFIG.world.h,
 
-  base: { x: 60, y: 300, w: 700, h: 900 },
-  corridor: { y: 720, h: 150 },      // 구역을 잇는 통로
+  base: { x: 60, y: 70, w: 900, h: 1260 },
+  pen:  { x: 130, y: 160, w: 430, h: 700, gate: { x: 345, y: 860 } },
+  treadmill: { x: 780, y: 400 },
+  penPad:    { x: 780, y: 760 },
+  spawn:     { x: 760, y: 1060 },
 
   zones: [],
   solids: [],
-  gates: [],
   props: [],
-  incubators: [],
-  treadmills: [],
-  shop: { x: 170, y: 1090 },
-  spawns: {},
-  bossSpots: {},
+  nestSpots: [],
   ground: null,
 
   /* ---------------- 초기화 ---------------- */
   init() {
-    const ZW = 780, ZH = 1080, ZY = 220, GAP = 60;
-    let x = 880;
+    const ZW = 770, ZH = 1260, ZY = 70;
+    let x = 960;
 
     this.zones.push(Object.assign({ id: 'base', name: '내 기지' }, this.base,
       { floor: '#6f7d92', floor2: '#5d6a7d' }));
@@ -1757,91 +1774,56 @@ const World = {
         id: z.id, name: z.name, x, y: ZY, w: ZW, h: ZH,
         floor: th.floor, floor2: th.floor2, fog: th.fog, prop: th.prop, cfg: z
       });
-      x += ZW + GAP;
+      x += ZW;
     }
-    this.w = x + 100;
+    this.w = x + 70;
     CONFIG.world.w = this.w;
 
-    const S = (a, b, c, d) => this.solids.push({ x: a, y: b, w: c, h: d });
+    /* 바깥 경계만 막는다 — 구역 사이엔 벽이 없다 */
+    this.solids.push({ x: -60, y: -60, w: this.w + 120, h: 60 });
+    this.solids.push({ x: -60, y: this.h, w: this.w + 120, h: 60 });
+    this.solids.push({ x: -60, y: -60, w: 60, h: this.h + 120 });
+    this.solids.push({ x: this.w, y: -60, w: 60, h: this.h + 120 });
 
-    /* 바깥 경계 */
-    S(-60, -60, this.w + 120, 60);
-    S(-60, this.h, this.w + 120, 60);
-    S(-60, -60, 60, this.h + 120);
-    S(this.w, -60, 60, this.h + 120);
+    /* 울타리 — 아래쪽 게이트만 열려 있다 */
+    const P = this.pen, T = 20;
+    const gw = 96, gx = P.gate.x - gw / 2;
+    this.solids.push({ x: P.x, y: P.y - T / 2, w: P.w, h: T });
+    this.solids.push({ x: P.x - T / 2, y: P.y, w: T, h: P.h });
+    this.solids.push({ x: P.x + P.w - T / 2, y: P.y, w: T, h: P.h });
+    this.solids.push({ x: P.x, y: P.y + P.h - T / 2, w: gx - P.x, h: T });
+    this.solids.push({ x: gx + gw, y: P.y + P.h - T / 2, w: P.x + P.w - gx - gw, h: T });
+    this.props.push({ type: 'penFence', ...P, gapX: gx, gapW: gw });
 
-    /* 기지 담장 (오른쪽 통로만 열림) */
-    const B = this.base, CY = this.corridor.y, CH = this.corridor.h;
-    this.wall(B.x, B.y, B.w, true);
-    this.wall(B.x, B.y + B.h, B.w, true);
-    this.wall(B.x, B.y, B.h, false);
-    this.wall(B.x + B.w, B.y, B.h, false, [[CY - B.y, CH]]);
+    /* 기지 설비 */
+    /* 둘 다 바닥 설비라 플레이어보다 먼저 그린다 (sort 키를 앞당김) */
+    this.props.push({ type: 'treadmill', x: this.treadmill.x, y: this.treadmill.y, sort: this.treadmill.y - 70 });
+    this.props.push({ type: 'penPad', x: this.penPad.x, y: this.penPad.y, sort: this.penPad.y - 90 });
 
-    /* 각 구역 울타리 : 좌/우 통로 개방 */
+    /* 구역별 둥지 + 장식 */
     for (const z of this.zones) {
       if (z.id === 'base') continue;
-      this.wall(z.x, z.y, z.w, true);
-      this.wall(z.x, z.y + z.h, z.w, true);
-      this.wall(z.x, z.y, z.h, false, [[CY - z.y, CH]]);
-      this.wall(z.x + z.w, z.y, z.h, false, [[CY - z.y, CH]]);
-
-      /* 잠금 게이트: 구역 입구 */
-      if (z.cfg.cost > 0) this.gates.push({ x: z.x - 16, y: CY, w: 32, h: CH, zone: z.id });
-
-      /* 스폰 위치 */
-      const list = [];
-      const cols = [z.x + 130, z.x + 330, z.x + 520, z.x + 680];
-      const rows = [z.y + 120, z.y + 300, z.y + 790, z.y + 950];
+      const cols = [z.x + 150, z.x + 385, z.x + 620];
+      const rows = [z.y + 190, z.y + 620, z.y + 1050];
+      let k = 0;
       rows.forEach((ry, ri) => cols.forEach((cx, ci) => {
-        if ((ri + ci) % 4 === 3) return;
-        list.push([cx, ry, (ri + ci) % 3 === 0 ? 1 : 0]);   // 1 = 엘리트
+        if (ri === 1 && ci === 1) return;               // 가운데는 비워 통로
+        const elite = (ri + ci) % 3 === 2;
+        this.nestSpots.push({
+          zone: z.id, spId: z.cfg.mobs[elite ? 1 : 0],
+          x: cx + rand(-26, 26), y: ry + rand(-22, 22), i: k++
+        });
       }));
-      this.spawns[z.id] = list;
-      this.bossSpots[z.id] = { x: z.x + z.w / 2, y: z.y + z.h - 130 };
 
-      /* 장식 */
-      for (let i = 0; i < 10; i++) {
-        const px = z.x + rand(70, z.w - 70);
-        const py = z.y + rand(60, z.h - 60);
-        if (py > CY - 70 && py < CY + CH + 70) continue;
+      for (let i = 0; i < 9; i++) {
+        const px = z.x + rand(60, z.w - 60), py = z.y + rand(60, z.h - 60);
+        if (this.nestSpots.some(n => n.zone === z.id && dist2(n.x, n.y, px, py) < 150 * 150)) continue;
         this.props.push({ type: z.prop, x: px, y: py, s: rand(0.75, 1.3), seed: rand(0, 10) });
       }
-      /* 구역 표지판 */
-      this.props.push({ type: 'sign', x: z.x + 70, y: CY - 40, zone: z.id });
+      this.props.push({ type: 'sign', x: z.x + 66, y: z.y + z.h - 70, zone: z.id });
     }
-
-    /* 부화기 / 러닝머신 / 상점 */
-    [[150, 430], [150, 580], [150, 730]].forEach((p, i) =>
-      this.incubators.push({ i, x: p[0], y: p[1], egg: null, grow: 0, ready: false }));
-
-    let k = 0;
-    for (const ry of [470, 1060]) {
-      for (const cx of [335, 445, 555, 665]) {
-        this.treadmills.push({ i: k++, x: cx, y: ry, pet: null, kind: 'basic' });
-      }
-    }
-    this.treadmills.forEach(t => S(t.x - 34, t.y - 22, 68, 30));
-    this.incubators.forEach(t => S(t.x - 30, t.y - 18, 60, 26));
-
-    this.props.push({ type: 'shop', x: this.shop.x, y: this.shop.y });
-    S(this.shop.x - 50, this.shop.y - 38, 100, 36);
 
     this.buildGround();
-  },
-
-  /* 한 변에 구멍이 있는 벽 */
-  wall(x, y, len, horiz, gaps = []) {
-    const T = 24;
-    let cur = 0;
-    const segs = [];
-    for (const [at, glen] of gaps.sort((a, b) => a[0] - b[0])) { segs.push([cur, at - cur]); cur = at + glen; }
-    segs.push([cur, len - cur]);
-    for (const [o, l] of segs) {
-      if (l <= 0) continue;
-      if (horiz) this.solids.push({ x: x + o, y: y - T / 2, w: l, h: T });
-      else this.solids.push({ x: x - T / 2, y: y + o, w: T, h: l });
-    }
-    this.props.push({ type: 'fenceLine', x, y, len, horiz, gaps });
   },
 
   zoneAt(x, y) {
@@ -1849,12 +1831,15 @@ const World = {
     return null;
   },
   zoneDef(id) { return this.zones.find(z => z.id === id); },
+  inPen(x, y) {
+    const P = this.pen;
+    return x > P.x && x < P.x + P.w && y > P.y && y < P.y + P.h;
+  },
 
-  /* 원 vs 사각형 충돌 해결 */
-  resolve(p, r, unlocked) {
-    const list = this.solids.concat(this.gates.filter(g => !unlocked[g.zone]));
+  /* 원 vs 사각형 충돌 */
+  resolve(p, r) {
     for (let pass = 0; pass < 2; pass++) {
-      for (const s of list) {
+      for (const s of this.solids) {
         const cx = clamp(p.x, s.x, s.x + s.w);
         const cy = clamp(p.y, s.y, s.y + s.h);
         const dx = p.x - cx, dy = p.y - cy;
@@ -1875,25 +1860,17 @@ const World = {
     p.y = clamp(p.y, 20, this.h - 20);
   },
 
-  /* ---------------- 지면 프리렌더 ---------------- */
+  /* ---------------- 지면 ---------------- */
   buildGround() {
     const c = document.createElement('canvas');
     c.width = this.w; c.height = this.h;
     const g = c.getContext('2d');
 
-    g.fillStyle = '#5c9b3e';
-    g.fillRect(0, 0, this.w, this.h);
-    for (let i = 0; i < 4000; i++) {
+    g.fillStyle = '#5c9b3e'; g.fillRect(0, 0, this.w, this.h);
+    for (let i = 0; i < 3500; i++) {
       g.fillStyle = Math.random() < 0.5 ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.06)';
       g.fillRect(Math.random() * this.w, Math.random() * this.h, rand(6, 22), rand(3, 7));
     }
-
-    /* 통로 */
-    const CY = this.corridor.y, CH = this.corridor.h;
-    g.fillStyle = '#c2a678';
-    g.fillRect(this.base.x + this.base.w, CY, this.w - this.base.x - this.base.w, CH);
-    g.fillStyle = 'rgba(0,0,0,0.07)';
-    for (let i = 0; i < 800; i++) g.fillRect(this.base.x + this.base.w + Math.random() * (this.w - 900), CY + Math.random() * CH, rand(5, 14), rand(3, 6));
 
     for (const z of this.zones) {
       g.fillStyle = z.floor; g.fillRect(z.x, z.y, z.w, z.h);
@@ -1903,45 +1880,44 @@ const World = {
         for (let tx = 0; tx < z.w; tx += tile)
           if (((tx / tile | 0) + (ty / tile | 0)) % 2)
             g.fillRect(z.x + tx, z.y + ty, Math.min(tile, z.w - tx), Math.min(tile, z.h - ty));
-
       for (let i = 0; i < 1100; i++) {
         g.fillStyle = Math.random() < 0.5 ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
         g.fillRect(z.x + Math.random() * z.w, z.y + Math.random() * z.h, rand(5, 16), rand(3, 6));
       }
       this.themeGround(g, z);
 
-      /* 통로가 구역을 관통 */
+      /* 구역 경계는 벽이 아니라 색 띠로만 표시 */
       if (z.id !== 'base') {
-        g.fillStyle = 'rgba(200,170,120,0.35)';
-        g.fillRect(z.x, CY, z.w, CH);
-      }
-      /* 보스 아레나 */
-      const bs = this.bossSpots[z.id];
-      if (bs) {
-        g.save();
-        g.strokeStyle = 'rgba(255,60,60,0.55)'; g.lineWidth = 6; g.setLineDash([18, 14]);
-        g.beginPath(); g.ellipse(bs.x, bs.y + 10, 150, 80, 0, 0, 7); g.stroke();
-        g.setLineDash([]);
-        g.fillStyle = 'rgba(255,60,60,0.10)';
-        g.beginPath(); g.ellipse(bs.x, bs.y + 10, 150, 80, 0, 0, 7); g.fill();
-        g.restore();
+        const grd = g.createLinearGradient(z.x - 26, 0, z.x + 26, 0);
+        grd.addColorStop(0, 'rgba(0,0,0,0.20)');
+        grd.addColorStop(1, 'rgba(0,0,0,0)');
+        g.fillStyle = grd; g.fillRect(z.x - 26, z.y, 52, z.h);
       }
     }
 
-    /* 기지 격자 + 슬롯 */
+    /* 기지 바닥 격자 */
     const B = this.zoneDef('base');
     g.strokeStyle = 'rgba(255,255,255,0.13)'; g.lineWidth = 3;
     for (let ty = B.y; ty < B.y + B.h; ty += 96) { g.beginPath(); g.moveTo(B.x, ty); g.lineTo(B.x + B.w, ty); g.stroke(); }
     for (let tx = B.x; tx < B.x + B.w; tx += 96) { g.beginPath(); g.moveTo(tx, B.y); g.lineTo(tx, B.y + B.h); g.stroke(); }
 
-    for (const t of this.treadmills) {
-      g.fillStyle = 'rgba(0,0,0,0.16)'; roundRect(g, t.x - 46, t.y - 40, 92, 96, 10); g.fill();
-      g.strokeStyle = 'rgba(255,255,255,0.22)'; g.lineWidth = 3; g.setLineDash([9, 8]); g.stroke(); g.setLineDash([]);
+    /* 울타리 안쪽 잔디 */
+    const P = this.pen;
+    g.fillStyle = '#7ab74e';
+    g.fillRect(P.x, P.y, P.w, P.h);
+    for (let i = 0; i < 900; i++) {
+      g.fillStyle = Math.random() < 0.5 ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.07)';
+      g.fillRect(P.x + Math.random() * P.w, P.y + Math.random() * P.h, rand(5, 15), rand(3, 6));
     }
-    for (const t of this.incubators) {
-      g.fillStyle = 'rgba(255,255,255,0.10)'; roundRect(g, t.x - 42, t.y - 40, 84, 88, 10); g.fill();
-      g.strokeStyle = 'rgba(255,255,255,0.28)'; g.lineWidth = 3; g.setLineDash([9, 8]); g.stroke(); g.setLineDash([]);
-    }
+
+    /* 설비 발판 */
+    const pad = (x, y, w, h, col) => {
+      g.fillStyle = col; roundRect(g, x - w / 2, y - h / 2, w, h, 12); g.fill();
+      g.strokeStyle = 'rgba(255,255,255,0.30)'; g.lineWidth = 3;
+      g.setLineDash([10, 8]); g.stroke(); g.setLineDash([]);
+    };
+    pad(this.treadmill.x, this.treadmill.y + 16, 168, 140, 'rgba(0,0,0,0.20)');
+    pad(this.penPad.x, this.penPad.y, 120, 108, 'rgba(57,255,154,0.14)');
 
     this.ground = c;
   },
@@ -1949,40 +1925,22 @@ const World = {
   themeGround(g, z) {
     const R = (n, f) => { for (let i = 0; i < n; i++) f(z.x + Math.random() * z.w, z.y + Math.random() * z.h); };
     if (z.id === 'pond') {
-      R(26, (x, y) => {
-        g.fillStyle = 'rgba(255,255,255,0.16)';
-        g.beginPath(); g.ellipse(x, y, rand(30, 90), rand(10, 26), 0, 0, 7); g.fill();
-      });
+      R(24, (x, y) => { g.fillStyle = 'rgba(255,255,255,0.16)'; g.beginPath(); g.ellipse(x, y, rand(30, 90), rand(10, 26), 0, 0, 7); g.fill(); });
     } else if (z.id === 'desert') {
-      R(40, (x, y) => {
-        g.strokeStyle = 'rgba(180,140,80,0.35)'; g.lineWidth = 3;
-        g.beginPath(); g.ellipse(x, y, rand(40, 110), rand(8, 20), rand(-0.3, 0.3), 0, 7); g.stroke();
-      });
+      R(38, (x, y) => { g.strokeStyle = 'rgba(180,140,80,0.35)'; g.lineWidth = 3; g.beginPath(); g.ellipse(x, y, rand(40, 110), rand(8, 20), rand(-0.3, 0.3), 0, 7); g.stroke(); });
     } else if (z.id === 'jungle') {
-      R(120, (x, y) => {
-        g.fillStyle = `rgba(${randInt(40, 90)},${randInt(120, 190)},${randInt(50, 90)},0.5)`;
-        g.beginPath(); g.ellipse(x, y, rand(10, 26), rand(5, 12), rand(0, 3), 0, 7); g.fill();
-      });
+      R(120, (x, y) => { g.fillStyle = `rgba(${randInt(40,90)},${randInt(120,190)},${randInt(50,90)},0.5)`; g.beginPath(); g.ellipse(x, y, rand(10, 26), rand(5, 12), rand(0, 3), 0, 7); g.fill(); });
     } else if (z.id === 'ocean') {
-      R(50, (x, y) => {
-        g.strokeStyle = 'rgba(140,215,255,0.22)'; g.lineWidth = 4;
-        g.beginPath(); g.arc(x, y, rand(20, 70), 0.2, 2.6); g.stroke();
-      });
-      R(160, (x, y) => { g.fillStyle = 'rgba(255,255,255,0.30)'; g.fillRect(x, y, 3, 3); });
+      R(48, (x, y) => { g.strokeStyle = 'rgba(140,215,255,0.22)'; g.lineWidth = 4; g.beginPath(); g.arc(x, y, rand(20, 70), 0.2, 2.6); g.stroke(); });
+      R(150, (x, y) => { g.fillStyle = 'rgba(255,255,255,0.30)'; g.fillRect(x, y, 3, 3); });
     } else if (z.id === 'dino') {
-      R(30, (x, y) => {
-        g.fillStyle = 'rgba(255,90,20,0.30)';
-        g.beginPath(); g.ellipse(x, y, rand(24, 70), rand(10, 26), rand(0, 3), 0, 7); g.fill();
-      });
+      R(28, (x, y) => { g.fillStyle = 'rgba(255,90,20,0.30)'; g.beginPath(); g.ellipse(x, y, rand(24, 70), rand(10, 26), rand(0, 3), 0, 7); g.fill(); });
       R(60, (x, y) => { g.fillStyle = 'rgba(0,0,0,0.22)'; g.fillRect(x, y, rand(8, 22), rand(5, 10)); });
     } else if (z.id === 'space') {
-      R(700, (x, y) => {
-        const s = rand(1, 3.4);
-        g.fillStyle = `rgba(255,255,255,${rand(0.25, 0.95)})`; g.fillRect(x, y, s, s);
-      });
+      R(700, (x, y) => { const s = rand(1, 3.4); g.fillStyle = `rgba(255,255,255,${rand(0.25,0.95)})`; g.fillRect(x, y, s, s); });
       R(6, (x, y) => {
         const gr = g.createRadialGradient(x, y, 4, x, y, 220);
-        gr.addColorStop(0, `rgba(${randInt(80, 200)},${randInt(60, 160)},255,0.30)`);
+        gr.addColorStop(0, `rgba(${randInt(80,200)},${randInt(60,160)},255,0.30)`);
         gr.addColorStop(1, 'rgba(0,0,0,0)');
         g.fillStyle = gr; g.beginPath(); g.arc(x, y, 220, 0, 7); g.fill();
       });
@@ -2025,6 +1983,8 @@ const Sfx = {
       case 'ready': this.tone(740, 0.09, 'triangle'); this.tone(980, 0.12, 'triangle', 0.13, 0.09); break;
       case 'buy':   this.tone(520, 0.08); this.tone(700, 0.08, 'square', 0.14, 0.07); this.tone(940, 0.14, 'square', 0.14, 0.14); break;
       case 'fail':  this.tone(220, 0.20, 'sawtooth', 0.15, 0, 0.4); break;
+      case 'alert': [880,1174,880,1174].forEach((f,i)=>this.tone(f,0.14,'square',0.15,i*0.13)); break;
+      case 'wake':  this.tone(880, 0.09, 'square', 0.16); this.tone(560, 0.22, 'sawtooth', 0.16, 0.07, 0.5); break;
       case 'boss':  this.tone(110, 0.35, 'sawtooth', 0.20, 0, 0.6); this.tone(160, 0.30, 'square', 0.10, 0.05, 0.5); break;
       case 'hatch': [523, 659, 784].forEach((f, i) => this.tone(f, 0.13, 'triangle', 0.14, i * 0.08)); break;
       case 'rare':  [523, 659, 784, 1046, 1318].forEach((f, i) => this.tone(f, 0.17, 'triangle', 0.16, i * 0.09)); break;
@@ -2048,9 +2008,8 @@ const Input = {
       this.keys[k] = true;
       if ([' ', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(k)) e.preventDefault();
       if (k === 'e' || k === ' ') { this.action = true; Game.interact(); }
-      if (k === 'b') UI.openShop('zone');
-      if (k === 'i' || k === 'tab') { e.preventDefault(); UI.openPets(); }
-      if (k === 'h' || k === '?' || k === '/') UI.openHelp();
+      if (k === 'i' || k === 'tab') { e.preventDefault(); UI.open('pets'); }
+      if (k === 'h' || k === '?' || k === '/') UI.open('help');
       if (k === 'escape') UI.closeModal();
     });
     addEventListener('keyup', e => {
@@ -2131,24 +2090,26 @@ const Input = {
 </script>
 <script>
 /* =========================================================
- *  ui.js - HUD / 모달 / 튜토리얼 / 토스트
+ *  ui.js - HUD / 알림 / 도감 / 부화 연출
+ *  (상점 없음 — 러닝머신과 울타리 확장은 월드 안 설비로 처리)
  * ========================================================= */
 const UI = {
   shakeAmt: 0,
-  toasts: [],
   reveal: null,
-  modalTab: 'zone',
+  modalTab: 'pets',
+  announceQ: [],
+  announceT: 0,
+  feed: [],
 
   init(game) {
     this.g = game;
     this.$ = id => document.getElementById(id);
     this.minimap = this.$('minimap');
-    this.minimap.width = 260; this.minimap.height = 74;
+    this.minimap.width = 260; this.minimap.height = 62;
 
-    this.$('btnShop').onclick = () => this.openShop('zone');
-    this.$('btnPets').onclick = () => this.openPets();
-    this.$('btnAuto').onclick = () => Game.autoPlace();
-    this.$('btnHelp').onclick = () => this.openHelp();
+    this.$('btnPets').onclick = () => this.open('pets');
+    this.$('btnDex').onclick  = () => this.open('dex');
+    this.$('btnHelp').onclick = () => this.open('help');
     this.$('btnMute').onclick = e => {
       Sfx.muted = !Sfx.muted;
       e.currentTarget.textContent = Sfx.muted ? '🔇' : '🔊';
@@ -2157,62 +2118,95 @@ const UI = {
     this.$('modalClose').onclick = () => this.closeModal();
     this.$('modal').addEventListener('click', e => { if (e.target.id === 'modal') this.closeModal(); });
     this.$('revealClose').onclick = () => this.closeReveal();
-    this.$('startBtn').onclick = () => {
-      this.$('splash').classList.add('gone');
-      Sfx.ensure();
-    };
+    this.$('startBtn').onclick = () => { this.$('splash').classList.add('gone'); Sfx.ensure(); };
     this.rc = this.$('revealCanvas');
     this.refresh();
   },
 
-  /* ---------------- 상단 HUD ---------------- */
+  /* ---------------- 매 프레임 ---------------- */
   fastRefresh() {
     const g = this.g;
     this.$('money').textContent = fmtMoney(g.money);
     this.$('rate').textContent = fmtMoney(g.income()) + '/초';
-    this.$('bag').textContent = `${g.carrying.length}/${g.carryMax()}`;
+    this.$('spd').textContent = Math.round(g.speed());
+    this.$('spdLv').textContent = 'Lv.' + g.speedLv;
+    this.$('pen').textContent = `${g.penUsed()}/${g.penSlots}`;
     const z = World.zoneAt(g.player.x, g.player.y);
-    this.$('zoneName').textContent = z ? (z.id === 'base' ? '🏠 내 기지' : (ZONE_BY_ID[z.id].emoji + ' ' + z.name)) : '🛣️ 이동 중';
-    this.bossBar();
+    this.$('zoneName').textContent = z
+      ? (z.id === 'base' ? '🏠 내 기지' : ZONE_BY_ID[z.id].emoji + ' ' + z.name)
+      : '🌱 들판';
+
+    /* 들고 있는 알 */
+    const eggEl = this.$('carry');
+    if (g.carrying) {
+      const r = RARITY_BY_ID[g.carrying.rarity];
+      eggEl.classList.add('on');
+      eggEl.style.borderColor = r.glow;
+      eggEl.innerHTML = `<span class="ic">🥚</span><b style="color:${r.glow}">${r.name}</b>`;
+    } else {
+      eggEl.classList.remove('on');
+      eggEl.style.borderColor = '';
+      eggEl.innerHTML = `<span class="ic">🥚</span><b>없음</b>`;
+    }
+
+    /* 추격 경고 */
+    const cw = this.$('chase');
+    if (g.chasers > 0) {
+      cw.classList.add('on');
+      cw.innerHTML = `🏃 <b>도망쳐!</b> ${g.chasers}마리 추격 중` +
+        (g.carrying ? ' — <span class="risk">잡히면 알을 뺏긴다</span>' : '');
+    } else cw.classList.remove('on');
+
     this.drawReveal();
   },
 
   refresh() {
     const g = this.g;
-    this.$('pets').textContent = g.pets.length;
-    this.$('tmCount').textContent = `${World.treadmills.filter(t => t.i < g.treadmillSlots && t.pet).length}/${g.treadmillSlots}`;
-    /* 튜토리얼 */
+    this.$('pen').textContent = `${g.penUsed()}/${g.penSlots}`;
     const step = TUTORIAL[g.tutorial];
     const box = this.$('tut');
-    if (!step) { box.classList.add('done'); box.innerHTML = `<div class="tut-h">✅ 튜토리얼 완료</div><div class="tut-b">이제 자유롭게 제국을 키워봐. [H] 도움말</div>`; }
-    else {
+    if (!step) {
+      box.classList.add('done');
+      box.innerHTML = `<div class="tut-h">✅ 튜토리얼 완료</div>
+        <div class="tut-b">구역은 전부 자유롭게 갈 수 있어. 파수꾼이 빠른 곳일수록 좋은 알이 나와 — 속도를 올리고 도전해봐. [H] 도움말</div>`;
+    } else {
       box.classList.remove('done');
-      box.innerHTML =
-        `<div class="tut-h"><span class="tut-n">${g.tutorial + 1}/${TUTORIAL.length}</span> ${step.title}</div>
-         <div class="tut-b">${step.body}</div>`;
+      box.innerHTML = `<div class="tut-h"><span class="tut-n">${g.tutorial + 1}/${TUTORIAL.length}</span> ${step.title}</div>
+        <div class="tut-b">${step.body}</div>`;
     }
     if (this.$('modal').classList.contains('open')) this.renderModal();
   },
 
-  bossBar() {
-    const b = Game.nearestBoss();
-    const el = this.$('bossbar');
-    if (!b) { el.classList.remove('on'); return; }
-    el.classList.add('on');
-    const c = b.cfg;
-    if (b.cooldownT > 0) {
-      el.innerHTML = `<div class="bb-name" style="color:${c.glow}">${c.name}</div>
-        <div class="bb-sub">재등장까지 ${fmtTime(b.cooldownT)}</div>`;
+  /* ---------------- 시크릿 이상 전광판 ---------------- */
+  announce(egg, verb) {
+    const r = RARITY_BY_ID[egg.rarity];
+    const v = VARIANT_BY_ID[egg.variant];
+    const sp = SPECIES[egg.species];
+    this.announceQ.push({
+      html: `<div class="an-top">🚨 ${r.name} 등급 ${verb}!</div>
+             <div class="an-main">${v.name ? v.name + ' ' : ''}${sp.name}의 ${r.name} 알</div>
+             <div class="an-sub">아우라 · ${r.auraName}${v.name ? ' + ' + v.name + ' x' + v.mult : ''}</div>`,
+      glow: r.glow, c1: r.c1
+    });
+    this.feed.unshift({ t: Date.now(), name: `${v.name ? v.name + ' ' : ''}${sp.name} · ${r.name}`, glow: r.glow, verb });
+    if (this.feed.length > 12) this.feed.pop();
+    Sfx.play('alert');
+  },
+
+  pumpAnnounce(dt) {
+    const el = this.$('announce');
+    if (this.announceT > 0) {
+      this.announceT -= dt;
+      if (this.announceT <= 0) el.classList.remove('on');
       return;
     }
-    const eggs = '🥚'.repeat(b.eggsLeft) + '<span class="dim">' + '🥚'.repeat(c.eggs - b.eggsLeft) + '</span>';
-    const rule = b.state === 'look'
-      ? '<span class="danger">쳐다보는 중 — 완전히 멈춰!</span>'
-      : b.state === 'warn'
-        ? '<span class="warn">❗ 돌아본다!</span>'
-        : `최소 <b style="color:${RARITIES[c.minTier].glow}">${RARITIES[c.minTier].name}</b> 확정 · 분노 ${b.rage}`;
-    el.innerHTML = `<div class="bb-name" style="color:${c.glow}">👑 ${c.name} <span class="bb-t">${c.title}</span></div>
-      <div class="bb-eggs">${eggs}</div><div class="bb-sub">${rule}</div>`;
+    if (!this.announceQ.length) return;
+    const a = this.announceQ.shift();
+    el.style.setProperty('--g', a.glow);
+    el.style.setProperty('--c1', a.c1);
+    el.innerHTML = a.html;
+    el.classList.add('on');
+    this.announceT = 3.4;
   },
 
   /* ---------------- 토스트 ---------------- */
@@ -2227,164 +2221,102 @@ const UI = {
   },
 
   shake(a) { this.shakeAmt = Math.max(this.shakeAmt, a); },
-  tick(dt) { this.shakeAmt = Math.max(0, this.shakeAmt - dt * 1.8); if (this.reveal) this.reveal.t += dt; },
+  tick(dt) {
+    this.shakeAmt = Math.max(0, this.shakeAmt - dt * 1.8);
+    if (this.reveal) this.reveal.t += dt;
+    this.pumpAnnounce(dt);
+  },
 
-  /* ---------------- 모달 ---------------- */
-  openShop(tab) { this.modalTab = tab || 'zone'; this.$('modal').classList.add('open'); Game.paused = false; this.renderModal(); Sfx.play('tick'); },
-  openPets() { this.modalTab = 'pets'; this.$('modal').classList.add('open'); this.renderModal(); Sfx.play('tick'); },
-  openHelp() { this.modalTab = 'help'; this.$('modal').classList.add('open'); this.renderModal(); Sfx.play('tick'); },
+  /* ---------------- 정보 패널 ---------------- */
+  open(tab) { this.modalTab = tab; this.$('modal').classList.add('open'); this.renderModal(); Sfx.play('tick'); },
   closeModal() { this.$('modal').classList.remove('open'); },
 
   renderModal() {
-    const g = this.g;
-    const tabs = [
-      ['zone', '🗺️ 구역'], ['gear', '🏃 러닝머신'], ['fac', '🏗️ 시설'],
-      ['pets', '🐣 내 펫'], ['dex', '📖 등급표'], ['help', '❓ 도움말']
-    ];
+    const tabs = [['pets', '🐣 내 펫'], ['dex', '📖 등급표'], ['log', '🚨 발견 기록'], ['help', '❓ 도움말']];
     this.$('modalTabs').innerHTML = tabs.map(([id, l]) =>
       `<button class="tab ${this.modalTab === id ? 'on' : ''}" data-tab="${id}">${l}</button>`).join('');
     this.$('modalTabs').querySelectorAll('.tab').forEach(b =>
       b.onclick = () => { this.modalTab = b.dataset.tab; this.renderModal(); });
-
-    const body = this.$('modalBody');
-    const F = {
-      zone: () => this.viewZones(), gear: () => this.viewGear(), fac: () => this.viewFac(),
-      pets: () => this.viewPets(), dex: () => this.viewDex(), help: () => this.viewHelp()
-    };
-    body.innerHTML = (F[this.modalTab] || F.zone)();
-    body.querySelectorAll('[data-buy]').forEach(b => b.onclick = () => {
-      const [k, v] = b.dataset.buy.split(':');
-      if (k === 'zone') Game.buyZone(v);
-      else if (k === 'tm') Game.buyTreadmillSlot();
-      else if (k === 'inc') Game.buyIncubatorSlot();
-      else if (k === 'bag') Game.buyBackpack();
-      else if (k === 'up') Game.upgradeTreadmill(v);
-      this.renderModal();
-    });
-    body.querySelectorAll('[data-sell]').forEach(b => b.onclick = () => {
-      const uid = +b.dataset.sell;
-      const i = Game.pets.findIndex(p => p.uid === uid);
-      if (i < 0) return;
-      const pet = Game.pets[i];
-      const price = Math.floor(petIncome(pet) * 45);
-      World.treadmills.forEach(t => { if (t.pet && t.pet.uid === uid) t.pet = null; });
-      Game.pets.splice(i, 1);
-      Game.money += price;
-      this.toast(`${petFullName(pet)} 판매 +${fmtMoney(price)}원`, '#39ff9a');
-      Sfx.play('buy'); this.refresh(); this.renderModal();
-    });
-  },
-
-  card(title, sub, right, cls = '') {
-    return `<div class="row ${cls}"><div class="row-l"><div class="row-t">${title}</div><div class="row-s">${sub}</div></div><div class="row-r">${right}</div></div>`;
-  },
-  btn(label, key, ok) {
-    return `<button class="buy ${ok ? '' : 'no'}" data-buy="${key}">${label}</button>`;
-  },
-
-  viewZones() {
-    const g = this.g;
-    let h = `<p class="hint">구역마다 알 주인이 다르고 <b>권장속도(초당 수익 기준값)</b>가 다르다. 각 구역엔 <b>보스</b>가 하나씩 있어.</p>`;
-    ZONES.forEach((z, i) => {
-      const un = g.unlocked[z.id];
-      const prev = i > 0 ? g.unlocked[ZONES[i - 1].id] : true;
-      const boss = BOSS_BY_ZONE[z.id];
-      const mobs = z.mobs.map(m => `${SPECIES[m].name}(${fmtMoney(SPECIES[m].base)})`).join(' · ');
-      const right = un ? `<span class="ok">해금됨</span>`
-        : prev ? this.btn(fmtMoney(z.cost) + '원', 'zone:' + z.id, g.money >= z.cost)
-          : `<span class="lock">앞 구역 먼저</span>`;
-      h += this.card(
-        `${z.emoji} ${z.name} <span class="spd">속도 ${fmtMoney(z.speed)}/초</span>`,
-        `${mobs}<br><span class="boss">👑 보스 ${boss.name} — 최소 ${RARITIES[boss.minTier].name} 확정</span>`,
-        right, un ? 'on' : '');
-    });
-    return h;
-  },
-
-  viewGear() {
-    const g = this.g;
-    let h = `<p class="hint">러닝머신 슬롯을 늘리고 등급을 올려. 수익 = <b>생물 속도 × 등급배수 × 아우라배수 × 러닝머신배수</b></p>`;
-    const canSlot = g.treadmillSlots < CONFIG.treadmillSlots.max;
-    const sc = CONFIG.treadmillSlots.cost(g.treadmillSlots);
-    h += this.card('러닝머신 슬롯 추가', `현재 ${g.treadmillSlots} / ${CONFIG.treadmillSlots.max}`,
-      canSlot ? this.btn(fmtMoney(sc) + '원', 'tm:1', g.money >= sc) : `<span class="ok">MAX</span>`);
-    TREADMILLS.forEach(t => {
-      if (t.cost === 0) return;
-      const n = World.treadmills.filter(q => q.i < g.treadmillSlots && q.kind === t.id).length;
-      h += this.card(`${t.name} <span class="spd">x${t.mult}</span>`,
-        `보유 ${n}대 — 가장 낮은 슬롯 1개를 업그레이드`,
-        this.btn(fmtMoney(t.cost) + '원', 'up:' + t.id, g.money >= t.cost));
-    });
-    return h;
-  },
-
-  viewFac() {
-    const g = this.g;
-    let h = `<p class="hint">부화기를 늘리면 알을 동시에 키우고, 가방을 키우면 한 번에 여러 개를 훔칠 수 있어.</p>`;
-    const ic = g.incubatorSlots < CONFIG.incubator.maxSlots;
-    const icc = CONFIG.incubator.slotCost[g.incubatorSlots];
-    h += this.card('부화기 추가', `현재 ${g.incubatorSlots} / ${CONFIG.incubator.maxSlots}`,
-      ic ? this.btn(fmtMoney(icc) + '원', 'inc:1', g.money >= icc) : `<span class="ok">MAX</span>`);
-    const bl = g.backpackLv < CONFIG.backpack.levels.length - 1;
-    const bc = CONFIG.backpack.cost[g.backpackLv + 1];
-    h += this.card('가방 확장', `한 번에 알 ${g.carryMax()}개 → ${bl ? CONFIG.backpack.levels[g.backpackLv + 1] : '-'}개`,
-      bl ? this.btn(fmtMoney(bc) + '원', 'bag:1', g.money >= bc) : `<span class="ok">MAX</span>`);
-    h += `<div class="stats">
-      <div><b>${fmtMoney(g.totalEarned)}</b><span>총 수익</span></div>
-      <div><b>${g.stolen}</b><span>훔친 알</span></div>
-      <div><b>${g.hatched}</b><span>부화</span></div>
-      <div><b>${g.bossKills}</b><span>보스 격파</span></div>
-      <div><b>${g.best !== null ? RARITIES[g.best].name : '-'}</b><span>최고 등급</span></div>
-    </div>
-    <button class="danger-btn" onclick="if(confirm('정말 처음부터 다시 할래? 저장이 지워져.'))Game.reset()">저장 초기화</button>`;
-    return h;
+    const F = { pets: () => this.viewPets(), dex: () => this.viewDex(), log: () => this.viewLog(), help: () => this.viewHelp() };
+    this.$('modalBody').innerHTML = (F[this.modalTab] || F.pets)();
   },
 
   viewPets() {
     const g = this.g;
-    if (!g.pets.length) return `<p class="hint">아직 펫이 없어. 알을 훔쳐서 부화시켜봐!</p>`;
-    const placed = new Set(World.treadmills.filter(t => t.pet).map(t => t.pet.uid));
-    const sorted = g.pets.slice().sort((a, b) => petIncome(b) - petIncome(a));
-    let h = `<p class="hint">총 ${g.pets.length}마리 · 가동 중 ${placed.size}마리 · <b>[자동 배치]</b>로 최고 수익 펫만 올릴 수 있어.</p><div class="petgrid">`;
-    for (const p of sorted) {
-      const r = RARITY_BY_ID[p.rarity], v = VARIANT_BY_ID[p.variant], sp = SPECIES[p.species];
-      h += `<div class="petcard" style="--c1:${r.c1};--c2:${r.c2};--g:${r.glow}">
-        <div class="pc-rar">${r.name}${v.name ? ' · ' + v.name : ''}</div>
-        <div class="pc-name">${sp.pet}</div>
-        <div class="pc-inc">${fmtMoney(petIncome(p))}/초</div>
-        <div class="pc-foot">${placed.has(p.uid) ? '<span class="run">가동중</span>' : '<span class="idle">대기</span>'}
-          <button class="sell" data-sell="${p.uid}">판매 ${fmtMoney(Math.floor(petIncome(p) * 45))}</button></div>
-      </div>`;
+    let h = `<div class="stats">
+      <div><b>${Math.round(g.speed())}</b><span>내 속도 (Lv.${g.speedLv})</span></div>
+      <div><b>${fmtMoney(g.income())}</b><span>초당 수익</span></div>
+      <div><b>${g.penUsed()}/${g.penSlots}</b><span>울타리</span></div>
+      <div><b>${g.stolen}</b><span>훔친 알</span></div>
+      <div><b>${g.caught}</b><span>잡힌 횟수</span></div>
+      <div><b>${g.best !== null ? RARITIES[g.best].name : '-'}</b><span>최고 등급</span></div>
+    </div>`;
+    if (!g.penPets.length && !g.penEggs.length)
+      return h + `<p class="hint">울타리가 비었어. 둥지에서 알을 훔쳐다 넣어봐!</p>`;
+    if (g.penEggs.length) {
+      h += `<h3 class="sec">부화 중 (${g.penEggs.length})</h3><div class="petgrid">`;
+      for (const e of g.penEggs) {
+        const r = RARITY_BY_ID[e.egg.rarity];
+        const pct = Math.round(clamp(e.t / CONFIG.hatch.time, 0, 1) * 100);
+        h += `<div class="petcard" style="--c1:${r.c1};--c2:${r.c2};--g:${r.glow}">
+          <div class="pc-rar">${r.name}</div><div class="pc-name">알 · ${SPECIES[e.egg.species].name}</div>
+          <div class="pc-inc">부화 ${pct}%</div></div>`;
+      }
+      h += '</div>';
     }
-    return h + '</div>';
+    if (g.penPets.length) {
+      h += `<h3 class="sec">울타리 안 펫 (${g.penPets.length})</h3><div class="petgrid">`;
+      for (const q of g.penPets.slice().sort((a, b) => petIncome(b.pet) - petIncome(a.pet))) {
+        const p = q.pet, r = RARITY_BY_ID[p.rarity], v = VARIANT_BY_ID[p.variant], sp = SPECIES[p.species];
+        h += `<div class="petcard" style="--c1:${r.c1};--c2:${r.c2};--g:${r.glow}">
+          <div class="pc-rar">${r.name}${v.name ? ' · ' + v.name : ''}</div>
+          <div class="pc-name">${sp.pet}</div>
+          <div class="pc-inc">${fmtMoney(petIncome(p))}/초</div></div>`;
+      }
+      h += '</div>';
+    }
+    return h + `<button class="danger-btn" onclick="if(confirm('정말 처음부터 다시 할래? 저장이 지워져.'))Game.reset()">저장 초기화</button>`;
   },
 
   viewDex() {
-    let h = `<p class="hint">등급이 높을수록 수익 배수가 커진다. <b>아우라 변형</b>은 등급 위에 한 번 더 곱해져.</p><div class="rargrid">`;
+    let h = `<p class="hint">등급이 높을수록 펫 수익 배수가 크다. <b>시크릿</b> 이상이 나오면 화면에 알림이 뜬다.</p><div class="rargrid">`;
     const total = RARITIES.reduce((a, r) => a + r.weight, 0);
     for (const r of RARITIES) {
       h += `<div class="rarcard" style="--c1:${r.c1};--c2:${r.c2};--g:${r.glow}">
-        <div class="rc-name">${r.name}</div>
+        <div class="rc-name">${r.name}${r.tier >= ANNOUNCE_TIER ? ' 🚨' : ''}</div>
         <div class="rc-en">${r.en}</div>
         <div class="rc-m">수익 x${r.mult}</div>
         <div class="rc-p">기본 확률 ${(r.weight / total * 100).toFixed(r.weight < 50 ? 3 : 1)}%</div>
-        <div class="rc-a">아우라 · ${r.auraName}</div>
-      </div>`;
+        <div class="rc-a">아우라 · ${r.auraName}</div></div>`;
     }
     h += `</div><h3 class="sec">아우라 변형</h3><div class="rargrid">`;
     const vt = VARIANTS.reduce((a, v) => a + v.weight, 0);
     for (const v of VARIANTS) {
-      h += `<div class="rarcard var">
-        <div class="rc-name">${v.name || '기본'}</div>
-        <div class="rc-m">수익 x${v.mult}</div>
-        <div class="rc-p">${(v.weight / vt * 100).toFixed(1)}%</div>
-      </div>`;
+      h += `<div class="rarcard var"><div class="rc-name">${v.name || '기본'}</div>
+        <div class="rc-m">수익 x${v.mult}</div><div class="rc-p">${(v.weight / vt * 100).toFixed(1)}%</div></div>`;
     }
-    h += `</div><h3 class="sec">생물 권장속도</h3><div class="spdlist">`;
+    h += `</div><h3 class="sec">구역 — 전부 자유롭게 갈 수 있다</h3>
+      <p class="hint">잠금은 없다. 다만 파수꾼이 빠른 구역은 <b>내 속도가 낮으면 무조건 잡힌다.</b></p><div class="spdlist">`;
+    const my = Math.round(Game.speed());
     for (const z of ZONES) {
-      h += `<div class="spdrow"><b>${z.emoji} ${z.name}</b>` +
-        z.mobs.map(m => `<span>${SPECIES[m].name} <em>${fmtMoney(SPECIES[m].base)}</em></span>`).join('') +
-        `<span class="bossrow">👑 ${BOSS_BY_ZONE[z.id].name} <em>최소 ${RARITIES[BOSS_BY_ZONE[z.id].minTier].name}</em></span></div>`;
+      const ok = my >= z.need;
+      h += `<div class="spdrow ${ok ? '' : 'no'}"><b>${z.emoji} ${z.name}</b>` +
+        z.mobs.map(m => `<span>${SPECIES[m].name} <em>추격 ${SPECIES[m].chase}</em></span>`).join('') +
+        `<span>펫 수익 <em>${fmtMoney(z.speed)}/초</em></span>
+         <span class="req">권장 속도 <em>${z.need}</em> ${ok ? '✔' : '⚠ 부족'}</span></div>`;
+    }
+    return h + `</div>`;
+  },
+
+  viewLog() {
+    if (!this.feed.length) return `<p class="hint">아직 시크릿 이상 등급을 발견한 적이 없어.</p>`;
+    let h = `<p class="hint">시크릿 이상 등급을 찾으면 여기에 쌓인다.</p><div class="logs">`;
+    for (const f of this.feed) {
+      const d = new Date(f.t);
+      h += `<div class="logrow" style="--g:${f.glow}">
+        <span class="lg-t">${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}</span>
+        <span class="lg-n" style="color:${f.glow}">${f.name}</span>
+        <span class="lg-v">${f.verb}</span></div>`;
     }
     return h + '</div>';
   },
@@ -2394,25 +2326,31 @@ const UI = {
     <h3 class="sec">조작</h3>
     <div class="keys">
       <div><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> 이동 (모바일: 왼쪽 화면 드래그)</div>
-      <div><kbd>E</kbd> 꾹 누르기 — 알 훔치기 / 부화 / 설치</div>
-      <div><kbd>B</kbd> 상점 · <kbd>I</kbd> 내 펫 · <kbd>H</kbd> 도움말 · <kbd>ESC</kbd> 닫기</div>
+      <div><kbd>E</kbd> <b>꾹</b> — 알 훔치기 / 울타리에 넣기 / 러닝머신 달리기 / 울타리 확장</div>
+      <div><kbd>I</kbd> 내 펫 · <kbd>H</kbd> 도움말 · <kbd>ESC</kbd> 닫기</div>
     </div>
-    <h3 class="sec">알 훔치기</h3>
-    <p class="hint">알을 품은 생물 옆에서 <b>E를 꾹</b> 누르면 게이지가 찬다.
-    머리 위에 <b style="color:#ffd54a">❗</b> 가 뜨면 곧 뒤돌아본다는 신호 —
-    <b style="color:#ff4d4d">즉시 손을 떼</b>. 눈이 빨개졌을 때 계속 잡고 있으면 들켜서 기절한다.</p>
-    <h3 class="sec">보스는 규칙이 다르다 👑</h3>
-    <p class="hint">
-    구역마다 보스가 하나씩 있고 알을 <b>3개</b> 품고 있어. 보스는:<br>
-    • 예고(❗)가 <b>훨씬 짧고</b>, 알을 뺏길 때마다 <b>분노</b>해서 더 짧아진다<br>
-    • <b style="color:#ff4d4d">무궁화꽃이 피었습니다</b> 룰 — 쳐다볼 땐 E를 떼는 것뿐 아니라 <b>완전히 멈춰야</b> 한다<br>
-    • 걸리면 <b>돌진</b>해서 날려버리고, 가방에 있던 알 1개를 떨어뜨린다<br>
-    • 대신 <b>등급 하한이 보장</b>되고, 3개를 다 털면 격파 — 일정 시간 뒤 부활한다</p>
-    <h3 class="sec">수익 공식</h3>
-    <p class="hint"><b>생물 권장속도 × 등급 배수 × 아우라 변형 배수 × 러닝머신 배수</b><br>
-    예) 고래(500K) × 코스믹(x350) × 무지개(x5) × 터보(x5) = 초당 4.4조</p>
-    <h3 class="sec">기타</h3>
-    <p class="hint">진행상황은 자동 저장돼. 껐다 켜면 최대 2시간치 오프라인 수익(50%)을 받아.</p>`;
+    <h3 class="sec">1. 알 훔치기</h3>
+    <p class="hint">구역마다 <b>둥지</b>가 있고 그 옆에서 파수꾼이 자고 있다(💤).
+    둥지 옆에서 <b>E를 꾹</b> 누르면 알을 들어올린다. 알을 드는 순간 <b>파수꾼이 깨어나 쫓아온다.</b></p>
+    <h3 class="sec">2. 도망치기</h3>
+    <p class="hint">잡히면 <b>알을 뺏기고</b> 튕겨나간다. 알은 원래 둥지로 돌아간다.
+    파수꾼은 일정 시간이 지나거나 충분히 멀어지면 포기하고 둥지로 돌아가 다시 잠든다.
+    알을 들면 살짝 느려지니 주의.</p>
+    <h3 class="sec">3. 울타리에 넣기</h3>
+    <p class="hint">기지 울타리 아래쪽 <b>알 넣는 곳</b>에서 <b>E</b>. 알은 울타리 안에서 자라다 부화하고,
+    부화한 펫은 울타리를 돌아다니며 <b>초당 돈을 벌어준다.</b>
+    칸이 부족하면 <b>울타리 확장 패드</b>를 밟고 <b>E</b>.</p>
+    <h3 class="sec">4. 러닝머신 = 내 속도</h3>
+    <p class="hint">러닝머신은 펫이 아니라 <b>내가 타는 것</b>이다. 올라서서 <b>E를 꾹</b> 누르면
+    돈을 쓰면서 달리고, 게이지가 차면 <b>속도 레벨이 오른다</b>. 레벨당 +10%.</p>
+    <h3 class="sec">5. 난이도</h3>
+    <p class="hint">구역은 <b>전부 자유롭게</b> 갈 수 있다. 잠금은 없다.
+    대신 뒤쪽 구역일수록 파수꾼의 <b>추격 속도</b>가 빨라서, 내 속도가 그보다 낮으면 절대 못 도망친다.
+    좋은 알 → 좋은 펫 → 더 많은 돈 → 더 높은 속도 → 더 먼 구역, 이게 성장 루프.</p>
+    <h3 class="sec">6. 알림</h3>
+    <p class="hint"><b>시크릿</b> 이상 등급을 발견하거나 부화시키면 화면 위에 <b>전광판 알림</b>이 뜬다.
+    둥지에 그 등급이 놓여 있으면 미니맵에도 크게 표시된다.</p>
+    <p class="hint">진행상황은 자동 저장. 껐다 켜면 최대 2시간치 오프라인 수익(50%)을 받는다.</p>`;
   },
 
   /* ---------------- 부화 연출 ---------------- */
@@ -2432,7 +2370,7 @@ const UI = {
     this.$('revMeta').innerHTML =
       `<span>${sp.name} 계열</span><span>아우라 · ${r.auraName}</span>` +
       (v.name ? `<span class="vtag">${v.name} x${v.mult}</span>` : '');
-    el.classList.toggle('big', r.tier >= 3);
+    el.classList.toggle('big', r.tier >= ANNOUNCE_TIER);
     this.rc.width = 300 * 2; this.rc.height = 260 * 2;
   },
   closeReveal() { this.reveal = null; this.$('reveal').classList.remove('open'); },
@@ -2444,22 +2382,8 @@ const UI = {
     c.clearRect(0, 0, this.rc.width, this.rc.height);
     c.setTransform(2, 0, 0, 2, 0, 0);
     const cx = 150, cy = 170;
-    if (t < 0.9) {
-      const sh = Math.sin(t * 40) * (2 + t * 9);
-      Draw.egg(c, cx + sh, cy - 26, 72, pet.rarity, pet.variant, t, true);
-    } else {
-      const p = Math.min(1, (t - 0.9) / 0.35);
-      c.save();
-      c.translate(cx, cy);
-      c.scale(0.9 + p * 0.25, 0.9 + p * 0.25);
-      c.translate(-cx, -cy);
-      Draw.pet(c, cx, cy + 16, pet, t, 3.0, false);
-      c.restore();
-    }
-  },
-
-  offlineModal(gain, secs) {
-    this.toast(`오프라인 ${fmtTime(secs)} 동안 +${fmtMoney(gain)}원 벌었어! 💤`, '#39ff9a');
+    if (t < 0.9) Draw.egg(c, cx + Math.sin(t * 40) * (2 + t * 9), cy - 26, 72, pet.rarity, pet.variant, t, true);
+    else Draw.pet(c, cx, cy + 16, pet, t, 3.0, false);
   }
 };
 
@@ -2468,37 +2392,37 @@ const UI = {
 /* =========================================================
  *  game.js - 상태 / 입력 / 게임 루프
  *
- *  일반 몹 : ❗ 뜨면 [E] 에서 손만 떼면 안 걸림
- *  보 스    : "무궁화꽃이 피었습니다" — 쳐다볼 때 움직이기만 해도 걸리고,
- *             걸리면 돌진해서 넉백 + 긴 기절 + 가방의 알 1개 손실
+ *  둥지에서 알을 들면 자던 파수꾼이 깨어나 쫓아온다.
+ *  잡히면 알을 떨어뜨린다. 도망쳐서 기지 울타리에 넣으면 부화,
+ *  울타리 안의 펫이 돈을 벌고, 그 돈으로 러닝머신을 타서 속도를 올린다.
  * ========================================================= */
 
 const Game = {
-  money: 0, totalEarned: 0, stolen: 0, hatched: 0, bossKills: 0,
-  best: null,
-  unlocked: { farm: true },
-  backpackLv: 0,
-  incubatorSlots: CONFIG.incubator.baseSlots,
-  treadmillSlots: CONFIG.treadmillSlots.base,
-  carrying: [], pets: [], dex: {},
-  tutorial: 0, lastSave: 0,
+  money: 0, totalEarned: 0, stolen: 0, hatched: 0, caught: 0,
+  best: null, speedLv: 0, penSlots: CONFIG.pen.baseSlots,
+  carrying: null,          // {species,rarity,variant,fromNest}
+  penEggs: [], penPets: [],
+  dex: {}, tutorial: 0, lastSave: 0,
+  runFill: 0,
 
   player: {
-    x: 400, y: 900, facing: 'down', phase: 0, moving: false,
+    x: World.spawn ? World.spawn.x : 700, y: 1080,
+    facing: 'down', phase: 0, moving: false,
     stun: 0, kx: 0, ky: 0, shirt: '#2f7dff', hatColor: '#e33b3b'
   },
 
-  mobs: [], bosses: [], particles: [],
-  cam: { x: 400, y: 900, scale: 1 },
-  time: 0, target: null, stealing: null, paused: false,
+  nests: [], particles: [],
+  cam: { x: 700, y: 1080, scale: 1 },
+  time: 0, target: null, stealing: null, chasers: 0,
 
   /* ================= 초기화 ================= */
   init(canvas) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
-    ZONES.forEach(z => { if (!(z.id in this.unlocked)) this.unlocked[z.id] = z.cost === 0; });
     World.init();
-    this.spawnAll();
+    this.player.x = World.spawn.x; this.player.y = World.spawn.y;
+    this.cam.x = this.player.x; this.cam.y = this.player.y;
+    this.buildNests();
     this.load();
     Input.init(canvas);
     UI.init(this);
@@ -2517,74 +2441,43 @@ const Game = {
     this.cam.scale = clamp(Math.min(w / 1420, h / 800), 0.48, 1.15);
   },
 
-  /* ================= 스폰 ================= */
-  spawnAll() {
-    this.mobs = []; this.bosses = [];
-    for (const z of ZONES) {
-      const spots = World.spawns[z.id] || [];
-      spots.forEach(([x, y, elite], i) => {
-        const spId = z.mobs[elite ? 1 : 0];
-        this.mobs.push(this.makeMob(z.id, spId, x, y));
-      });
-      const b = BOSS_BY_ZONE[z.id];
-      const spot = World.bossSpots[z.id];
-      if (b && spot) this.bosses.push(this.makeBoss(b, spot));
-    }
+  buildNests() {
+    this.nests = World.nestSpots.map((s, i) => {
+      const sp = SPECIES[s.spId];
+      const n = {
+        i, zone: s.zone, spId: s.spId, sp,
+        x: s.x, y: s.y, egg: null, respawn: 0,
+        guard: {
+          x: s.x + 46, y: s.y + 12, hx: s.x + 46, hy: s.y + 12,
+          state: 'sleep', chaseT: 0, sleepT: 0,
+          faceX: -1, phase: rand(0, 6), seed: rand(0, 10), moving: false
+        }
+      };
+      this.rollNest(n);
+      return n;
+    });
   },
 
-  makeMob(zone, spId, x, y) {
-    const sp = SPECIES[spId];
-    const m = {
-      zone, spId, sp, boss: false,
-      x, y, hx: x, hy: y, tx: x, ty: y,
-      faceX: 1, phase: rand(0, 6), seed: rand(0, 10), moving: false,
-      speed: rand(sp.spd[0], sp.spd[1]), waitT: rand(0.4, 2.2),
-      state: 'calm', stateT: rand(1, 3),
-      hasEgg: true, eggRarity: null, eggVariant: null,
-      respawn: 0, flee: 0, hidden: 0, blinkT: rand(3, 8), scale: 1
-    };
-    this.rollEgg(m);
-    return m;
-  },
-
-  makeBoss(cfg, spot) {
-    return {
-      zone: cfg.zone, cfg, sp: cfg, boss: true,
-      x: spot.x, y: spot.y, hx: spot.x, hy: spot.y, tx: spot.x, ty: spot.y,
-      faceX: -1, phase: rand(0, 6), seed: rand(0, 10), moving: false,
-      speed: 58, waitT: rand(1, 3),
-      state: 'calm', stateT: rand(1.2, 2.4),
-      eggsLeft: cfg.eggs, rage: 0, hasEgg: true,
-      eggRarity: null, eggVariant: null,
-      charge: null, cooldownT: 0, scale: 1, hidden: 0
-    };
-  },
-
-  rollEgg(m) {
-    const r = rollRarity(m.sp.luck);
+  rollNest(n) {
+    const r = rollRarity(n.sp.luck);
     const v = rollVariant();
-    m.eggRarity = r.id; m.eggVariant = v.id; m.hasEgg = true;
-  },
-  rollBossEgg(b) {
-    const r = rollRarityMin(b.cfg.luck, b.cfg.minTier);
-    const v = rollVariant();
-    b.eggRarity = r.id; b.eggVariant = v.id; b.hasEgg = b.eggsLeft > 0;
+    n.egg = { species: n.spId, rarity: r.id, variant: v.id };
   },
 
   /* ================= 저장 ================= */
   save() {
-    const d = {
-      money: this.money, totalEarned: this.totalEarned, stolen: this.stolen,
-      hatched: this.hatched, bossKills: this.bossKills, best: this.best,
-      unlocked: this.unlocked, backpackLv: this.backpackLv,
-      incubatorSlots: this.incubatorSlots, treadmillSlots: this.treadmillSlots,
-      tutorial: this.tutorial, carrying: this.carrying, pets: this.pets, dex: this.dex,
-      px: this.player.x, py: this.player.y,
-      inc: World.incubators.map(i => ({ egg: i.egg, grow: i.grow, ready: i.ready })),
-      tms: World.treadmills.map(t => ({ pet: t.pet, kind: t.kind })),
-      savedAt: Date.now(), seq: _petSeq
-    };
-    try { localStorage.setItem(CONFIG.save.key, JSON.stringify(d)); } catch (e) {}
+    try {
+      localStorage.setItem(CONFIG.save.key, JSON.stringify({
+        money: this.money, totalEarned: this.totalEarned, stolen: this.stolen,
+        hatched: this.hatched, caught: this.caught, best: this.best,
+        speedLv: this.speedLv, penSlots: this.penSlots, tutorial: this.tutorial,
+        carrying: this.carrying, dex: this.dex,
+        penEggs: this.penEggs.map(e => ({ egg: e.egg, t: e.t })),
+        penPets: this.penPets.map(p => p.pet),
+        px: this.player.x, py: this.player.y,
+        savedAt: Date.now(), seq: _petSeq
+      }));
+    } catch (e) {}
   },
 
   load() {
@@ -2593,49 +2486,34 @@ const Game = {
     if (!d) return;
     this.money = d.money || 0; this.totalEarned = d.totalEarned || 0;
     this.stolen = d.stolen || 0; this.hatched = d.hatched || 0;
-    this.bossKills = d.bossKills || 0; this.best = d.best ?? null;
-    Object.assign(this.unlocked, d.unlocked || {});
-    this.unlocked.farm = true;
-    this.backpackLv = d.backpackLv || 0;
-    this.incubatorSlots = d.incubatorSlots || 1;
-    this.treadmillSlots = d.treadmillSlots || 1;
+    this.caught = d.caught || 0; this.best = d.best ?? null;
+    this.speedLv = d.speedLv || 0;
+    this.penSlots = d.penSlots || CONFIG.pen.baseSlots;
     this.tutorial = d.tutorial || 0;
-    this.carrying = d.carrying || []; this.pets = d.pets || []; this.dex = d.dex || {};
-    _petSeq = d.seq || (this.pets.length + 1);
-    this.player.x = d.px || 400; this.player.y = d.py || 900;
+    this.carrying = d.carrying || null;
+    this.dex = d.dex || {};
+    _petSeq = d.seq || 1;
+    (d.penEggs || []).forEach(e => this.addPenEgg(e.egg, e.t));
+    (d.penPets || []).forEach(p => this.addPenPet(p));
+    this.player.x = d.px || World.spawn.x; this.player.y = d.py || World.spawn.y;
     this.cam.x = this.player.x; this.cam.y = this.player.y;
-    (d.inc || []).forEach((v, i) => {
-      const inc = World.incubators[i]; if (!inc) return;
-      inc.egg = v.egg || null; inc.grow = v.grow || 0; inc.ready = !!v.ready;
-    });
-    (d.tms || []).forEach((v, i) => {
-      const t = World.treadmills[i]; if (!t) return;
-      t.pet = v.pet || null; t.kind = v.kind || 'basic';
-    });
     if (d.savedAt) {
       const secs = clamp((Date.now() - d.savedAt) / 1000, 0, CONFIG.offline.capHours * 3600);
       const gain = Math.floor(this.income() * secs * CONFIG.offline.rate);
       if (gain > 0 && secs > 30) {
         this.money += gain; this.totalEarned += gain;
-        setTimeout(() => UI.offlineModal(gain, secs), 500);
+        setTimeout(() => UI.toast(`오프라인 ${fmtTime(secs)} 동안 +${fmtMoney(gain)}원 💤`, '#39ff9a'), 500);
       }
     }
   },
-
   reset() { try { localStorage.removeItem(CONFIG.save.key); } catch (e) {} location.reload(); },
 
-  /* ================= 경제 ================= */
-  income() {
-    let s = 0;
-    for (const t of World.treadmills) {
-      if (t.i >= this.treadmillSlots || !t.pet) continue;
-      s += petIncome(t.pet) * TREADMILL_BY_ID[t.kind].mult;
-    }
-    return s;
-  },
-  carryMax() { return CONFIG.backpack.levels[this.backpackLv]; },
-  spend(n) { if (this.money < n) { UI.toast('돈이 부족해!', '#ff6b6b'); return false; } this.money -= n; return true; },
-  toast(m, c) { UI.toast(m, c); },
+  /* ================= 파생 수치 ================= */
+  speed() { return CONFIG.player.baseSpeed * (1 + CONFIG.player.perLevel * this.speedLv); },
+  income() { return this.penPets.reduce((s, p) => s + petIncome(p.pet), 0); },
+  nextSpeedCost() { return CONFIG.treadmill.cost(this.speedLv); },
+  nextPenCost() { return CONFIG.pen.cost(this.penSlots); },
+  penUsed() { return this.penEggs.length + this.penPets.length; },
 
   pop(x, y, text, color, size = 16) {
     this.particles.push({ x, y, vy: -46, life: 1.15, max: 1.15, text, color, size });
@@ -2643,26 +2521,23 @@ const Game = {
   burst(x, y, color, n = 18, spread = 150) {
     for (let i = 0; i < n; i++) {
       const a = rand(0, 6.283), sp = rand(40, spread);
-      this.particles.push({
-        x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 40,
-        life: rand(0.5, 1.1), max: 1.1, color, size: rand(3, 7), box: true
-      });
+      this.particles.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 40,
+        life: rand(0.5, 1.1), max: 1.1, color, size: rand(3, 7), box: true });
     }
   },
 
   /* ================= 업데이트 ================= */
   update(dt) {
     this.time += dt;
-    if (this.paused) return;
     this.updatePlayer(dt);
-    this.updateMobs(dt);
-    this.updateBosses(dt);
+    this.updateNests(dt);
+    this.updatePen(dt);
+    this.updateStations(dt);
     this.updateSteal(dt);
-    this.updateIncubators(dt);
-    this.updateEconomy(dt);
     this.updateParticles(dt);
     this.pickTarget();
     this.checkTutorial();
+
     const k = 1 - Math.pow(0.0015, dt);
     this.cam.x = lerp(this.cam.x, this.player.x, k);
     this.cam.y = lerp(this.cam.y, this.player.y - 40, k);
@@ -2670,6 +2545,7 @@ const Game = {
     const hh = this.canvas.height / (2 * this.cam.scale * this.dpr);
     this.cam.x = hw * 2 >= World.w ? World.w / 2 : clamp(this.cam.x, hw, World.w - hw);
     this.cam.y = hh * 2 >= World.h ? World.h / 2 : clamp(this.cam.y, hh, World.h - hh);
+
     if (this.time - this.lastSave > CONFIG.save.interval) { this.lastSave = this.time; this.save(); }
   },
 
@@ -2678,187 +2554,108 @@ const Game = {
     if (Math.abs(p.kx) + Math.abs(p.ky) > 1) {
       p.x += p.kx * dt; p.y += p.ky * dt;
       p.kx *= Math.pow(0.02, dt); p.ky *= Math.pow(0.02, dt);
-      World.resolve(p, CONFIG.player.radius, this.unlocked);
+      World.resolve(p, CONFIG.player.radius);
     }
     if (p.stun > 0) { p.stun -= dt; p.moving = false; p.phase += dt * 20; return; }
 
     let ax = Input.dirX, ay = Input.dirY;
     const len = Math.hypot(ax, ay);
     if (len > 1) { ax /= len; ay /= len; }
-    const sp = this.stealing ? 0 : CONFIG.player.speed;
+    const busy = this.stealing || this.onTreadmill();
+    const sp = busy ? 0 : this.speed() * (this.carrying ? CONFIG.player.carryPenalty : 1);
     p.x += ax * sp * dt; p.y += ay * sp * dt;
-    p.moving = len > 0.06 && !this.stealing;
+    p.moving = len > 0.06 && !busy;
     if (p.moving) {
       p.phase += dt * 12;
       if (Math.abs(ax) > Math.abs(ay)) p.facing = ax > 0 ? 'right' : 'left';
       else p.facing = ay > 0 ? 'down' : 'up';
-    } else p.phase += dt * 2;
-    World.resolve(p, CONFIG.player.radius, this.unlocked);
+    } else p.phase += dt * (this.running ? 16 : 2);
+    World.resolve(p, CONFIG.player.radius);
   },
 
-  /* ---------- 일반 몹 ---------- */
-  updateMobs(dt) {
+  /* ---------- 둥지 + 파수꾼 ---------- */
+  updateNests(dt) {
     const p = this.player;
-    for (const m of this.mobs) {
-      if (!this.unlocked[m.zone]) continue;
-      const far = Math.abs(m.x - this.cam.x) > 1200;
-      if (!m.hasEgg) { m.respawn -= dt; if (m.respawn <= 0) this.rollEgg(m); }
-      if (m.hidden > 0) { m.hidden -= dt; if (m.hidden <= 0) this.reposition(m, 120); continue; }
+    let chasing = 0;
+
+    for (const n of this.nests) {
+      if (!n.egg) { n.respawn -= dt; if (n.respawn <= 0) this.rollNest(n); }
+      const g = n.guard, sp = n.sp;
+      const far = Math.abs(n.x - this.cam.x) > 1500;
+
+      if (g.state === 'chase') {
+        chasing++;
+        const d = dist(g.x, g.y, p.x, p.y);
+        const a = Math.atan2(p.y - g.y, p.x - g.x);
+        if (g.startle > 0) {            // 벌떡 일어나는 중 — 아직 못 움직인다
+          g.startle -= dt;
+          g.moving = false; g.faceX = Math.cos(a);
+          continue;
+        }
+        g.chaseT -= dt;
+        g.x += Math.cos(a) * sp.chase * dt;
+        g.y += Math.sin(a) * sp.chase * dt;
+        g.moving = true; g.phase += dt * 15; g.faceX = Math.cos(a);
+        if (sp.quake && d < 420) UI.shake(Math.min(0.12, (420 - d) / 3600));
+        if (d < CONFIG.steal.catchDist && p.stun <= 0) this.getCaught(n);
+        else if (g.chaseT <= 0 || d > 1400) {
+          g.state = 'return';
+          this.pop(g.x, g.y - 70, '...', '#cfd6e0', 18);
+        }
+        continue;
+      }
+
       if (far) continue;
 
-      const near = dist(m.x, m.y, p.x, p.y);
-      const engaged = near < CONFIG.steal.range * 2.0 && m.hasEgg;
-
-      if (engaged) {
-        m.stateT -= dt;
-        if (m.stateT <= 0) {
-          const A = m.sp.alert, wm = m.sp.warnMul || 1;
-          if (m.state === 'calm') { m.state = 'warn'; m.stateT = CONFIG.steal.warnTime * wm / A; }
-          else if (m.state === 'warn') { m.state = 'look'; m.stateT = CONFIG.steal.lookTime; }
-          else { m.state = 'calm'; m.stateT = rand(CONFIG.steal.calmMin, CONFIG.steal.calmMax) / A; }
-        }
-      } else if (m.state !== 'calm') { m.state = 'calm'; m.stateT = rand(1.4, 3); }
-
-      /* 특수 습성 */
-      if (m.sp.burrow && !engaged) {
-        m.blinkT -= dt;
-        if (m.blinkT <= 0) { m.blinkT = rand(6, 14); m.hidden = 1.4; this.burst(m.x, m.y - 8, '#e6c98a', 12, 90); }
-      }
-      if (m.sp.blink && !engaged) {
-        m.blinkT -= dt;
-        if (m.blinkT <= 0) {
-          m.blinkT = rand(4, 9);
-          this.burst(m.x, m.y - 20, m.sp.accent, 10, 100);
-          this.reposition(m, 170);
-          this.burst(m.x, m.y - 20, m.sp.accent, 10, 100);
-        }
-      }
-      if (m.sp.quake && m.moving && near < 320) UI.shake(Math.min(0.10, (320 - near) / 3200));
-
-      if (m.flee > 0) {
-        m.flee -= dt;
-        const a = Math.atan2(m.y - p.y, m.x - p.x);
-        m.x += Math.cos(a) * m.speed * 2.3 * dt; m.y += Math.sin(a) * m.speed * 2.3 * dt;
-        m.moving = true; m.phase += dt * 17; m.faceX = Math.cos(a);
-      } else if (m.state === 'look' || (this.stealing && this.stealing.mob === m)) {
-        m.moving = false;
-        if (m.state === 'look') m.faceX = (p.x - m.x) > 0 ? 1 : -1;
-      } else {
-        m.waitT -= dt;
-        if (m.waitT <= 0) { this.pickWander(m, 170); m.waitT = rand(1.4, 4.2); }
-        const d = dist(m.x, m.y, m.tx, m.ty);
-        if (d > 6) {
-          const a = Math.atan2(m.ty - m.y, m.tx - m.x);
-          m.x += Math.cos(a) * m.speed * dt; m.y += Math.sin(a) * m.speed * dt;
-          m.moving = true; m.phase += dt * 13; m.faceX = Math.cos(a);
-        } else m.moving = false;
-      }
-      this.clampToZone(m);
-    }
-  },
-
-  pickWander(m, r) {
-    const z = World.zoneDef(m.zone);
-    m.tx = clamp(m.hx + rand(-r, r), z.x + 70, z.x + z.w - 70);
-    m.ty = clamp(m.hy + rand(-r, r), z.y + 70, z.y + z.h - 70);
-  },
-  reposition(m, r) {
-    const z = World.zoneDef(m.zone);
-    m.x = clamp(m.hx + rand(-r, r), z.x + 70, z.x + z.w - 70);
-    m.y = clamp(m.hy + rand(-r, r), z.y + 70, z.y + z.h - 70);
-    m.tx = m.x; m.ty = m.y;
-  },
-  clampToZone(m) {
-    const z = World.zoneDef(m.zone);
-    m.x = clamp(m.x, z.x + 42, z.x + z.w - 42);
-    m.y = clamp(m.y, z.y + 42, z.y + z.h - 42);
-  },
-
-  /* ---------- 보스 ---------- */
-  updateBosses(dt) {
-    const p = this.player;
-    for (const b of this.bosses) {
-      if (!this.unlocked[b.zone]) continue;
-
-      if (b.cooldownT > 0) {
-        b.cooldownT -= dt;
-        if (b.cooldownT <= 0) {
-          b.eggsLeft = b.cfg.eggs; b.rage = 0; b.hasEgg = true;
-          this.rollBossEgg(b);
-          this.burst(b.x, b.y - 40, b.cfg.glow, 34, 260);
-          if (dist(b.x, b.y, p.x, p.y) < 900) UI.toast(`${b.cfg.name} 부활!`, b.cfg.glow);
-        }
-        continue;
-      }
-      if (!b.eggRarity) this.rollBossEgg(b);
-      if (Math.abs(b.x - this.cam.x) > 1300) continue;
-
-      const near = dist(b.x, b.y, p.x, p.y);
-
-      /* 돌진 중 */
-      if (b.charge) {
-        b.charge.t -= dt;
-        const a = b.charge.a;
-        b.x += Math.cos(a) * b.cfg.chargeSpeed * dt;
-        b.y += Math.sin(a) * b.cfg.chargeSpeed * dt;
-        b.moving = true; b.phase += dt * 22; b.faceX = Math.cos(a);
-        UI.shake(0.22);
-        if (near < 62 && !b.charge.hit) { b.charge.hit = true; this.bossHit(b); }
-        if (b.charge.t <= 0) { b.charge = null; b.state = 'calm'; b.stateT = rand(1.4, 2.4); }
-        this.clampToZone(b);
-        continue;
-      }
-
-      const engaged = near < CONFIG.steal.range * 3.4 && b.eggsLeft > 0;
-      if (engaged) {
-        b.stateT -= dt;
-        if (b.stateT <= 0) {
-          const c = b.cfg;
-          if (b.state === 'calm') { b.state = 'warn'; b.stateT = Math.max(0.10, c.warn * (1 - b.rage * 0.2)); }
-          else if (b.state === 'warn') { b.state = 'look'; b.stateT = c.look; }
-          else { b.state = 'calm'; b.stateT = rand(c.calm[0], c.calm[1]); }
-        }
-        /* 무궁화꽃이 피었습니다 — 볼 때 움직이면 걸림 */
-        if (b.state === 'look' && near < 260) {
-          const busted = this.stealing && this.stealing.mob === b ? true : p.moving;
-          if (busted && p.stun <= 0) this.bossCharge(b);
-        }
-      } else if (b.state !== 'calm') { b.state = 'calm'; b.stateT = rand(1.2, 2.2); }
-
-      if (b.state === 'look') { b.moving = false; b.faceX = (p.x - b.x) > 0 ? 1 : -1; }
-      else {
-        b.waitT -= dt;
-        if (b.waitT <= 0) { this.pickWander(b, b.cfg.roam); b.waitT = rand(1.8, 4); }
-        const d = dist(b.x, b.y, b.tx, b.ty);
+      if (g.state === 'return') {
+        const d = dist(g.x, g.y, g.hx, g.hy);
         if (d > 8) {
-          const a = Math.atan2(b.ty - b.y, b.tx - b.x);
-          b.x += Math.cos(a) * b.speed * dt; b.y += Math.sin(a) * b.speed * dt;
-          b.moving = true; b.phase += dt * 9; b.faceX = Math.cos(a);
-        } else b.moving = false;
+          const a = Math.atan2(g.hy - g.y, g.hx - g.x);
+          g.x += Math.cos(a) * sp.chase * 0.55 * dt;
+          g.y += Math.sin(a) * sp.chase * 0.55 * dt;
+          g.moving = true; g.phase += dt * 11; g.faceX = Math.cos(a);
+        } else {
+          g.moving = false;
+          g.sleepT = (g.sleepT || 0) + dt;
+          if (g.sleepT > CONFIG.steal.sleepAgain) {
+            g.state = 'sleep'; g.sleepT = 0; g.x = g.hx; g.y = g.hy; g.faceX = -1;
+            this.pop(g.x, g.y - 60, '💤', '#8ed2ff', 20);
+          }
+        }
+      } else {  // sleep
+        g.moving = false;
+        g.phase += dt * 1.2;
       }
-      this.clampToZone(b);
     }
+    this.chasers = chasing;
   },
 
-  bossCharge(b) {
+  wake(n, hard) {
+    const g = n.guard;
+    if (g.state === 'chase') { g.chaseT = Math.max(g.chaseT, n.sp.rage); return; }
+    g.state = 'chase'; g.chaseT = n.sp.rage; g.sleepT = 0;
+    g.startle = CONFIG.steal.startle;
+    this.pop(g.x, g.y - 74, hard ? '꽥!!' : '음?', '#ff4d4d', hard ? 22 : 17);
+    this.burst(g.x, g.y - 30, '#ffd54a', 10, 90);
+    Sfx.play(hard ? 'wake' : 'tick');
+  },
+
+  getCaught(n) {
     const p = this.player;
     this.stealing = null;
-    b.charge = { t: b.cfg.chargeTime, a: Math.atan2(p.y - b.y, p.x - b.x), hit: false };
-    this.pop(b.x, b.y - 120, '들켰다!!', '#ff2b4d', 26);
+    p.stun = CONFIG.steal.stun;
+    const a = Math.atan2(p.y - n.guard.y, p.x - n.guard.x);
+    p.kx = Math.cos(a) * 560; p.ky = Math.sin(a) * 560;
+    this.caught++;
+    if (this.carrying) {
+      const home = this.nests.find(q => q.i === this.carrying.fromNest) || n;
+      if (!home.egg) { home.egg = this.carrying; home.respawn = 0; }
+      this.carrying = null;
+      this.pop(p.x, p.y - 100, '알을 뺏겼다!', '#ff4d4d', 21);
+    } else this.pop(p.x, p.y - 100, '잡혔다!', '#ff4d4d', 20);
+    this.burst(p.x, p.y - 40, '#ff4d4d', 20, 190);
+    n.guard.state = 'return';
     UI.shake(0.5);
-    Sfx.play('boss');
-  },
-
-  bossHit(b) {
-    const p = this.player;
-    const a = Math.atan2(p.y - b.y, p.x - b.x);
-    p.kx = Math.cos(a) * 900; p.ky = Math.sin(a) * 900;
-    p.stun = b.cfg.stun;
-    let msg = '기절!';
-    if (this.carrying.length) { this.carrying.pop(); msg = '알을 떨어뜨렸다!'; }
-    this.pop(p.x, p.y - 100, msg, '#ff4d4d', 22);
-    this.burst(p.x, p.y - 40, '#ff4d4d', 22, 200);
-    UI.shake(0.7);
     Sfx.play('fail');
     UI.refresh();
   },
@@ -2869,159 +2666,148 @@ const Game = {
     const holding = Input.action && p.stun <= 0;
 
     if (this.stealing) {
-      const m = this.stealing.mob;
-      const gone = m.boss ? (m.eggsLeft <= 0 || m.charge || m.cooldownT > 0) : !m.hasEgg;
-      const far = dist(m.x, m.y, p.x, p.y) > CONFIG.steal.range * 1.4;
-      if (gone || far) { this.stealing = null; return; }
-
-      if (!holding) {
-        this.stealing.idle = true;
-        this.stealing.progress -= dt * 0.22;
-        if (this.stealing.progress <= 0) this.stealing = null;
-        if (!m.boss) return;
-      } else this.stealing.idle = false;
-
-      if (m.state === 'look' && !this.stealing.idle && !m.boss) { this.caught(m); return; }
-      if (!this.stealing || this.stealing.idle) return;
-
-      const ft = m.boss ? m.cfg.fillTime : CONFIG.steal.fillTime;
-      this.stealing.progress += dt / ft;
-      if (this.stealing.progress >= 1) this.succeed(m);
-
-    } else if (holding && this.target && this.target.kind === 'mob') {
-      if (this.carrying.length >= this.carryMax()) {
-        if (!this._bagWarn || this.time - this._bagWarn > 2) {
-          this._bagWarn = this.time;
-          UI.toast('가방이 꽉 찼어! 부화기에 넣고 와', '#ff9f43');
-        }
-      } else this.stealing = { mob: this.target.ref, progress: 0, idle: false };
+      const n = this.stealing.nest;
+      if (!n.egg || !holding || dist(n.x, n.y, p.x, p.y) > CONFIG.steal.reach * 1.4) {
+        this.stealing = null; return;
+      }
+      this.stealing.t += dt;
+      if (this.stealing.t >= n.sp.wake) this.takeEgg(n);
+    } else if (holding && this.target && this.target.kind === 'nest') {
+      if (this.carrying) {
+        if (!this._w || this.time - this._w > 2) { this._w = this.time; UI.toast('알은 한 번에 하나만! 울타리에 먼저 넣어', '#ff9f43'); }
+      } else this.stealing = { nest: this.target.ref, t: 0 };
     }
   },
 
-  caught(m) {
+  takeEgg(n) {
     const p = this.player;
     this.stealing = null;
-    p.stun = CONFIG.steal.stunTime;
-    m.flee = 1.4;
-    if (m.sp.pounce) {
-      const a = Math.atan2(p.y - m.y, p.x - m.x);
-      p.kx = Math.cos(a) * 480; p.ky = Math.sin(a) * 480;
-      p.stun += 0.5;
-      this.pop(p.x, p.y - 100, '덮쳤다!', '#ff4d4d', 20);
-    } else this.pop(p.x, p.y - 92, '들켰다!', '#ff4d4d', 21);
-    this.burst(m.x, m.y - 26, '#ff4d4d', 14, 130);
-    UI.shake(0.35);
-    Sfx.play('fail');
-  },
-
-  succeed(m) {
-    const p = this.player;
-    this.stealing = null;
-    const spId = m.boss ? m.cfg.species : m.spId;
-    this.carrying.push({ species: spId, rarity: m.eggRarity, variant: m.eggVariant });
+    this.carrying = Object.assign({}, n.egg, { fromNest: n.i });
+    n.egg = null; n.respawn = CONFIG.steal.respawn;
     this.stolen++;
-    this.pop(p.x, p.y - 100, '알 획득!', '#39ff9a', 21);
-    this.burst(m.x, m.y - 24, RARITY_BY_ID[m.eggRarity].glow, 20, 170);
+    const r = RARITY_BY_ID[this.carrying.rarity];
+    this.pop(p.x, p.y - 100, r.name + ' 알 획득!', r.glow, 20);
+    this.burst(n.x, n.y - 16, r.glow, 20, 170);
     Sfx.play('get');
-
-    if (m.boss) {
-      m.eggsLeft--; m.rage++;
-      if (m.eggsLeft <= 0) {
-        m.hasEgg = false; m.cooldownT = m.cfg.cooldown; m.state = 'calm';
-        this.bossKills++;
-        this.burst(m.x, m.y - 60, m.cfg.glow, 48, 320);
-        UI.toast(`${m.cfg.name} 격파! 🏆`, m.cfg.glow);
-        UI.shake(0.5);
-        Sfx.play('rare');
-      } else {
-        this.rollBossEgg(m);
-        UI.toast(`${m.cfg.name} 분노! 예고가 더 짧아진다`, '#ff6b3d');
-        m.state = 'calm'; m.stateT = 0.7;
-      }
-    } else {
-      m.hasEgg = false; m.respawn = CONFIG.steal.respawn; m.flee = 0.9;
-    }
+    if (r.tier >= ANNOUNCE_TIER) UI.announce(this.carrying, '발견');
+    this.wake(n, true);
     UI.refresh();
   },
 
-  /* ---------- 부화기 ---------- */
-  updateIncubators(dt) {
-    for (const inc of World.incubators) {
-      if (inc.i >= this.incubatorSlots) { inc.egg = null; continue; }
-      if (inc.egg && !inc.ready) {
-        inc.grow += dt;
-        if (inc.grow >= CONFIG.incubator.growTime) { inc.ready = true; Sfx.play('ready'); }
-      }
-    }
+  /* ---------- 울타리 ---------- */
+  addPenEgg(egg, t) {
+    const P = World.pen;
+    this.penEggs.push({
+      egg, t: t || 0,
+      x: P.x + rand(60, P.w - 60), y: P.y + rand(70, P.h - 90)
+    });
   },
-  putEgg(inc) {
-    if (!this.carrying.length) return;
-    inc.egg = this.carrying.shift(); inc.grow = 0; inc.ready = false;
-    this.pop(inc.x, inc.y - 70, '알 투입', '#8ed2ff', 15);
-    Sfx.play('place'); UI.refresh();
+  addPenPet(pet) {
+    const P = World.pen;
+    const x = P.x + rand(60, P.w - 60), y = P.y + rand(70, P.h - 90);
+    this.penPets.push({ pet, x, y, tx: x, ty: y, waitT: rand(0.5, 3), faceX: 1, phase: rand(0, 6), moving: false });
   },
-  petEgg(inc) {
-    inc.grow = Math.min(CONFIG.incubator.growTime, inc.grow + CONFIG.incubator.petBonus);
-    this.pop(inc.x + rand(-14, 14), inc.y - 60, '쓰담', '#ffd54a', 13);
-    Sfx.play('tick');
-  },
-  hatch(inc) {
-    const e = inc.egg;
-    inc.egg = null; inc.grow = 0; inc.ready = false;
-    const pet = makePet(e.species, e.rarity, e.variant);
-    this.pets.push(pet); this.hatched++;
-    const key = pet.species + ':' + pet.rarity;
-    this.dex[key] = (this.dex[key] || 0) + 1;
-    const r = RARITY_BY_ID[pet.rarity];
-    if (this.best === null || r.tier > this.best) this.best = r.tier;
-    this.burst(inc.x, inc.y - 40, r.glow, 34, 240);
-    if (r.tier >= 3) UI.shake(0.4);
-    UI.showReveal(pet);
-    Sfx.play(r.tier >= 3 ? 'rare' : 'hatch');
+
+  depositEgg() {
+    if (!this.carrying) return;
+    if (this.penUsed() >= this.penSlots) { UI.toast('울타리가 꽉 찼어! 확장 패드에서 넓혀', '#ff9f43'); return; }
+    this.addPenEgg({ species: this.carrying.species, rarity: this.carrying.rarity, variant: this.carrying.variant }, 0);
+    this.carrying = null;
+    this.pop(World.pen.gate.x, World.pen.gate.y - 60, '울타리에 넣었다', '#8ed2ff', 15);
+    Sfx.play('place');
     UI.refresh();
   },
 
-  /* ---------- 러닝머신 ---------- */
-  freePets() {
-    const used = new Set(World.treadmills.filter(t => t.pet).map(t => t.pet.uid));
-    return this.pets.filter(p => !used.has(p.uid));
-  },
-  placePet(tm) {
-    const free = this.freePets();
-    if (!free.length) { UI.toast('배치할 펫이 없어. 알을 부화시켜!', '#ff9f43'); return; }
-    free.sort((a, b) => petIncome(b) - petIncome(a));
-    tm.pet = free[0];
-    this.pop(tm.x, tm.y - 72, petFullName(tm.pet), RARITY_BY_ID[tm.pet.rarity].glow, 13);
-    Sfx.play('place'); UI.refresh();
-  },
-  removePet(tm) {
-    if (!tm.pet) return;
-    this.pop(tm.x, tm.y - 70, '회수', '#cfd6e0', 14);
-    tm.pet = null; Sfx.play('tick'); UI.refresh();
-  },
-  autoPlace() {
-    const slots = World.treadmills.filter(t => t.i < this.treadmillSlots);
-    const all = this.pets.slice().sort((a, b) => petIncome(b) - petIncome(a));
-    let n = 0;
-    slots.forEach((t, i) => { t.pet = all[i] || null; if (t.pet) n++; });
-    UI.toast(n ? `러닝머신 ${n}대 가동!` : '배치할 펫이 없어', n ? '#39ff9a' : '#ff9f43');
-    Sfx.play(n ? 'buy' : 'tick'); UI.refresh();
-  },
+  updatePen(dt) {
+    /* 부화 */
+    for (let i = this.penEggs.length - 1; i >= 0; i--) {
+      const e = this.penEggs[i];
+      e.t += dt;
+      if (e.t < CONFIG.hatch.time) continue;
+      this.penEggs.splice(i, 1);
+      const pet = makePet(e.egg.species, e.egg.rarity, e.egg.variant);
+      this.addPenPet(pet);
+      this.hatched++;
+      const key = pet.species + ':' + pet.rarity;
+      this.dex[key] = (this.dex[key] || 0) + 1;
+      const r = RARITY_BY_ID[pet.rarity];
+      if (this.best === null || r.tier > this.best) this.best = r.tier;
+      this.burst(e.x, e.y - 20, r.glow, 30, 220);
+      if (r.tier >= ANNOUNCE_TIER) { UI.announce(e.egg, '부화'); UI.shake(0.4); }
+      UI.showReveal(pet);
+      Sfx.play(r.tier >= ANNOUNCE_TIER ? 'rare' : 'hatch');
+      UI.refresh();
+    }
 
-  updateEconomy(dt) {
+    /* 펫 배회 */
+    const P = World.pen;
+    for (const q of this.penPets) {
+      q.waitT -= dt;
+      if (q.waitT <= 0) {
+        q.tx = clamp(q.x + rand(-140, 140), P.x + 45, P.x + P.w - 45);
+        q.ty = clamp(q.y + rand(-120, 120), P.y + 55, P.y + P.h - 45);
+        q.waitT = rand(1.2, 4);
+      }
+      const d = dist(q.x, q.y, q.tx, q.ty);
+      if (d > 5) {
+        const a = Math.atan2(q.ty - q.y, q.tx - q.x);
+        q.x += Math.cos(a) * 52 * dt; q.y += Math.sin(a) * 52 * dt;
+        q.moving = true; q.phase += dt * 12; q.faceX = Math.cos(a);
+      } else q.moving = false;
+    }
+
+    /* 수익 */
     const inc = this.income();
-    if (inc <= 0) return;
-    this.money += inc * dt; this.totalEarned += inc * dt;
-    this._mt = (this._mt || 0) + dt;
-    if (this._mt > 1.1) {
-      this._mt = 0;
-      const act = World.treadmills.filter(t => t.pet && t.i < this.treadmillSlots);
-      if (act.length) {
-        const t = pick(act);
-        this.pop(t.x + rand(-10, 10), t.y - 64,
-          '+' + fmtMoney(petIncome(t.pet) * TREADMILL_BY_ID[t.kind].mult), '#39ff9a', 13);
+    if (inc > 0) {
+      this.money += inc * dt; this.totalEarned += inc * dt;
+      this._mt = (this._mt || 0) + dt;
+      if (this._mt > 1.2 && this.penPets.length) {
+        this._mt = 0;
+        const q = pick(this.penPets);
+        this.pop(q.x, q.y - 44, '+' + fmtMoney(petIncome(q.pet)), '#39ff9a', 13);
       }
     }
+  },
+
+  /* ---------- 러닝머신 / 확장 패드 ---------- */
+  onTreadmill() { return dist(this.player.x, this.player.y, World.treadmill.x, World.treadmill.y) < 62; },
+  onPenPad()    { return dist(this.player.x, this.player.y, World.penPad.x, World.penPad.y) < 66; },
+
+  updateStations(dt) {
+    this.running = false;
+    if (this.speedLv >= CONFIG.treadmill.maxLevel) { this.runFill = 0; return; }
+    if (!(this.onTreadmill() && Input.action && this.player.stun <= 0)) { return; }
+
+    const cost = this.nextSpeedCost();
+    const drain = cost / CONFIG.treadmill.fillTime;
+    if (this.money < drain * dt) {
+      if (!this._nm || this.time - this._nm > 1.6) {
+        this._nm = this.time;
+        UI.toast(`돈이 부족해 — 다음 속도까지 ${fmtMoney(cost)}원`, '#ff6b6b');
+      }
+      return;
+    }
+    this.running = true;
+    this.money -= drain * dt;
+    this.runFill += dt / CONFIG.treadmill.fillTime;
+    if (this.runFill >= 1) {
+      this.runFill = 0;
+      this.speedLv++;
+      this.pop(World.treadmill.x, World.treadmill.y - 90, `속도 Lv.${this.speedLv}!`, '#39ff9a', 20);
+      this.burst(World.treadmill.x, World.treadmill.y - 40, '#39ff9a', 24, 200);
+      UI.toast(`속도 Lv.${this.speedLv} — ${Math.round(this.speed())} px/s`, '#39ff9a');
+      Sfx.play('buy'); UI.refresh();
+    }
+  },
+
+  expandPen() {
+    if (this.penSlots >= CONFIG.pen.maxSlots) { UI.toast('울타리가 최대야', '#ff9f43'); return; }
+    const c = this.nextPenCost();
+    if (this.money < c) { UI.toast(`${fmtMoney(c)}원 필요해`, '#ff6b6b'); return; }
+    this.money -= c; this.penSlots++;
+    this.pop(World.penPad.x, World.penPad.y - 70, `울타리 ${this.penSlots}칸!`, '#39ff9a', 18);
+    UI.toast(`울타리 확장 — ${this.penSlots}칸`, '#39ff9a');
+    Sfx.play('buy'); UI.refresh();
   },
 
   updateParticles(dt) {
@@ -3043,87 +2829,26 @@ const Game = {
       if (d > range) return;
       if (!best || d < best.dist) best = { kind, ref, label, dist: d, x, y };
     };
-    for (const m of this.mobs) {
-      if (!m.hasEgg || m.hidden > 0 || !this.unlocked[m.zone]) continue;
-      C('mob', m, m.x, m.y, `${m.sp.name} 알 훔치기`, CONFIG.steal.range);
+    for (const n of this.nests) {
+      if (!n.egg) continue;
+      if (Math.abs(n.x - this.cam.x) > 1200) continue;
+      const r = RARITY_BY_ID[n.egg.rarity];
+      C('nest', n, n.x, n.y, `${r.name} 알 훔치기`, CONFIG.steal.reach);
     }
-    for (const b of this.bosses) {
-      if (!this.unlocked[b.zone] || b.eggsLeft <= 0 || b.charge) continue;
-      C('mob', b, b.x, b.y, `${b.cfg.name}의 알 훔치기`, CONFIG.steal.range * 1.25);
-    }
-    for (const inc of World.incubators) {
-      if (inc.i >= this.incubatorSlots) continue;
-      let l = null;
-      if (inc.ready) l = '부화하기';
-      else if (inc.egg) l = '쓰다듬기 (성장 +)';
-      else if (this.carrying.length) l = '알 넣기';
-      if (l) C('inc', inc, inc.x, inc.y, l, 68);
-    }
-    for (const tm of World.treadmills) {
-      if (tm.i >= this.treadmillSlots) continue;
-      C('tm', tm, tm.x, tm.y, tm.pet ? '펫 회수' : '펫 올리기', 64);
-    }
-    C('shop', null, World.shop.x, World.shop.y, '상점 열기', 100);
-    for (const g of World.gates) {
-      if (this.unlocked[g.zone]) continue;
-      C('gate', g, g.x + g.w / 2, g.y + g.h / 2, `${ZONE_BY_ID[g.zone].name} 해금`, 110);
-    }
+    const G = World.pen.gate;
+    if (this.carrying) C('pen', null, G.x, G.y, '울타리에 넣기', 90);
+    if (this.speedLv < CONFIG.treadmill.maxLevel)
+      C('run', null, World.treadmill.x, World.treadmill.y, `달리기 — Lv.${this.speedLv + 1} ${fmtMoney(this.nextSpeedCost())}원`, 62);
+    if (this.penSlots < CONFIG.pen.maxSlots)
+      C('pad', null, World.penPad.x, World.penPad.y, `울타리 확장 ${fmtMoney(this.nextPenCost())}원`, 66);
     this.target = best;
   },
 
   interact() {
     const t = this.target;
     if (!t || this.player.stun > 0) return;
-    if (t.kind === 'inc') {
-      const i = t.ref;
-      if (i.ready) this.hatch(i); else if (i.egg) this.petEgg(i); else this.putEgg(i);
-    } else if (t.kind === 'tm') {
-      if (t.ref.pet) this.removePet(t.ref); else this.placePet(t.ref);
-    } else if (t.kind === 'shop') UI.openShop('zone');
-    else if (t.kind === 'gate') UI.openShop('zone');
-  },
-
-  /* ---------- 구매 ---------- */
-  buyZone(id) {
-    const z = ZONE_BY_ID[id];
-    if (this.unlocked[id]) return;
-    const idx = ZONES.findIndex(q => q.id === id);
-    if (idx > 0 && !this.unlocked[ZONES[idx - 1].id]) { UI.toast('앞 구역부터 해금해야 해', '#ff9f43'); return; }
-    if (!this.spend(z.cost)) return;
-    this.unlocked[id] = true;
-    UI.toast(`${z.emoji} ${z.name} 해금! 🎉`, '#ffd54a');
-    Sfx.play('buy'); UI.refresh();
-  },
-  buyTreadmillSlot() {
-    if (this.treadmillSlots >= CONFIG.treadmillSlots.max) return;
-    if (!this.spend(CONFIG.treadmillSlots.cost(this.treadmillSlots))) return;
-    this.treadmillSlots++;
-    UI.toast(`러닝머신 슬롯 ${this.treadmillSlots}개!`, '#39ff9a');
-    Sfx.play('buy'); UI.refresh();
-  },
-  buyIncubatorSlot() {
-    if (this.incubatorSlots >= CONFIG.incubator.maxSlots) return;
-    if (!this.spend(CONFIG.incubator.slotCost[this.incubatorSlots])) return;
-    this.incubatorSlots++;
-    UI.toast(`부화기 ${this.incubatorSlots}개!`, '#8ed2ff');
-    Sfx.play('buy'); UI.refresh();
-  },
-  buyBackpack() {
-    if (this.backpackLv >= CONFIG.backpack.levels.length - 1) return;
-    if (!this.spend(CONFIG.backpack.cost[this.backpackLv + 1])) return;
-    this.backpackLv++;
-    UI.toast(`가방 확장! 알 ${this.carryMax()}개까지`, '#b45cff');
-    Sfx.play('buy'); UI.refresh();
-  },
-  upgradeTreadmill(kind) {
-    const cfg = TREADMILL_BY_ID[kind];
-    const tm = World.treadmills.filter(t => t.i < this.treadmillSlots)
-      .find(t => TREADMILL_BY_ID[t.kind].mult < cfg.mult);
-    if (!tm) { UI.toast('전부 이미 그 등급 이상이야', '#ff9f43'); return; }
-    if (!this.spend(cfg.cost)) return;
-    tm.kind = kind;
-    UI.toast(`${cfg.name} 설치! (슬롯 ${tm.i + 1})`, cfg.frame);
-    Sfx.play('buy'); UI.refresh();
+    if (t.kind === 'pen') this.depositEgg();
+    else if (t.kind === 'pad') this.expandPen();
   },
 
   /* ---------- 튜토리얼 ---------- */
@@ -3132,56 +2857,44 @@ const Game = {
     if (!s) return;
     let done = false;
     switch (s.id) {
-      case 'move': done = (this._moved || 0) > 240; break;
+      case 'move':   done = (this._moved || 0) > 240; break;
       case 'goFarm': done = World.zoneAt(this.player.x, this.player.y)?.id === 'farm'; break;
-      case 'steal': done = this.stolen > 0; break;
-      case 'deliver': done = World.incubators.some(i => i.egg) || this.hatched > 0; break;
-      case 'hatch': done = this.hatched > 0; break;
-      case 'place': done = World.treadmills.some(t => t.pet); break;
-      case 'buy': done = this.treadmillSlots > 1 || this.unlocked.pond; break;
-      case 'boss': done = this.bossKills > 0; break;
+      case 'steal':  done = this.stolen > 0; break;
+      case 'escape': done = !!this.carrying && World.zoneAt(this.player.x, this.player.y)?.id === 'base'; break;
+      case 'pen':    done = this.penUsed() > 0; break;
+      case 'run':    done = this.speedLv > 0; break;
+      case 'far':    done = this.stolen > 3 && this.speedLv > 1; break;
     }
     if (!done) return;
     this.tutorial++;
     UI.refresh();
-    if (this.tutorial >= TUTORIAL.length) {
-      UI.toast('튜토리얼 완료! 이제 제국을 세워봐 👑', '#ffd54a');
-      Sfx.play('rare');
-    } else Sfx.play('ready');
+    if (this.tutorial >= TUTORIAL.length) { UI.toast('튜토리얼 완료! 더 먼 구역을 노려봐 👑', '#ffd54a'); Sfx.play('rare'); }
+    else Sfx.play('ready');
   },
 
   tutorialTarget() {
     const s = TUTORIAL[this.tutorial];
     if (!s) return null;
-    const z = World.zoneDef('farm');
     switch (s.id) {
-      case 'goFarm': return { x: z.x + 200, y: World.corridor.y + 70 };
+      case 'goFarm':
       case 'steal': {
-        let bm = null, bd = 1e9;
-        for (const m of this.mobs) {
-          if (m.zone !== 'farm' || !m.hasEgg) continue;
-          const d = dist2(m.x, m.y, this.player.x, this.player.y);
-          if (d < bd) { bd = d; bm = m; }
+        let b = null, bd = 1e9;
+        for (const n of this.nests) {
+          if (n.zone !== 'farm' || !n.egg) continue;
+          const d = dist2(n.x, n.y, this.player.x, this.player.y);
+          if (d < bd) { bd = d; b = n; }
         }
-        return bm;
+        return b;
       }
-      case 'deliver': return World.incubators[0];
-      case 'hatch': return World.incubators.find(i => i.egg) || World.incubators[0];
-      case 'place': return World.treadmills[0];
-      case 'buy': return World.shop;
-      case 'boss': return this.bosses.find(b => b.zone === 'farm' && b.eggsLeft > 0);
+      case 'escape':
+      case 'pen': return World.pen.gate;
+      case 'run': return World.treadmill;
+      case 'far': {
+        const z = World.zoneDef('pond');
+        return { x: z.x + z.w / 2, y: z.y + z.h / 2 };
+      }
     }
     return null;
-  },
-
-  nearestBoss() {
-    let b = null, bd = 620;
-    for (const q of this.bosses) {
-      if (!this.unlocked[q.zone]) continue;
-      const d = dist(q.x, q.y, this.player.x, this.player.y);
-      if (d < bd) { bd = d; b = q; }
-    }
-    return b;
   },
 
   /* ================= 렌더 ================= */
@@ -3196,100 +2909,69 @@ const Game = {
     const ox = this.canvas.width / 2 - this.cam.x * S + (sh ? rand(-10, 10) * sh : 0);
     const oy = this.canvas.height / 2 - this.cam.y * S + (sh ? rand(-10, 10) * sh : 0);
     ctx.setTransform(S, 0, 0, S, ox, oy);
-
     ctx.drawImage(World.ground, 0, 0);
 
     for (const z of World.zones) {
-      if (z.id === 'base' || !this.unlocked[z.id]) continue;
-      if (z.fog) { ctx.fillStyle = z.fog; ctx.fillRect(z.x, z.y, z.w, z.h); }
+      if (z.id === 'base' || !z.fog) continue;
+      ctx.fillStyle = z.fog; ctx.fillRect(z.x, z.y, z.w, z.h);
     }
 
-    for (const g of World.gates) {
-      if (this.unlocked[g.zone]) continue;
-      const z = ZONE_BY_ID[g.zone];
-      const grd = ctx.createLinearGradient(g.x, 0, g.x + g.w, 0);
-      grd.addColorStop(0, 'rgba(255,80,80,0.10)');
-      grd.addColorStop(0.5, `rgba(255,80,80,${0.45 + Math.sin(t * 4) * 0.15})`);
-      grd.addColorStop(1, 'rgba(255,80,80,0.10)');
-      ctx.fillStyle = grd; ctx.fillRect(g.x, g.y, g.w, g.h);
-      ctx.strokeStyle = '#ff5a5a'; ctx.lineWidth = 3; ctx.strokeRect(g.x, g.y, g.w, g.h);
-      outlineText(ctx, '🔒 ' + z.name, g.x + g.w / 2, g.y - 30, 19, '#ffd54a', '#000');
-      outlineText(ctx, fmtMoney(z.cost) + '원', g.x + g.w / 2, g.y - 8, 15, '#fff', '#000');
-      outlineText(ctx, '[E] 해금', g.x + g.w / 2, g.y + g.h + 16, 14, '#8ed2ff', '#000');
-    }
-
+    const vis = 1050 / this.cam.scale;
+    const near = (x, y) => Math.abs(x - this.cam.x) < vis && Math.abs(y - this.cam.y) < vis;
     const list = [];
+
     for (const p of World.props) {
-      if (p.type === 'fenceLine') { Draw.prop(ctx, p, t); continue; }
-      list.push({ y: p.y, f: () => Draw.prop(ctx, p, t) });
+      if (p.type === 'penFence') { Draw.penFence(ctx, p, t); continue; }
+      if (!near(p.x, p.y)) continue;
+      list.push({ y: p.sort ?? p.y, f: () => Draw.prop(ctx, p, t) });
     }
-    for (const inc of World.incubators) {
-      if (inc.i >= this.incubatorSlots) continue;
-      list.push({ y: inc.y, f: () => Draw.incubator(ctx, inc, t) });
+    for (const n of this.nests) {
+      if (!near(n.x, n.y)) continue;
+      list.push({ y: n.y + 2, f: () => Draw.nest(ctx, n, t) });
+      const g = n.guard;
+      list.push({ y: g.y, f: () => Draw.guardian(ctx, n, t) });
     }
-    for (const tm of World.treadmills) {
-      if (tm.i >= this.treadmillSlots) continue;
-      list.push({ y: tm.y, f: () => Draw.treadmill(ctx, tm, t) });
+    for (const e of this.penEggs) {
+      list.push({ y: e.y, f: () => Draw.penEgg(ctx, e, t) });
     }
-    const vis = 1000 / this.cam.scale;
-    for (const m of this.mobs) {
-      if (!this.unlocked[m.zone] || m.hidden > 0) continue;
-      if (Math.abs(m.x - this.cam.x) > vis || Math.abs(m.y - this.cam.y) > vis) continue;
-      list.push({ y: m.y, f: () => Draw.creature(ctx, m, t) });
-    }
-    for (const b of this.bosses) {
-      if (!this.unlocked[b.zone] || b.cooldownT > 0) continue;
-      if (Math.abs(b.x - this.cam.x) > vis + 300) continue;
-      list.push({ y: b.y, f: () => Draw.creature(ctx, b, t) });
+    for (const q of this.penPets) {
+      list.push({ y: q.y, f: () => Draw.pet(ctx, q.x, q.y, q.pet, t, 1.0, q.moving) });
     }
     const p = this.player;
-    list.push({
-      y: p.y, f: () => Draw.avatar(ctx, {
-        x: p.x, y: p.y, facing: p.facing, phase: p.phase, moving: p.moving,
-        shirt: p.shirt, hatColor: p.hatColor,
-        carry: this.carrying.length > 0, stunned: p.stun > 0
-      })
-    });
+    list.push({ y: p.y, f: () => Draw.avatar(ctx, {
+      x: p.x, y: p.y, facing: p.facing, phase: p.phase,
+      moving: p.moving || this.running, shirt: p.shirt, hatColor: p.hatColor,
+      carry: !!this.carrying, stunned: p.stun > 0
+    }) });
     list.sort((a, b) => a.y - b.y);
     for (const it of list) it.f();
 
-    /* 잠긴 구역은 내용물까지 어둡게 */
-    for (const z of World.zones) {
-      if (z.id === 'base' || this.unlocked[z.id]) continue;
-      ctx.fillStyle = 'rgba(6,8,16,0.70)';
-      ctx.fillRect(z.x, z.y, z.w, z.h);
+    for (const n of this.nests) {
+      if (n.guard.state === 'chase' && near(n.guard.x, n.guard.y)) Draw.guardianTag(ctx, n, t);
     }
 
-    /* 보스 쿨다운 표시 */
-    for (const b of this.bosses) {
-      if (!this.unlocked[b.zone] || b.cooldownT <= 0) continue;
-      if (Math.abs(b.x - this.cam.x) > vis) continue;
-      outlineText(ctx, `${b.cfg.name} 재등장까지`, b.x, b.y - 40, 15, '#9aa7b8', '#000');
-      outlineText(ctx, fmtTime(b.cooldownT), b.x, b.y - 18, 20, '#ffd54a', '#000');
+    if (this.carrying) {
+      Draw.egg(ctx, p.x, p.y - 56 + Math.sin(t * 3) * 1.5, 21, this.carrying.rarity, this.carrying.variant, t, true);
     }
 
-    if (this.carrying.length) {
-      const e = this.carrying[0];
-      Draw.egg(ctx, p.x, p.y - 54 + Math.sin(t * 3) * 1.5, 20, e.rarity, e.variant, t, true);
-      if (this.carrying.length > 1) outlineText(ctx, 'x' + this.carrying.length, p.x + 19, p.y - 64, 14, '#fff', '#000');
-    }
-
+    /* 훔치는 중 게이지 */
     if (this.stealing) {
-      const m = this.stealing.mob;
-      const danger = m.state === 'warn' || m.state === 'look';
-      const top = m.y - (m.boss ? 150 : 82);
-      Draw.bar(ctx, m.x, top, 92, 11, this.stealing.progress, danger ? '#ff4d4d' : '#39ff9a');
-      const msg = m.boss
-        ? (m.state === 'look' ? '멈춰!! 움직이면 죽는다' : danger ? '손 떼고 멈춰!' : '훔치는 중...')
-        : (danger ? '손 떼!!' : '훔치는 중...');
-      outlineText(ctx, msg, m.x, top - 19, 15, danger ? '#ff4d4d' : '#fff', '#000');
+      const n = this.stealing.nest;
+      Draw.bar(ctx, n.x, n.y - 62, 84, 10, this.stealing.t / n.sp.wake, '#ffd54a');
+      outlineText(ctx, '조용히...', n.x, n.y - 80, 14, '#ffd54a', '#000');
     }
 
+    /* 러닝머신 게이지 */
+    if (this.onTreadmill() && this.speedLv < CONFIG.treadmill.maxLevel) {
+      const T = World.treadmill;
+      Draw.bar(ctx, T.x, T.y - 108, 118, 11, this.runFill, this.running ? '#39ff9a' : '#5b6472');
+      outlineText(ctx, `Lv.${this.speedLv} → ${this.speedLv + 1}`, T.x, T.y - 128, 14, '#fff', '#000');
+    }
+
+    /* 상호작용 프롬프트 */
     if (this.target && !this.stealing) {
       const tg = this.target;
-      const y = tg.kind === 'mob' && tg.ref.boss
-        ? tg.y + 38
-        : tg.y - (tg.kind === 'mob' ? 78 : tg.kind === 'shop' ? 112 : 84);
+      const y = tg.y - (tg.kind === 'nest' ? 56 : 74);
       const label = ` [E] ${tg.label} `;
       ctx.save();
       ctx.font = '800 15px "Pretendard",system-ui,sans-serif';
@@ -3302,23 +2984,20 @@ const Game = {
     }
 
     const tt = this.tutorialTarget();
-    if (tt) {
+    if (tt && dist(p.x, p.y, tt.x, tt.y) > 110) {
       const a = Math.atan2(tt.y - p.y, tt.x - p.x);
-      if (dist(p.x, p.y, tt.x, tt.y) > 100) {
-        const rr = 66 + Math.sin(t * 5) * 8;
-        ctx.save();
-        ctx.translate(p.x + Math.cos(a) * rr, p.y - 40 + Math.sin(a) * rr);
-        ctx.rotate(a);
-        ctx.fillStyle = '#ffd54a'; ctx.strokeStyle = '#000'; ctx.lineWidth = 3; ctx.lineJoin = 'round';
-        ctx.beginPath(); ctx.moveTo(17, 0); ctx.lineTo(-10, -13); ctx.lineTo(-4, 0); ctx.lineTo(-10, 13);
-        ctx.closePath(); ctx.fill(); ctx.stroke();
-        ctx.restore();
-      }
+      const rr = 66 + Math.sin(t * 5) * 8;
+      ctx.save();
+      ctx.translate(p.x + Math.cos(a) * rr, p.y - 40 + Math.sin(a) * rr);
+      ctx.rotate(a);
+      ctx.fillStyle = '#ffd54a'; ctx.strokeStyle = '#000'; ctx.lineWidth = 3; ctx.lineJoin = 'round';
+      ctx.beginPath(); ctx.moveTo(17, 0); ctx.lineTo(-10, -13); ctx.lineTo(-4, 0); ctx.lineTo(-10, 13);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.restore();
     }
 
     for (const q of this.particles) {
-      const a = clamp(q.life / q.max, 0, 1);
-      ctx.save(); ctx.globalAlpha = a;
+      ctx.save(); ctx.globalAlpha = clamp(q.life / q.max, 0, 1);
       if (q.box) { ctx.fillStyle = q.color; ctx.fillRect(q.x, q.y, q.size, q.size); }
       else outlineText(ctx, q.text, q.x, q.y, q.size, q.color, '#000');
       ctx.restore();
@@ -3336,23 +3015,25 @@ const Game = {
     g.clearRect(0, 0, W, H);
     g.fillStyle = 'rgba(12,15,22,0.9)'; g.fillRect(0, 0, W, H);
     for (const z of World.zones) {
-      const un = z.id === 'base' || this.unlocked[z.id];
-      g.fillStyle = un ? z.floor : '#2a2f3a';
+      g.fillStyle = z.floor;
       g.fillRect(z.x * sx, z.y * sy, z.w * sx, z.h * sy);
-      if (!un) { g.fillStyle = 'rgba(255,80,80,0.30)'; g.fillRect(z.x * sx, z.y * sy, z.w * sx, z.h * sy); }
     }
-    g.fillStyle = 'rgba(200,170,120,0.7)';
-    g.fillRect((World.base.x + World.base.w) * sx, World.corridor.y * sy,
-      (World.w - World.base.x - World.base.w) * sx, World.corridor.h * sy);
-    for (const b of this.bosses) {
-      if (!this.unlocked[b.zone]) continue;
-      g.fillStyle = b.cooldownT > 0 ? '#555' : '#ffd54a';
-      g.fillRect(b.x * sx - 2.5, b.y * sy - 2.5, 5, 5);
+    for (const n of this.nests) {
+      if (!n.egg) continue;
+      const r = RARITY_BY_ID[n.egg.rarity];
+      const big = r.tier >= ANNOUNCE_TIER;
+      g.fillStyle = r.glow;
+      g.fillRect(n.x * sx - (big ? 2 : 1), n.y * sy - (big ? 2 : 1), big ? 5 : 3, big ? 5 : 3);
+    }
+    for (const n of this.nests) {
+      if (n.guard.state !== 'chase') continue;
+      g.fillStyle = '#ff3b3b';
+      g.fillRect(n.guard.x * sx - 2, n.guard.y * sy - 2, 4, 4);
     }
     const p = this.player;
-    g.fillStyle = '#ff3b3b';
+    g.fillStyle = '#ffffff';
     g.beginPath(); g.arc(p.x * sx, p.y * sy, 3.6, 0, 7); g.fill();
-    g.strokeStyle = '#fff'; g.lineWidth = 1.4; g.stroke();
+    g.strokeStyle = '#000'; g.lineWidth = 1.4; g.stroke();
   },
 
   loop() {
@@ -3360,7 +3041,7 @@ const Game = {
     let dt = Math.min(t - this.lastT, 0.05);
     this.lastT = t;
     Input.update();
-    if (this.player.moving) this._moved = (this._moved || 0) + CONFIG.player.speed * dt;
+    if (this.player.moving) this._moved = (this._moved || 0) + this.speed() * dt;
     this.update(dt);
     UI.tick(dt);
     this.render();

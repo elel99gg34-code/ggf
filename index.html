@@ -17,9 +17,9 @@
     <div class="top-left">
       <div class="pill money"><span class="ic">💰</span><b id="money">0</b><span class="unit">원</span></div>
       <div class="pill rate"><span class="ic">📈</span><b id="rate">0/초</b></div>
-      <div class="pill bag"><span class="ic">🥚</span><b id="bag">0/1</b></div>
-      <div class="pill pet"><span class="ic">🐣</span><b id="pets">0</b></div>
-      <div class="pill tm"><span class="ic">🏃</span><b id="tmCount">0/1</b></div>
+      <div class="pill spd"><span class="ic">⚡</span><b id="spd">230</b><span class="unit" id="spdLv">Lv.0</span></div>
+      <div class="pill carry" id="carry"><span class="ic">🥚</span><b>없음</b></div>
+      <div class="pill pen"><span class="ic">🐣</span><b id="pen">0/4</b></div>
     </div>
 
     <div class="top-right">
@@ -29,15 +29,17 @@
       </div>
     </div>
 
-    <div id="bossbar"></div>
-    <div id="toasts"></div>
+    <div id="topStack">
+      <div id="announce"></div>
+      <div id="chase"></div>
+      <div id="toasts"></div>
+    </div>
 
     <div id="tut" class="tut"></div>
 
     <div class="btnbar">
-      <button id="btnShop" class="hb primary">🛒 상점 <kbd>B</kbd></button>
-      <button id="btnPets" class="hb">🐣 내 펫 <kbd>I</kbd></button>
-      <button id="btnAuto" class="hb">⚡ 자동 배치</button>
+      <button id="btnPets" class="hb primary">🐣 내 펫 <kbd>I</kbd></button>
+      <button id="btnDex" class="hb">📖 등급표</button>
       <button id="btnHelp" class="hb sm">❓</button>
       <button id="btnMute" class="hb sm">🔊</button>
     </div>
@@ -81,12 +83,14 @@
       <h1 class="sp-title">계란을 훔치다</h1>
       <div class="sp-sub">STEAL AN EGG</div>
       <ul class="sp-list">
-        <li><b>7개 구역</b> — 농장 🐔 → 오리 연못 🦆 → 사막 🦂 → 정글 🐯 → 바다 🐋 → 공룡 계곡 🦖 → 우주 💀</li>
-        <li><b>7개 등급</b> — 일반 · 레어 알 · 에픽 · 시크릿 · 디바인 · 코스믹 · 영원한 + 아우라 변형</li>
-        <li><b>보스는 다르다</b> — 예고가 짧고, 쳐다볼 땐 <u>완전히 멈춰야</u> 하고, 걸리면 돌진해온다</li>
+        <li><b>자는 파수꾼 옆 둥지</b>에서 알을 훔친다 → 깨어나서 <u>쫓아온다</u> → 도망쳐라</li>
+        <li>기지 <b>울타리</b>에 넣으면 부화하고, 그 펫이 초당 돈을 벌어준다</li>
+        <li><b>러닝머신은 내가 탄다</b> — 돈을 써서 달리면 내 이동 속도가 오른다</li>
+        <li>구역 7개는 <b>전부 자유 이동</b>. 뒤로 갈수록 파수꾼이 빨라 속도가 없으면 못 도망친다</li>
+        <li><b>시크릿</b> 이상 등급을 찾으면 화면에 <u>알림</u>이 뜬다</li>
       </ul>
       <button id="startBtn" class="sp-btn">게임 시작</button>
-      <div class="sp-tip">WASD 이동 · E 꾹 눌러 훔치기 · B 상점</div>
+      <div class="sp-tip">WASD 이동 · E 꾹 눌러 훔치기 · I 내 펫</div>
     </div>
   </div>
 </div>
