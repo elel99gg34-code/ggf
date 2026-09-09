@@ -284,6 +284,21 @@ kbd{display:inline-block;padding:1px 6px;margin-left:5px;border-radius:6px;
 .spdrow .req em{color:#ff9f43}
 .spdrow.no .req{color:#ff9f43}
 
+/* ---------- 쓰러짐 / 리스폰 오버레이 ---------- */
+#downed{position:absolute;inset:0;display:none;place-items:center;z-index:15;
+  background:radial-gradient(circle at 50% 50%,rgba(60,6,14,.55),rgba(4,5,10,.88));
+  pointer-events:none}
+#downed.on{display:grid;animation:fade .25s}
+.dn-in{text-align:center;animation:pop .3s cubic-bezier(.2,1.5,.4,1)}
+.dn-icon{font-size:56px;animation:wob 1.1s ease-in-out infinite}
+.dn-title{font-size:clamp(30px,7vw,46px);font-weight:900;color:#ff5e6e;
+  text-shadow:0 0 30px rgba(255,60,80,.7);margin-top:4px}
+.dn-sub{font-size:14px;color:#cdd6e4;font-weight:700;margin-top:2px}
+.dn-barwrap{width:min(280px,70vw);height:12px;margin:16px auto 0;border-radius:999px;
+  background:rgba(255,255,255,.14);border:2px solid rgba(255,255,255,.22);overflow:hidden}
+.dn-bar{height:100%;width:0%;border-radius:999px;
+  background:linear-gradient(90deg,#12c46e,#5ff0a8);transition:width .1s linear}
+
 </style>
 </head>
 <body>
@@ -320,6 +335,15 @@ kbd{display:inline-block;padding:1px 6px;margin-left:5px;border-radius:6px;
       <button id="btnDex" class="hb">📖 등급표</button>
       <button id="btnHelp" class="hb sm">❓</button>
       <button id="btnMute" class="hb sm">🔊</button>
+    </div>
+
+    <div id="downed">
+      <div class="dn-in">
+        <div class="dn-icon">💫</div>
+        <div class="dn-title">잡혔다!</div>
+        <div class="dn-sub">기지에서 리스폰 중…</div>
+        <div class="dn-barwrap"><div class="dn-bar"></div></div>
+      </div>
     </div>
 
     <!-- 모바일 -->
@@ -398,7 +422,10 @@ const RARITIES = [
   { id:'cosmic',  name:'코스믹',  en:'COSMIC',  tier:5, weight:34,   mult:350,
     c1:'#2b1b7a', c2:'#43e8ff', glow:'#7a5cff', aura:'nebula',  auraName:'성운' },
   { id:'eternal', name:'영원한',  en:'ETERNAL', tier:6, weight:6,    mult:1600,
-    c1:'#ff5fbe', c2:'#7dffe0', glow:'#ffffff', aura:'eternal', auraName:'무한' }
+    c1:'#ff5fbe', c2:'#7dffe0', glow:'#ffffff', aura:'eternal', auraName:'무한' },
+  /* 최상위 — 우주에서만, 그것도 아주 드물게 나온다 */
+  { id:'transcend', name:'초월', en:'TRANSCENDENT', tier:7, weight:0.12, mult:12000,
+    c1:'#05060c', c2:'#d7b0ff', glow:'#c9a2ff', aura:'transcend', auraName:'균열' }
 ];
 const RARITY_BY_ID = {};
 RARITIES.forEach(r => { RARITY_BY_ID[r.id] = r; });
@@ -478,15 +505,18 @@ const CHICKEN_TYPES = SPECIES;   // 하위 호환
  *  maxTier : 이 구역에서 나올 수 있는 최고 등급 (RARITIES 의 tier)
  *            농장·연못은 에픽까지 — 시크릿은 사막부터 나온다.
  */
+/*  스테이지 하나 = 몹 1마리 + 둥지 1개(알 4개).
+ *  mob 이 그 스테이지를 지키는 유일한 파수꾼이다.  */
 const ZONES = [
-  { id:'farm',   name:'닭의 숲',   emoji:'🐔', speed:1,        mobs:['chicken','hen'],           need:0,   maxTier:2 },
-  { id:'pond',   name:'오리 연못', emoji:'🦆', speed:150,      mobs:['duck','swan'],             need:240, maxTier:2 },
-  { id:'desert', name:'사막',      emoji:'🦂', speed:1000,     mobs:['scorpion','kingScorpion'], need:300, maxTier:3 },
-  { id:'jungle', name:'정글',      emoji:'🐯', speed:10000,    mobs:['tiger','whiteTiger'],      need:365, maxTier:4 },
-  { id:'ocean',  name:'바다',      emoji:'🐋', speed:500000,   mobs:['whale','orca'],            need:400, maxTier:5 },
-  { id:'dino',   name:'공룡 계곡', emoji:'🦖', speed:1800000,  mobs:['dino','trex'],             need:460, maxTier:6 },
-  { id:'space',  name:'우주',      emoji:'💀', speed:18000000, mobs:['skeleton','skullKing'],    need:545, maxTier:6 }
+  { id:'farm',   name:'닭의 숲',   emoji:'🐔', speed:1,        mob:'chicken',  need:0,   maxTier:2 },
+  { id:'pond',   name:'오리 연못', emoji:'🦆', speed:150,      mob:'duck',     need:240, maxTier:2 },
+  { id:'desert', name:'사막',      emoji:'🦂', speed:1000,     mob:'scorpion', need:300, maxTier:3 },
+  { id:'jungle', name:'정글',      emoji:'🐯', speed:10000,    mob:'tiger',    need:365, maxTier:4 },
+  { id:'ocean',  name:'바다',      emoji:'🐋', speed:500000,   mob:'whale',    need:400, maxTier:5 },
+  { id:'dino',   name:'공룡 계곡', emoji:'🦖', speed:1800000,  mob:'dino',     need:460, maxTier:6 },
+  { id:'space',  name:'우주',      emoji:'💀', speed:18000000, mob:'skeleton', need:545, maxTier:7 }
 ];
+ZONES.forEach(z => { z.mobs = [z.mob]; });   // 하위 호환
 const ZONE_BY_ID = {};
 ZONES.forEach(z => { ZONE_BY_ID[z.id] = z; });
 
@@ -496,7 +526,11 @@ const CONFIG = {
     baseSpeed: 230,      // 속도 레벨 0 일 때
     perLevel: 0.10,      // 레벨당 +10%
     radius: 16,
-    carryPenalty: 0.92   // 알을 들면 살짝 느려진다
+    carryPenalty: 0.92,  // 알을 들면 살짝 느려진다
+
+    /* 리스폰 — 체력 개념은 없다. 잡히면 그 자리에서 쓰러지고 기지로 돌아간다 */
+    downTime: 2.0,       // 쓰러져 있는 시간
+    respawnGrace: 2.5    // 리스폰 직후 무적 (바로 다시 잡히지 않게)
   },
 
   /* 러닝머신 — 플레이어가 직접 타서 속도를 올린다 */
@@ -514,8 +548,9 @@ const CONFIG = {
   },
 
   nest: {
-    eggs: 4,            // 둥지 하나에 알 4개 (파수꾼은 둥지마다 딱 한 마리)
-    respawn: 22         // 다 털린 둥지가 알 4개로 다시 차기까지
+    eggs: 4,            // 둥지 하나에 알 4개
+    respawn: 16,        // 다 털린 둥지가 알 4개로 다시 차기까지
+    guardScale: 1.7     // 스테이지의 유일한 몹이라 크게 그린다
   },
 
   steal: {
@@ -886,7 +921,7 @@ n_topTier(n) {
 guardian(ctx, n, t) {
   const g = n.guard, sp = n.sp;
   const dir = g.faceX < 0 ? -1 : 1;
-  const s = sp.scale || 1;
+  const s = (sp.scale || 1) * (n.gs || 1);
   const asleep = g.state === 'sleep';
   const chase = g.state === 'chase';
   const breathe = asleep ? Math.sin(t * 1.5 + g.seed) * 1.6 : 0;
@@ -918,6 +953,7 @@ guardian(ctx, n, t) {
   ctx.restore();
 
   const top = g.y - (24 + 46 * s);
+  outlineText(ctx, sp.name, g.x, g.y + 28, 14, '#ffe8bf', '#000');
   if (asleep) {
     ctx.save();
     for (let i = 0; i < 3; i++) {
@@ -1391,6 +1427,72 @@ aura(ctx, x, y, R, r, v, t) {
       const a = -t * 1.9 + i * 0.785;
       star(ctx, Math.cos(a) * R * 1.05, Math.sin(a) * R * 0.7, 4.4, rainbow(t * 2 + i * 0.4, 78));
     }
+  } else if (kind === 'transcend') {
+    /* 균열 — 현실이 찢어진 듯한 최상위 아우라 */
+    R *= 1.45;
+    ctx.globalCompositeOperation = 'source-over';
+    const core = ctx.createRadialGradient(0, 0, R * 0.05, 0, 0, R * 0.95);
+    core.addColorStop(0, 'rgba(4,4,10,0.92)');
+    core.addColorStop(0.55, 'rgba(10,6,26,0.55)');
+    core.addColorStop(1, 'rgba(10,6,26,0)');
+    ctx.fillStyle = core;
+    ctx.beginPath(); ctx.arc(0, 0, R * 0.95, 0, 7); ctx.fill();
+
+    ctx.globalCompositeOperation = 'lighter';
+    /* 색수차 링 3겹 */
+    const rings = [['#ff2fd0', -1], ['#5cf0ff', 0], ['#c9a2ff', 1]];
+    rings.forEach(([col, off], i) => {
+      ctx.save();
+      ctx.rotate(t * (0.9 + i * 0.35) + i * 2.1);
+      ctx.strokeStyle = col; ctx.lineWidth = 3.6;
+      ctx.globalAlpha = 0.9;
+      ctx.beginPath();
+      ctx.ellipse(off * 3, 0, R * (1.02 + i * 0.12), R * (0.30 + i * 0.12), 0, 0.3, 5.6);
+      ctx.stroke();
+      ctx.restore();
+    });
+    /* 바깥 후광 */
+    ctx.globalAlpha = 0.5;
+    const halo = ctx.createRadialGradient(0, 0, R * 0.55, 0, 0, R * 1.55);
+    halo.addColorStop(0, 'rgba(201,162,255,0)');
+    halo.addColorStop(0.6, 'rgba(201,162,255,0.45)');
+    halo.addColorStop(1, 'rgba(92,240,255,0)');
+    ctx.fillStyle = halo;
+    ctx.beginPath(); ctx.arc(0, 0, R * 1.55, 0, 7); ctx.fill();
+
+    /* 찢어진 균열 조각 */
+    ctx.globalAlpha = 1;
+    for (let i = 0; i < 9; i++) {
+      const a = -t * 1.25 + i * (Math.PI * 2 / 9);
+      const rr = R * (1.05 + Math.sin(t * 2.4 + i * 1.7) * 0.18);
+      ctx.save();
+      ctx.translate(Math.cos(a) * rr, Math.sin(a) * rr * 0.66);
+      ctx.rotate(a + t * 1.6);
+      ctx.fillStyle = i % 2 ? '#e7ccff' : '#8df5ff';
+      ctx.beginPath();
+      ctx.moveTo(0, -11); ctx.lineTo(4.8, -2); ctx.lineTo(2.2, 11);
+      ctx.lineTo(-3.2, 1.8); ctx.closePath(); ctx.fill();
+      ctx.restore();
+    }
+
+    /* 세로 균열선 — 주기적으로 번쩍 */
+    const flash = Math.max(0, Math.sin(t * 2.1));
+    ctx.globalAlpha = flash * 0.9;
+    ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 3; ctx.lineJoin = 'round';
+    for (let i = 0; i < 4; i++) {
+      const a = t * 0.55 + i * 1.57;
+      ctx.save(); ctx.rotate(a);
+      ctx.beginPath(); ctx.moveTo(0, 0);
+      let px = 0, py = 0;
+      for (let k = 0; k < 4; k++) {
+        px += R * 0.34; py += (k % 2 ? 1 : -1) * R * 0.16;
+        ctx.lineTo(px, py);
+      }
+      ctx.stroke(); ctx.restore();
+    }
+    ctx.globalAlpha = flash * 0.7;
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath(); ctx.arc(0, 0, R * 0.26 * flash, 0, 7); ctx.fill();
   }
 
   /* 변형 오버레이 */
@@ -1450,103 +1552,6 @@ pet(ctx, x, y, pet, t, scale, running) {
 },
 
 /* ---------------------------------------------------------
- *  러닝머신
- * ------------------------------------------------------- */
-treadmill(ctx, tm, t) {
-  const cfg = TREADMILL_BY_ID[tm.kind];
-  const x = tm.x, y = tm.y;
-  ctx.save();
-  ctx.translate(x, y);
-  shadowEllipse(ctx, 0, 4, 40, 12, 0.28);
-
-  // 벨트 바닥
-  block(ctx, -34, -20, 68, 26, cfg.belt, { outline: true });
-  // 움직이는 줄무늬
-  ctx.save();
-  ctx.beginPath(); ctx.rect(-33, -19, 66, 24); ctx.clip();
-  ctx.fillStyle = 'rgba(255,255,255,0.16)';
-  const off = (tm.pet ? (t * 90) % 16 : 0);
-  for (let i = -1; i < 6; i++) ctx.fillRect(-33 + i * 16 + off, -19, 7, 24);
-  ctx.restore();
-
-  // 사이드 레일
-  block(ctx, -40, -24, 8, 32, cfg.frame, { outline: true });
-  block(ctx, 32, -24, 8, 32, cfg.frame, { outline: true });
-  // 콘솔 (뒤쪽 · 위로)
-  block(ctx, -19, -74, 38, 22, cfg.frame, { outline: true });
-  block(ctx, -23, -54, 46, 7, shade(cfg.frame, -0.25), { outline: true });
-  ctx.fillStyle = shade(cfg.frame, -0.4);
-  ctx.fillRect(-4, -52, 8, 30);
-  ctx.fillStyle = tm.pet ? '#0d2c1e' : '#1b1f27';
-  ctx.fillRect(-14, -70, 28, 14);
-  ctx.fillStyle = tm.pet ? '#39ff9a' : '#5b6472';
-  for (let i = 0; i < 3; i++) ctx.fillRect(-10 + i * 8, -66 + (tm.pet ? (i * 3) % 5 : 2), 5, 5);
-  ctx.restore();
-
-  // 펫
-  if (tm.pet) {
-    this.pet(ctx, x, y - 10, tm.pet, t, 1.05, true);
-    const inc = petIncome(tm.pet) * cfg.mult;
-    const lab = ' ' + fmtMoney(inc) + '/초 ';
-    ctx.save();
-    ctx.font = '900 12px "Pretendard",system-ui,sans-serif';
-    const w = ctx.measureText(lab).width + 8;
-    roundRect(ctx, x - w / 2, y - 106, w, 20, 7);
-    ctx.fillStyle = 'rgba(6,24,16,0.85)'; ctx.fill();
-    ctx.strokeStyle = cfg.frame; ctx.lineWidth = 1.6; ctx.stroke();
-    outlineText(ctx, lab, x, y - 96, 12, '#39ff9a', 'rgba(0,0,0,0)', 900);
-    ctx.restore();
-  } else {
-    ctx.save();
-    ctx.globalAlpha = 0.45 + Math.sin(t * 3) * 0.18;
-    outlineText(ctx, '＋', x, y - 28, 26, '#fff', '#000');
-    ctx.restore();
-  }
-},
-
-/* ---------------------------------------------------------
- *  부화기
- * ------------------------------------------------------- */
-incubator(ctx, inc, t) {
-  const x = inc.x, y = inc.y;
-  ctx.save();
-  ctx.translate(x, y);
-  shadowEllipse(ctx, 0, 4, 34, 11, 0.26);
-  block(ctx, -30, -16, 60, 22, '#7c8798', { outline: true });
-  block(ctx, -34, -22, 68, 8, '#9aa6b8', { outline: true });
-  ctx.restore();
-
-  /* 유리 돔 — 알 뒤 */
-  ctx.save();
-  ctx.globalAlpha = 0.30;
-  const g = ctx.createLinearGradient(0, y - 60, 0, y - 10);
-  g.addColorStop(0, 'rgba(190,225,255,0.35)');
-  g.addColorStop(1, 'rgba(190,225,255,0.02)');
-  ctx.fillStyle = g;
-  ctx.beginPath(); ctx.ellipse(x, y - 28, 27, 34, 0, 0, 7); ctx.fill();
-  ctx.strokeStyle = 'rgba(220,240,255,0.45)'; ctx.lineWidth = 2; ctx.stroke();
-  ctx.restore();
-
-  if (inc.egg) {
-    const p = clamp(inc.grow / CONFIG.incubator.growTime, 0, 1);
-    const shake = inc.ready ? Math.sin(t * 24) * 3 : Math.sin(t * (3 + p * 8)) * (1 + p * 1.6);
-    this.egg(ctx, x + shake, y - 32 + Math.sin(t * 2) * 2, 22 + p * 6, inc.egg.rarity, inc.egg.variant, t, true);
-    this.bar(ctx, x, y - 84, 58, 8, p, inc.ready ? '#39ff9a' : '#ffd54a');
-    if (inc.ready) {
-      ctx.save();
-      ctx.globalAlpha = 0.6 + Math.sin(t * 8) * 0.4;
-      outlineText(ctx, '부화 준비!', x, y - 100, 13, '#39ff9a', '#062015');
-      ctx.restore();
-    }
-  } else {
-    ctx.save();
-    ctx.globalAlpha = 0.45 + Math.sin(t * 3) * 0.18;
-    outlineText(ctx, '＋', x, y - 34, 24, '#fff', '#000');
-    ctx.restore();
-  }
-},
-
-/* ---------------------------------------------------------
  *  게이지 바
  * ------------------------------------------------------- */
 bar(ctx, x, y, w, h, p, color) {
@@ -1575,6 +1580,7 @@ prop(ctx, p, t) {
   if (T === 'sign')      return this.sign(ctx, p, t);
   if (T === 'treadmill') return this.gym(ctx, p, t);
   if (T === 'penPad')    return this.padPlate(ctx, p, t);
+  if (T === 'spawnPad')  return this.spawnPad(ctx, p, t);
 
   const s = p.s || 1;
   ctx.save(); ctx.translate(p.x, p.y); ctx.scale(s, s);
@@ -1711,6 +1717,56 @@ gym(ctx, p, t) {
   ctx.restore();
 },
 
+/* 쓰러진 플레이어 */
+downed(ctx, p, downT, t) {
+  ctx.save();
+  ctx.translate(p.x, p.y);
+  shadowEllipse(ctx, 0, 0, 26, 9, 0.30);
+  ctx.rotate(Math.PI / 2 * 0.92);
+  ctx.scale(0.96, 0.96);
+  block(ctx, -14, -56, 28, 30, '#2f7dff', { outline: true });
+  block(ctx, -25, -56, 11, 30, '#ffd54a', { outline: true });
+  block(ctx, 14, -56, 11, 30, '#ffd54a', { outline: true });
+  block(ctx, -13, -26, 12, 26, '#2b3140', { outline: true });
+  block(ctx, 1, -26, 12, 26, '#2b3140', { outline: true });
+  block(ctx, -12, -78, 24, 22, '#ffd54a', { outline: true });
+  ctx.strokeStyle = '#1b1b1b'; ctx.lineWidth = 2.4; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(-8, -72); ctx.lineTo(-2, -66);
+  ctx.moveTo(-2, -72); ctx.lineTo(-8, -66);
+  ctx.moveTo(2, -72); ctx.lineTo(8, -66);
+  ctx.moveTo(8, -72); ctx.lineTo(2, -66);
+  ctx.stroke();
+  ctx.restore();
+  for (let i = 0; i < 3; i++) {
+    const a = t * 4.5 + i * 2.1;
+    star(ctx, p.x + Math.cos(a) * 22, p.y - 62 + Math.sin(a * 2) * 6, 6, '#ffd54a');
+  }
+},
+
+/* 리스폰 지점 */
+spawnPad(ctx, p, t) {
+  ctx.save();
+  ctx.translate(p.x, p.y);
+  const pulse = 0.5 + Math.sin(t * 2.2) * 0.22;
+  ctx.globalAlpha = pulse * 0.55;
+  ctx.fillStyle = '#39ff9a';
+  ctx.beginPath(); ctx.ellipse(0, 0, 54, 26, 0, 0, 7); ctx.fill();
+  ctx.globalAlpha = 1;
+  ctx.strokeStyle = '#39ff9a'; ctx.lineWidth = 3;
+  ctx.setLineDash([12, 9]); ctx.lineDashOffset = -t * 22;
+  ctx.beginPath(); ctx.ellipse(0, 0, 54, 26, 0, 0, 7); ctx.stroke();
+  ctx.setLineDash([]);
+  for (let i = 0; i < 4; i++) {
+    const q = ((t * 0.7 + i * 0.25) % 1);
+    ctx.globalAlpha = (1 - q) * 0.7;
+    ctx.strokeStyle = '#a9ffd2'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.ellipse(0, -q * 46, 40 * (1 - q * 0.5), 18 * (1 - q * 0.5), 0, 0, 7); ctx.stroke();
+  }
+  ctx.globalAlpha = 1;
+  outlineText(ctx, '⛑ 리스폰 지점', 0, -50, 13, '#a9ffd2', '#04231a');
+  ctx.restore();
+},
+
 padPlate(ctx, p, t) {
   const x = p.x, y = p.y;
   const can = Game.penSlots < CONFIG.pen.maxSlots;
@@ -1828,25 +1884,20 @@ const World = {
     /* 둘 다 바닥 설비라 플레이어보다 먼저 그린다 (sort 키를 앞당김) */
     this.props.push({ type: 'treadmill', x: this.treadmill.x, y: this.treadmill.y, sort: this.treadmill.y - 70 });
     this.props.push({ type: 'penPad', x: this.penPad.x, y: this.penPad.y, sort: this.penPad.y - 90 });
+    this.props.push({ type: 'spawnPad', x: this.spawn.x, y: this.spawn.y, sort: this.spawn.y - 80 });
 
     /* 구역별 둥지 + 장식 */
     for (const z of this.zones) {
       if (z.id === 'base') continue;
-      const cols = [z.x + 150, z.x + 385, z.x + 620];
-      const rows = [z.y + 190, z.y + 620, z.y + 1050];
-      let k = 0;
-      rows.forEach((ry, ri) => cols.forEach((cx, ci) => {
-        if (ri === 1 && ci === 1) return;               // 가운데는 비워 통로
-        const elite = (ri + ci) % 3 === 2;
-        this.nestSpots.push({
-          zone: z.id, spId: z.cfg.mobs[elite ? 1 : 0],
-          x: cx + rand(-26, 26), y: ry + rand(-22, 22), i: k++
-        });
-      }));
+      /* 스테이지당 둥지 하나 — 한가운데 */
+      this.nestSpots.push({
+        zone: z.id, spId: z.cfg.mob,
+        x: z.x + z.w / 2, y: z.y + z.h / 2 + 40, i: this.nestSpots.length
+      });
 
-      for (let i = 0; i < 9; i++) {
+      for (let i = 0; i < 14; i++) {
         const px = z.x + rand(60, z.w - 60), py = z.y + rand(60, z.h - 60);
-        if (this.nestSpots.some(n => n.zone === z.id && dist2(n.x, n.y, px, py) < 150 * 150)) continue;
+        if (this.nestSpots.some(n => n.zone === z.id && dist2(n.x, n.y, px, py) < 300 * 300)) continue;
         this.props.push({ type: z.prop, x: px, y: py, s: rand(0.75, 1.3), seed: rand(0, 10) });
       }
       this.props.push({ type: 'sign', x: z.x + 66, y: z.y + z.h - 70, zone: z.id });
@@ -2012,6 +2063,8 @@ const Sfx = {
       case 'ready': this.tone(740, 0.09, 'triangle'); this.tone(980, 0.12, 'triangle', 0.13, 0.09); break;
       case 'buy':   this.tone(520, 0.08); this.tone(700, 0.08, 'square', 0.14, 0.07); this.tone(940, 0.14, 'square', 0.14, 0.14); break;
       case 'fail':  this.tone(220, 0.20, 'sawtooth', 0.15, 0, 0.4); break;
+      case 'down':    [440,330,247,175].forEach((f,i)=>this.tone(f,0.22,'sawtooth',0.17,i*0.12)); break;
+      case 'respawn': [392,523,659,880].forEach((f,i)=>this.tone(f,0.15,'triangle',0.15,i*0.09)); break;
       case 'alert': [880,1174,880,1174].forEach((f,i)=>this.tone(f,0.14,'square',0.15,i*0.13)); break;
       case 'wake':  this.tone(880, 0.09, 'square', 0.16); this.tone(560, 0.22, 'sawtooth', 0.16, 0.07, 0.5); break;
       case 'boss':  this.tone(110, 0.35, 'sawtooth', 0.20, 0, 0.6); this.tone(160, 0.30, 'square', 0.10, 0.05, 0.5); break;
@@ -2186,6 +2239,11 @@ const UI = {
         (g.carrying ? ' — <span class="risk">잡히면 알을 뺏긴다</span>' : '');
     } else cw.classList.remove('on');
 
+    /* 리스폰 진행 바 */
+    if (g.downT > 0) {
+      const p = 1 - g.downT / CONFIG.player.downTime;
+      this.$('downed').querySelector('.dn-bar').style.width = (p * 100).toFixed(1) + '%';
+    }
     this.drawReveal();
   },
 
@@ -2249,6 +2307,11 @@ const UI = {
     setTimeout(() => { el.classList.remove('in'); setTimeout(() => el.remove(), 350); }, 2400);
   },
 
+  downOverlay(on) {
+    const el = this.$('downed');
+    el.classList.toggle('on', !!on);
+  },
+
   shake(a) { this.shakeAmt = Math.max(this.shakeAmt, a); },
   tick(dt) {
     this.shakeAmt = Math.max(0, this.shakeAmt - dt * 1.8);
@@ -2278,6 +2341,7 @@ const UI = {
       <div><b>${g.penUsed()}/${g.penSlots}</b><span>울타리</span></div>
       <div><b>${g.stolen}</b><span>훔친 알</span></div>
       <div><b>${g.caught}</b><span>잡힌 횟수</span></div>
+      <div><b>${g.deaths}</b><span>리스폰</span></div>
       <div><b>${g.best !== null ? RARITIES[g.best].name : '-'}</b><span>최고 등급</span></div>
     </div>`;
     if (!g.penPets.length && !g.penEggs.length)
@@ -2364,13 +2428,16 @@ const UI = {
       <div><kbd>I</kbd> 내 펫 · <kbd>H</kbd> 도움말 · <kbd>ESC</kbd> 닫기</div>
     </div>
     <h3 class="sec">1. 알 훔치기</h3>
-    <p class="hint">구역마다 <b>둥지</b>가 있고, 둥지 하나에 <b>파수꾼은 딱 한 마리</b>가 자고 있다(💤).
-    <b>둥지에는 알이 4개</b> 들어 있고 알마다 등급이 따로다.
-    둥지 옆에서 <b>E를 꾹</b> 누르면 맨 앞의 알을 들어올리고, <b>그 순간 파수꾼이 깨어나 쫓아온다.</b>
-    한 둥지를 네 번 털 수 있지만 매번 새로 깨우게 된다.</p>
-    <h3 class="sec">2. 도망치기</h3>
-    <p class="hint">잡히면 <b>알을 뺏기고</b> 튕겨나간다. 알은 원래 둥지로 돌아간다.
-    파수꾼은 일정 시간이 지나거나 충분히 멀어지면 포기하고 둥지로 돌아가 다시 잠든다.
+    <p class="hint"><b>스테이지 하나에 몹은 딱 한 마리</b>다. 그 몹이 둥지 옆에서 자고 있고(💤),
+    <b>둥지에는 알이 4개</b> 들어 있으며 알마다 등급이 따로 굴려진다.
+    둥지 옆에서 <b>E를 꾹</b> 누르면 맨 앞 알을 들어올리고, <b>그 순간 몹이 깨어나 쫓아온다.</b>
+    한 둥지를 네 번까지 털 수 있지만 매번 새로 깨우게 된다.</p>
+    <h3 class="sec">2. 도망치기 · 리스폰</h3>
+    <p class="hint">체력 같은 건 없다. <b>한 번 잡히면 그 자리에서 쓰러지고</b>,
+    2초 뒤 기지의 <b>⛑ 리스폰 지점</b>에서 다시 시작한다.
+    들고 있던 알은 원래 둥지로 돌아가고, 추격도 전부 풀린다.
+    리스폰 직후 2.5초 동안은 무적이다.<br>
+    파수꾼은 시간이 지나거나 충분히 멀어지면 스스로 포기하고 둥지로 돌아가 다시 잠든다.
     알을 들면 살짝 느려지니 주의.</p>
     <h3 class="sec">3. 울타리에 넣기</h3>
     <p class="hint">기지 울타리 아래쪽 <b>알 넣는 곳</b>에서 <b>E</b>. 알은 울타리 안에서 자라다 부화하고,
@@ -2443,6 +2510,7 @@ const Game = {
   penEggs: [], penPets: [],
   dex: {}, tutorial: 0, lastSave: 0,
   runFill: 0,
+  invuln: 0, downT: 0, deaths: 0,
 
   player: {
     x: World.spawn ? World.spawn.x : 700, y: 1080,
@@ -2487,8 +2555,9 @@ const Game = {
         i, zone: s.zone, spId: s.spId, sp,
         maxTier: ZONE_BY_ID[s.zone].maxTier,
         x: s.x, y: s.y, eggs: [], respawn: 0,
+        gs: CONFIG.nest.guardScale,
         guard: {
-          x: s.x + 46, y: s.y + 12, hx: s.x + 46, hy: s.y + 12,
+          x: s.x + 78, y: s.y + 16, hx: s.x + 78, hy: s.y + 16,
           state: 'sleep', chaseT: 0, sleepT: 0,
           faceX: -1, phase: rand(0, 6), seed: rand(0, 10), moving: false
         }
@@ -2522,6 +2591,7 @@ const Game = {
         money: this.money, totalEarned: this.totalEarned, stolen: this.stolen,
         hatched: this.hatched, caught: this.caught, best: this.best,
         speedLv: this.speedLv, penSlots: this.penSlots, tutorial: this.tutorial,
+        deaths: this.deaths,
         carrying: this.carrying, dex: this.dex,
         penEggs: this.penEggs.map(e => ({ egg: e.egg, t: e.t })),
         penPets: this.penPets.map(p => p.pet),
@@ -2538,6 +2608,7 @@ const Game = {
     this.money = d.money || 0; this.totalEarned = d.totalEarned || 0;
     this.stolen = d.stolen || 0; this.hatched = d.hatched || 0;
     this.caught = d.caught || 0; this.best = d.best ?? null;
+    this.deaths = d.deaths || 0;
     this.speedLv = d.speedLv || 0;
     this.penSlots = d.penSlots || CONFIG.pen.baseSlots;
     this.tutorial = d.tutorial || 0;
@@ -2585,6 +2656,7 @@ const Game = {
     this.updatePen(dt);
     this.updateStations(dt);
     this.updateSteal(dt);
+    this.updateVitals(dt);
     this.updateParticles(dt);
     this.pickTarget();
     this.checkTutorial();
@@ -2607,7 +2679,7 @@ const Game = {
       p.kx *= Math.pow(0.02, dt); p.ky *= Math.pow(0.02, dt);
       World.resolve(p, CONFIG.player.radius);
     }
-    if (p.stun > 0) { p.stun -= dt; p.moving = false; p.phase += dt * 20; return; }
+    if (this.downT > 0 || p.stun > 0) { p.stun -= dt; p.moving = false; p.phase += dt * 20; return; }
 
     let ax = Input.dirX, ay = Input.dirY;
     const len = Math.hypot(ax, ay);
@@ -2648,7 +2720,7 @@ const Game = {
         g.y += Math.sin(a) * sp.chase * dt;
         g.moving = true; g.phase += dt * 15; g.faceX = Math.cos(a);
         if (sp.quake && d < 420) UI.shake(Math.min(0.12, (420 - d) / 3600));
-        if (d < CONFIG.steal.catchDist && p.stun <= 0) this.getCaught(n);
+        if (d < CONFIG.steal.catchDist && p.stun <= 0 && this.invuln <= 0 && this.downT <= 0) this.getCaught(n);
         else if (g.chaseT <= 0 || d > 1400) {
           g.state = 'return';
           this.pop(g.x, g.y - 70, '...', '#cfd6e0', 18);
@@ -2693,10 +2765,10 @@ const Game = {
 
   getCaught(n) {
     const p = this.player;
+    if (this.invuln > 0 || this.downT > 0) return;
     this.stealing = null;
-    p.stun = CONFIG.steal.stun;
     const a = Math.atan2(p.y - n.guard.y, p.x - n.guard.x);
-    p.kx = Math.cos(a) * 560; p.ky = Math.sin(a) * 560;
+    p.kx = Math.cos(a) * 620; p.ky = Math.sin(a) * 620;
     this.caught++;
     if (this.carrying) {
       const home = this.nests.find(q => q.i === this.carrying.fromNest) || n;
@@ -2710,9 +2782,56 @@ const Game = {
     } else this.pop(p.x, p.y - 100, '잡혔다!', '#ff4d4d', 20);
     this.burst(p.x, p.y - 40, '#ff4d4d', 20, 190);
     n.guard.state = 'return';
-    UI.shake(0.5);
-    Sfx.play('fail');
+    UI.shake(0.6);
+    this.goDown();
     UI.refresh();
+  },
+
+  /* ---------- 쓰러짐 → 리스폰 ---------- */
+  goDown() {
+    const p = this.player;
+    this.deaths++;
+    this.downT = CONFIG.player.downTime;
+    p.stun = CONFIG.player.downTime + 0.2;
+    this.stealing = null;
+    /* 들고 있던 알은 둥지로 되돌린다 */
+    if (this.carrying) {
+      const home = this.nests.find(q => q.i === this.carrying.fromNest);
+      if (home && home.eggs.length < CONFIG.nest.eggs) {
+        home.eggs.unshift({ species: this.carrying.species, rarity: this.carrying.rarity, variant: this.carrying.variant });
+        home.respawn = 0;
+      }
+      this.carrying = null;
+    }
+    /* 추격 전부 해제 */
+    for (const n of this.nests) if (n.guard.state === 'chase') n.guard.state = 'return';
+    this.burst(p.x, p.y - 40, '#ff2b4d', 40, 300);
+    UI.shake(0.8);
+    UI.downOverlay(true);
+    Sfx.play('down');
+  },
+
+  respawn() {
+    const p = this.player;
+    this.downT = 0;
+    this.invuln = CONFIG.player.respawnGrace;
+    p.stun = 0; p.kx = 0; p.ky = 0;
+    p.x = World.spawn.x; p.y = World.spawn.y;
+    this.cam.x = p.x; this.cam.y = p.y - 40;
+    this.burst(p.x, p.y - 40, '#39ff9a', 30, 240);
+    this.pop(p.x, p.y - 120, '리스폰!', '#39ff9a', 22);
+    UI.downOverlay(false);
+    UI.toast('기지에서 리스폰했어', '#39ff9a');
+    Sfx.play('respawn');
+    UI.refresh();
+  },
+
+  updateVitals(dt) {
+    if (this.invuln > 0) this.invuln -= dt;
+    if (this.downT > 0) {
+      this.downT -= dt;
+      if (this.downT <= 0) this.respawn();
+    }
   },
 
   /* ---------- 훔치기 ---------- */
@@ -2995,11 +3114,17 @@ const Game = {
       list.push({ y: q.y, f: () => Draw.pet(ctx, q.x, q.y, q.pet, t, 1.0, q.moving) });
     }
     const p = this.player;
-    list.push({ y: p.y, f: () => Draw.avatar(ctx, {
-      x: p.x, y: p.y, facing: p.facing, phase: p.phase,
-      moving: p.moving || this.running, shirt: p.shirt, hatColor: p.hatColor,
-      carry: !!this.carrying, stunned: p.stun > 0
-    }) });
+    const blink = this.invuln > 0 && Math.floor(this.time * 12) % 2 === 0;
+    if (this.downT <= 0) list.push({ y: p.y, f: () => {
+      if (blink) ctx.globalAlpha = 0.35;
+      Draw.avatar(ctx, {
+        x: p.x, y: p.y, facing: p.facing, phase: p.phase,
+        moving: p.moving || this.running, shirt: p.shirt, hatColor: p.hatColor,
+        carry: !!this.carrying, stunned: p.stun > 0
+      });
+      ctx.globalAlpha = 1;
+    } });
+    else list.push({ y: p.y, f: () => Draw.downed(ctx, p, this.downT, t) });
     list.sort((a, b) => a.y - b.y);
     for (const it of list) it.f();
 

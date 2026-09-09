@@ -70,25 +70,20 @@ const World = {
     /* 둘 다 바닥 설비라 플레이어보다 먼저 그린다 (sort 키를 앞당김) */
     this.props.push({ type: 'treadmill', x: this.treadmill.x, y: this.treadmill.y, sort: this.treadmill.y - 70 });
     this.props.push({ type: 'penPad', x: this.penPad.x, y: this.penPad.y, sort: this.penPad.y - 90 });
+    this.props.push({ type: 'spawnPad', x: this.spawn.x, y: this.spawn.y, sort: this.spawn.y - 80 });
 
     /* 구역별 둥지 + 장식 */
     for (const z of this.zones) {
       if (z.id === 'base') continue;
-      const cols = [z.x + 150, z.x + 385, z.x + 620];
-      const rows = [z.y + 190, z.y + 620, z.y + 1050];
-      let k = 0;
-      rows.forEach((ry, ri) => cols.forEach((cx, ci) => {
-        if (ri === 1 && ci === 1) return;               // 가운데는 비워 통로
-        const elite = (ri + ci) % 3 === 2;
-        this.nestSpots.push({
-          zone: z.id, spId: z.cfg.mobs[elite ? 1 : 0],
-          x: cx + rand(-26, 26), y: ry + rand(-22, 22), i: k++
-        });
-      }));
+      /* 스테이지당 둥지 하나 — 한가운데 */
+      this.nestSpots.push({
+        zone: z.id, spId: z.cfg.mob,
+        x: z.x + z.w / 2, y: z.y + z.h / 2 + 40, i: this.nestSpots.length
+      });
 
-      for (let i = 0; i < 9; i++) {
+      for (let i = 0; i < 14; i++) {
         const px = z.x + rand(60, z.w - 60), py = z.y + rand(60, z.h - 60);
-        if (this.nestSpots.some(n => n.zone === z.id && dist2(n.x, n.y, px, py) < 150 * 150)) continue;
+        if (this.nestSpots.some(n => n.zone === z.id && dist2(n.x, n.y, px, py) < 300 * 300)) continue;
         this.props.push({ type: z.prop, x: px, y: py, s: rand(0.75, 1.3), seed: rand(0, 10) });
       }
       this.props.push({ type: 'sign', x: z.x + 66, y: z.y + z.h - 70, zone: z.id });

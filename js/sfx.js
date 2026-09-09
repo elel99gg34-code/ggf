@@ -31,6 +31,8 @@ const Sfx = {
       case 'ready': this.tone(740, 0.09, 'triangle'); this.tone(980, 0.12, 'triangle', 0.13, 0.09); break;
       case 'buy':   this.tone(520, 0.08); this.tone(700, 0.08, 'square', 0.14, 0.07); this.tone(940, 0.14, 'square', 0.14, 0.14); break;
       case 'fail':  this.tone(220, 0.20, 'sawtooth', 0.15, 0, 0.4); break;
+      case 'down':    [440,330,247,175].forEach((f,i)=>this.tone(f,0.22,'sawtooth',0.17,i*0.12)); break;
+      case 'respawn': [392,523,659,880].forEach((f,i)=>this.tone(f,0.15,'triangle',0.15,i*0.09)); break;
       case 'alert': [880,1174,880,1174].forEach((f,i)=>this.tone(f,0.14,'square',0.15,i*0.13)); break;
       case 'wake':  this.tone(880, 0.09, 'square', 0.16); this.tone(560, 0.22, 'sawtooth', 0.16, 0.07, 0.5); break;
       case 'boss':  this.tone(110, 0.35, 'sawtooth', 0.20, 0, 0.6); this.tone(160, 0.30, 'square', 0.10, 0.05, 0.5); break;

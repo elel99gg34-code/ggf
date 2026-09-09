@@ -22,7 +22,10 @@ const RARITIES = [
   { id:'cosmic',  name:'코스믹',  en:'COSMIC',  tier:5, weight:34,   mult:350,
     c1:'#2b1b7a', c2:'#43e8ff', glow:'#7a5cff', aura:'nebula',  auraName:'성운' },
   { id:'eternal', name:'영원한',  en:'ETERNAL', tier:6, weight:6,    mult:1600,
-    c1:'#ff5fbe', c2:'#7dffe0', glow:'#ffffff', aura:'eternal', auraName:'무한' }
+    c1:'#ff5fbe', c2:'#7dffe0', glow:'#ffffff', aura:'eternal', auraName:'무한' },
+  /* 최상위 — 우주에서만, 그것도 아주 드물게 나온다 */
+  { id:'transcend', name:'초월', en:'TRANSCENDENT', tier:7, weight:0.12, mult:12000,
+    c1:'#05060c', c2:'#d7b0ff', glow:'#c9a2ff', aura:'transcend', auraName:'균열' }
 ];
 const RARITY_BY_ID = {};
 RARITIES.forEach(r => { RARITY_BY_ID[r.id] = r; });
@@ -102,15 +105,18 @@ const CHICKEN_TYPES = SPECIES;   // 하위 호환
  *  maxTier : 이 구역에서 나올 수 있는 최고 등급 (RARITIES 의 tier)
  *            농장·연못은 에픽까지 — 시크릿은 사막부터 나온다.
  */
+/*  스테이지 하나 = 몹 1마리 + 둥지 1개(알 4개).
+ *  mob 이 그 스테이지를 지키는 유일한 파수꾼이다.  */
 const ZONES = [
-  { id:'farm',   name:'닭의 숲',   emoji:'🐔', speed:1,        mobs:['chicken','hen'],           need:0,   maxTier:2 },
-  { id:'pond',   name:'오리 연못', emoji:'🦆', speed:150,      mobs:['duck','swan'],             need:240, maxTier:2 },
-  { id:'desert', name:'사막',      emoji:'🦂', speed:1000,     mobs:['scorpion','kingScorpion'], need:300, maxTier:3 },
-  { id:'jungle', name:'정글',      emoji:'🐯', speed:10000,    mobs:['tiger','whiteTiger'],      need:365, maxTier:4 },
-  { id:'ocean',  name:'바다',      emoji:'🐋', speed:500000,   mobs:['whale','orca'],            need:400, maxTier:5 },
-  { id:'dino',   name:'공룡 계곡', emoji:'🦖', speed:1800000,  mobs:['dino','trex'],             need:460, maxTier:6 },
-  { id:'space',  name:'우주',      emoji:'💀', speed:18000000, mobs:['skeleton','skullKing'],    need:545, maxTier:6 }
+  { id:'farm',   name:'닭의 숲',   emoji:'🐔', speed:1,        mob:'chicken',  need:0,   maxTier:2 },
+  { id:'pond',   name:'오리 연못', emoji:'🦆', speed:150,      mob:'duck',     need:240, maxTier:2 },
+  { id:'desert', name:'사막',      emoji:'🦂', speed:1000,     mob:'scorpion', need:300, maxTier:3 },
+  { id:'jungle', name:'정글',      emoji:'🐯', speed:10000,    mob:'tiger',    need:365, maxTier:4 },
+  { id:'ocean',  name:'바다',      emoji:'🐋', speed:500000,   mob:'whale',    need:400, maxTier:5 },
+  { id:'dino',   name:'공룡 계곡', emoji:'🦖', speed:1800000,  mob:'dino',     need:460, maxTier:6 },
+  { id:'space',  name:'우주',      emoji:'💀', speed:18000000, mob:'skeleton', need:545, maxTier:7 }
 ];
+ZONES.forEach(z => { z.mobs = [z.mob]; });   // 하위 호환
 const ZONE_BY_ID = {};
 ZONES.forEach(z => { ZONE_BY_ID[z.id] = z; });
 
@@ -120,7 +126,11 @@ const CONFIG = {
     baseSpeed: 230,      // 속도 레벨 0 일 때
     perLevel: 0.10,      // 레벨당 +10%
     radius: 16,
-    carryPenalty: 0.92   // 알을 들면 살짝 느려진다
+    carryPenalty: 0.92,  // 알을 들면 살짝 느려진다
+
+    /* 리스폰 — 체력 개념은 없다. 잡히면 그 자리에서 쓰러지고 기지로 돌아간다 */
+    downTime: 2.0,       // 쓰러져 있는 시간
+    respawnGrace: 2.5    // 리스폰 직후 무적 (바로 다시 잡히지 않게)
   },
 
   /* 러닝머신 — 플레이어가 직접 타서 속도를 올린다 */
@@ -138,8 +148,9 @@ const CONFIG = {
   },
 
   nest: {
-    eggs: 4,            // 둥지 하나에 알 4개 (파수꾼은 둥지마다 딱 한 마리)
-    respawn: 22         // 다 털린 둥지가 알 4개로 다시 차기까지
+    eggs: 4,            // 둥지 하나에 알 4개
+    respawn: 16,        // 다 털린 둥지가 알 4개로 다시 차기까지
+    guardScale: 1.7     // 스테이지의 유일한 몹이라 크게 그린다
   },
 
   steal: {

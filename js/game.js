@@ -13,6 +13,7 @@ const Game = {
   penEggs: [], penPets: [],
   dex: {}, tutorial: 0, lastSave: 0,
   runFill: 0,
+  invuln: 0, downT: 0, deaths: 0,
 
   player: {
     x: World.spawn ? World.spawn.x : 700, y: 1080,
@@ -57,8 +58,9 @@ const Game = {
         i, zone: s.zone, spId: s.spId, sp,
         maxTier: ZONE_BY_ID[s.zone].maxTier,
         x: s.x, y: s.y, eggs: [], respawn: 0,
+        gs: CONFIG.nest.guardScale,
         guard: {
-          x: s.x + 46, y: s.y + 12, hx: s.x + 46, hy: s.y + 12,
+          x: s.x + 78, y: s.y + 16, hx: s.x + 78, hy: s.y + 16,
           state: 'sleep', chaseT: 0, sleepT: 0,
           faceX: -1, phase: rand(0, 6), seed: rand(0, 10), moving: false
         }
@@ -92,6 +94,7 @@ const Game = {
         money: this.money, totalEarned: this.totalEarned, stolen: this.stolen,
         hatched: this.hatched, caught: this.caught, best: this.best,
         speedLv: this.speedLv, penSlots: this.penSlots, tutorial: this.tutorial,
+        deaths: this.deaths,
         carrying: this.carrying, dex: this.dex,
         penEggs: this.penEggs.map(e => ({ egg: e.egg, t: e.t })),
         penPets: this.penPets.map(p => p.pet),
@@ -108,6 +111,7 @@ const Game = {
     this.money = d.money || 0; this.totalEarned = d.totalEarned || 0;
     this.stolen = d.stolen || 0; this.hatched = d.hatched || 0;
     this.caught = d.caught || 0; this.best = d.best ?? null;
+    this.deaths = d.deaths || 0;
     this.speedLv = d.speedLv || 0;
     this.penSlots = d.penSlots || CONFIG.pen.baseSlots;
     this.tutorial = d.tutorial || 0;
@@ -155,6 +159,7 @@ const Game = {
     this.updatePen(dt);
     this.updateStations(dt);
     this.updateSteal(dt);
+    this.updateVitals(dt);
     this.updateParticles(dt);
     this.pickTarget();
     this.checkTutorial();
@@ -177,7 +182,7 @@ const Game = {
       p.kx *= Math.pow(0.02, dt); p.ky *= Math.pow(0.02, dt);
       World.resolve(p, CONFIG.player.radius);
     }
-    if (p.stun > 0) { p.stun -= dt; p.moving = false; p.phase += dt * 20; return; }
+    if (this.downT > 0 || p.stun > 0) { p.stun -= dt; p.moving = false; p.phase += dt * 20; return; }
 
     let ax = Input.dirX, ay = Input.dirY;
     const len = Math.hypot(ax, ay);
@@ -218,7 +223,7 @@ const Game = {
         g.y += Math.sin(a) * sp.chase * dt;
         g.moving = true; g.phase += dt * 15; g.faceX = Math.cos(a);
         if (sp.quake && d < 420) UI.shake(Math.min(0.12, (420 - d) / 3600));
-        if (d < CONFIG.steal.catchDist && p.stun <= 0) this.getCaught(n);
+        if (d < CONFIG.steal.catchDist && p.stun <= 0 && this.invuln <= 0 && this.downT <= 0) this.getCaught(n);
         else if (g.chaseT <= 0 || d > 1400) {
           g.state = 'return';
           this.pop(g.x, g.y - 70, '...', '#cfd6e0', 18);
@@ -263,10 +268,10 @@ const Game = {
 
   getCaught(n) {
     const p = this.player;
+    if (this.invuln > 0 || this.downT > 0) return;
     this.stealing = null;
-    p.stun = CONFIG.steal.stun;
     const a = Math.atan2(p.y - n.guard.y, p.x - n.guard.x);
-    p.kx = Math.cos(a) * 560; p.ky = Math.sin(a) * 560;
+    p.kx = Math.cos(a) * 620; p.ky = Math.sin(a) * 620;
     this.caught++;
     if (this.carrying) {
       const home = this.nests.find(q => q.i === this.carrying.fromNest) || n;
@@ -280,9 +285,56 @@ const Game = {
     } else this.pop(p.x, p.y - 100, '잡혔다!', '#ff4d4d', 20);
     this.burst(p.x, p.y - 40, '#ff4d4d', 20, 190);
     n.guard.state = 'return';
-    UI.shake(0.5);
-    Sfx.play('fail');
+    UI.shake(0.6);
+    this.goDown();
     UI.refresh();
+  },
+
+  /* ---------- 쓰러짐 → 리스폰 ---------- */
+  goDown() {
+    const p = this.player;
+    this.deaths++;
+    this.downT = CONFIG.player.downTime;
+    p.stun = CONFIG.player.downTime + 0.2;
+    this.stealing = null;
+    /* 들고 있던 알은 둥지로 되돌린다 */
+    if (this.carrying) {
+      const home = this.nests.find(q => q.i === this.carrying.fromNest);
+      if (home && home.eggs.length < CONFIG.nest.eggs) {
+        home.eggs.unshift({ species: this.carrying.species, rarity: this.carrying.rarity, variant: this.carrying.variant });
+        home.respawn = 0;
+      }
+      this.carrying = null;
+    }
+    /* 추격 전부 해제 */
+    for (const n of this.nests) if (n.guard.state === 'chase') n.guard.state = 'return';
+    this.burst(p.x, p.y - 40, '#ff2b4d', 40, 300);
+    UI.shake(0.8);
+    UI.downOverlay(true);
+    Sfx.play('down');
+  },
+
+  respawn() {
+    const p = this.player;
+    this.downT = 0;
+    this.invuln = CONFIG.player.respawnGrace;
+    p.stun = 0; p.kx = 0; p.ky = 0;
+    p.x = World.spawn.x; p.y = World.spawn.y;
+    this.cam.x = p.x; this.cam.y = p.y - 40;
+    this.burst(p.x, p.y - 40, '#39ff9a', 30, 240);
+    this.pop(p.x, p.y - 120, '리스폰!', '#39ff9a', 22);
+    UI.downOverlay(false);
+    UI.toast('기지에서 리스폰했어', '#39ff9a');
+    Sfx.play('respawn');
+    UI.refresh();
+  },
+
+  updateVitals(dt) {
+    if (this.invuln > 0) this.invuln -= dt;
+    if (this.downT > 0) {
+      this.downT -= dt;
+      if (this.downT <= 0) this.respawn();
+    }
   },
 
   /* ---------- 훔치기 ---------- */
@@ -565,11 +617,17 @@ const Game = {
       list.push({ y: q.y, f: () => Draw.pet(ctx, q.x, q.y, q.pet, t, 1.0, q.moving) });
     }
     const p = this.player;
-    list.push({ y: p.y, f: () => Draw.avatar(ctx, {
-      x: p.x, y: p.y, facing: p.facing, phase: p.phase,
-      moving: p.moving || this.running, shirt: p.shirt, hatColor: p.hatColor,
-      carry: !!this.carrying, stunned: p.stun > 0
-    }) });
+    const blink = this.invuln > 0 && Math.floor(this.time * 12) % 2 === 0;
+    if (this.downT <= 0) list.push({ y: p.y, f: () => {
+      if (blink) ctx.globalAlpha = 0.35;
+      Draw.avatar(ctx, {
+        x: p.x, y: p.y, facing: p.facing, phase: p.phase,
+        moving: p.moving || this.running, shirt: p.shirt, hatColor: p.hatColor,
+        carry: !!this.carrying, stunned: p.stun > 0
+      });
+      ctx.globalAlpha = 1;
+    } });
+    else list.push({ y: p.y, f: () => Draw.downed(ctx, p, this.downT, t) });
     list.sort((a, b) => a.y - b.y);
     for (const it of list) it.f();
 

@@ -66,6 +66,11 @@ const UI = {
         (g.carrying ? ' — <span class="risk">잡히면 알을 뺏긴다</span>' : '');
     } else cw.classList.remove('on');
 
+    /* 리스폰 진행 바 */
+    if (g.downT > 0) {
+      const p = 1 - g.downT / CONFIG.player.downTime;
+      this.$('downed').querySelector('.dn-bar').style.width = (p * 100).toFixed(1) + '%';
+    }
     this.drawReveal();
   },
 
@@ -129,6 +134,11 @@ const UI = {
     setTimeout(() => { el.classList.remove('in'); setTimeout(() => el.remove(), 350); }, 2400);
   },
 
+  downOverlay(on) {
+    const el = this.$('downed');
+    el.classList.toggle('on', !!on);
+  },
+
   shake(a) { this.shakeAmt = Math.max(this.shakeAmt, a); },
   tick(dt) {
     this.shakeAmt = Math.max(0, this.shakeAmt - dt * 1.8);
@@ -158,6 +168,7 @@ const UI = {
       <div><b>${g.penUsed()}/${g.penSlots}</b><span>울타리</span></div>
       <div><b>${g.stolen}</b><span>훔친 알</span></div>
       <div><b>${g.caught}</b><span>잡힌 횟수</span></div>
+      <div><b>${g.deaths}</b><span>리스폰</span></div>
       <div><b>${g.best !== null ? RARITIES[g.best].name : '-'}</b><span>최고 등급</span></div>
     </div>`;
     if (!g.penPets.length && !g.penEggs.length)
@@ -244,13 +255,16 @@ const UI = {
       <div><kbd>I</kbd> 내 펫 · <kbd>H</kbd> 도움말 · <kbd>ESC</kbd> 닫기</div>
     </div>
     <h3 class="sec">1. 알 훔치기</h3>
-    <p class="hint">구역마다 <b>둥지</b>가 있고, 둥지 하나에 <b>파수꾼은 딱 한 마리</b>가 자고 있다(💤).
-    <b>둥지에는 알이 4개</b> 들어 있고 알마다 등급이 따로다.
-    둥지 옆에서 <b>E를 꾹</b> 누르면 맨 앞의 알을 들어올리고, <b>그 순간 파수꾼이 깨어나 쫓아온다.</b>
-    한 둥지를 네 번 털 수 있지만 매번 새로 깨우게 된다.</p>
-    <h3 class="sec">2. 도망치기</h3>
-    <p class="hint">잡히면 <b>알을 뺏기고</b> 튕겨나간다. 알은 원래 둥지로 돌아간다.
-    파수꾼은 일정 시간이 지나거나 충분히 멀어지면 포기하고 둥지로 돌아가 다시 잠든다.
+    <p class="hint"><b>스테이지 하나에 몹은 딱 한 마리</b>다. 그 몹이 둥지 옆에서 자고 있고(💤),
+    <b>둥지에는 알이 4개</b> 들어 있으며 알마다 등급이 따로 굴려진다.
+    둥지 옆에서 <b>E를 꾹</b> 누르면 맨 앞 알을 들어올리고, <b>그 순간 몹이 깨어나 쫓아온다.</b>
+    한 둥지를 네 번까지 털 수 있지만 매번 새로 깨우게 된다.</p>
+    <h3 class="sec">2. 도망치기 · 리스폰</h3>
+    <p class="hint">체력 같은 건 없다. <b>한 번 잡히면 그 자리에서 쓰러지고</b>,
+    2초 뒤 기지의 <b>⛑ 리스폰 지점</b>에서 다시 시작한다.
+    들고 있던 알은 원래 둥지로 돌아가고, 추격도 전부 풀린다.
+    리스폰 직후 2.5초 동안은 무적이다.<br>
+    파수꾼은 시간이 지나거나 충분히 멀어지면 스스로 포기하고 둥지로 돌아가 다시 잠든다.
     알을 들면 살짝 느려지니 주의.</p>
     <h3 class="sec">3. 울타리에 넣기</h3>
     <p class="hint">기지 울타리 아래쪽 <b>알 넣는 곳</b>에서 <b>E</b>. 알은 울타리 안에서 자라다 부화하고,
