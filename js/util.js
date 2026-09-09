@@ -47,9 +47,10 @@ function weightedPick(items, weightFn) {
   return items[items.length - 1];
 }
 
-/* 닭 종류 luck 을 반영해 등급 뽑기 */
-function rollRarity(luck) {
-  return weightedPick(RARITIES, r => r.weight * Math.pow(luck, r.tier));
+/* luck 을 반영해 등급 뽑기. maxTier 가 있으면 그 위 등급은 아예 나오지 않는다 */
+function rollRarity(luck, maxTier) {
+  const pool = maxTier === undefined ? RARITIES : RARITIES.filter(r => r.tier <= maxTier);
+  return weightedPick(pool, r => r.weight * Math.pow(luck, r.tier));
 }
 function rollVariant() {
   return weightedPick(VARIANTS, v => v.weight);

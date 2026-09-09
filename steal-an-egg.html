@@ -361,11 +361,11 @@ kbd{display:inline-block;padding:1px 6px;margin-left:5px;border-radius:6px;
       <h1 class="sp-title">계란을 훔치다</h1>
       <div class="sp-sub">STEAL AN EGG</div>
       <ul class="sp-list">
-        <li><b>자는 파수꾼 옆 둥지</b>에서 알을 훔친다 → 깨어나서 <u>쫓아온다</u> → 도망쳐라</li>
+        <li><b>자는 파수꾼 옆 둥지</b>에서 알을 훔친다 → 깨어나서 <u>쫓아온다</u> → 도망쳐라<br>둥지마다 파수꾼 한 마리, <b>알은 4개</b></li>
         <li>기지 <b>울타리</b>에 넣으면 부화하고, 그 펫이 초당 돈을 벌어준다</li>
         <li><b>러닝머신은 내가 탄다</b> — 돈을 써서 달리면 내 이동 속도가 오른다</li>
         <li>구역 7개는 <b>전부 자유 이동</b>. 뒤로 갈수록 파수꾼이 빨라 속도가 없으면 못 도망친다</li>
-        <li><b>시크릿</b> 이상 등급을 찾으면 화면에 <u>알림</u>이 뜬다</li>
+        <li>구역마다 최고 등급이 다르다 — <b>시크릿은 사막부터</b>. 찾으면 <u>전광판 알림</u>이 뜬다</li>
       </ul>
       <button id="startBtn" class="sp-btn">게임 시작</button>
       <div class="sp-tip">WASD 이동 · E 꾹 눌러 훔치기 · I 내 펫</div>
@@ -474,15 +474,18 @@ const SPECIES = {
 };
 const CHICKEN_TYPES = SPECIES;   // 하위 호환
 
-/* ---------- 구역 (전부 자유 이동 · 잠금 없음) ---------- */
+/* ---------- 구역 (전부 자유 이동 · 잠금 없음) ----------
+ *  maxTier : 이 구역에서 나올 수 있는 최고 등급 (RARITIES 의 tier)
+ *            농장·연못은 에픽까지 — 시크릿은 사막부터 나온다.
+ */
 const ZONES = [
-  { id:'farm',   name:'농장',      emoji:'🐔', speed:1,        mobs:['chicken','hen'],           need:0   },
-  { id:'pond',   name:'오리 연못', emoji:'🦆', speed:150,      mobs:['duck','swan'],             need:240 },
-  { id:'desert', name:'사막',      emoji:'🦂', speed:1000,     mobs:['scorpion','kingScorpion'], need:300 },
-  { id:'jungle', name:'정글',      emoji:'🐯', speed:10000,    mobs:['tiger','whiteTiger'],      need:365 },
-  { id:'ocean',  name:'바다',      emoji:'🐋', speed:500000,   mobs:['whale','orca'],            need:400 },
-  { id:'dino',   name:'공룡 계곡', emoji:'🦖', speed:1800000,  mobs:['dino','trex'],             need:460 },
-  { id:'space',  name:'우주',      emoji:'💀', speed:18000000, mobs:['skeleton','skullKing'],    need:545 }
+  { id:'farm',   name:'닭의 숲',   emoji:'🐔', speed:1,        mobs:['chicken','hen'],           need:0,   maxTier:2 },
+  { id:'pond',   name:'오리 연못', emoji:'🦆', speed:150,      mobs:['duck','swan'],             need:240, maxTier:2 },
+  { id:'desert', name:'사막',      emoji:'🦂', speed:1000,     mobs:['scorpion','kingScorpion'], need:300, maxTier:3 },
+  { id:'jungle', name:'정글',      emoji:'🐯', speed:10000,    mobs:['tiger','whiteTiger'],      need:365, maxTier:4 },
+  { id:'ocean',  name:'바다',      emoji:'🐋', speed:500000,   mobs:['whale','orca'],            need:400, maxTier:5 },
+  { id:'dino',   name:'공룡 계곡', emoji:'🦖', speed:1800000,  mobs:['dino','trex'],             need:460, maxTier:6 },
+  { id:'space',  name:'우주',      emoji:'💀', speed:18000000, mobs:['skeleton','skullKing'],    need:545, maxTier:6 }
 ];
 const ZONE_BY_ID = {};
 ZONES.forEach(z => { ZONE_BY_ID[z.id] = z; });
@@ -510,12 +513,16 @@ const CONFIG = {
     cost: n => Math.floor(400 * Math.pow(1.9, n - 4))
   },
 
+  nest: {
+    eggs: 4,            // 둥지 하나에 알 4개 (파수꾼은 둥지마다 딱 한 마리)
+    respawn: 22         // 다 털린 둥지가 알 4개로 다시 차기까지
+  },
+
   steal: {
     startle: 0.75,      // 깨어나서 벌떡 일어나기까지 — 이 틈에 도망쳐야 한다
     reach: 74,          // 둥지에 손이 닿는 거리
     catchDist: 46,      // 파수꾼에게 잡히는 거리
     stun: 1.0,
-    respawn: 12,        // 털린 둥지에 새 알이 생기기까지
     sleepAgain: 3.5     // 추격 포기 후 다시 잠들기까지
   },
 
@@ -530,11 +537,11 @@ const CONFIG = {
 const TUTORIAL = [
   { id:'move',   title:'움직여보기',     body:'WASD / 방향키로 움직여. (모바일은 왼쪽 화면 드래그)' },
   { id:'goFarm', title:'농장 둥지로',    body:'오른쪽 농장에 닭이 자고 있어. 노란 화살표를 따라가.' },
-  { id:'steal',  title:'알 훔치기',      body:'둥지 옆에서 [E] 를 꾹! 알을 들면 닭이 깨서 쫓아온다.' },
+  { id:'steal',  title:'알 훔치기',      body:'둥지엔 알이 4개. 옆에서 [E] 를 꾹! 하나 들 때마다 닭이 깨서 쫓아온다.' },
   { id:'escape', title:'도망쳐!',        body:'잡히면 알을 떨어뜨려. 기지 쪽으로 도망가서 따돌려.' },
   { id:'pen',    title:'울타리에 넣기',  body:'기지 울타리 앞에서 [E]. 알이 부화하면 펫이 돈을 벌어줘.' },
   { id:'run',    title:'러닝머신 타기',  body:'러닝머신 위에서 [E] 를 꾹 눌러 달려. 돈을 써서 내 속도를 올린다.' },
-  { id:'far',    title:'더 먼 구역으로', body:'구역마다 파수꾼이 더 빨라. 속도를 올려야 도망칠 수 있어!' }
+  { id:'far',    title:'더 먼 구역으로', body:'구역마다 파수꾼이 더 빨라. 시크릿은 사막부터 나온다 — 속도를 올려야 갈 수 있어!' }
 ];
 
 </script>
@@ -588,9 +595,10 @@ function weightedPick(items, weightFn) {
   return items[items.length - 1];
 }
 
-/* 닭 종류 luck 을 반영해 등급 뽑기 */
-function rollRarity(luck) {
-  return weightedPick(RARITIES, r => r.weight * Math.pow(luck, r.tier));
+/* luck 을 반영해 등급 뽑기. maxTier 가 있으면 그 위 등급은 아예 나오지 않는다 */
+function rollRarity(luck, maxTier) {
+  const pool = maxTier === undefined ? RARITIES : RARITIES.filter(r => r.tier <= maxTier);
+  return weightedPick(pool, r => r.weight * Math.pow(luck, r.tier));
 }
 function rollVariant() {
   return weightedPick(VARIANTS, v => v.weight);
@@ -836,21 +844,40 @@ nest(ctx, n, t) {
   }
   ctx.restore();
 
-  if (n.egg) {
-    this.egg(ctx, x, y - 10 + Math.sin(t * 1.6 + n.i) * 1.2, 24, n.egg.rarity, n.egg.variant, t, true);
-    const r = RARITY_BY_ID[n.egg.rarity];
-    if (r.tier >= ANNOUNCE_TIER) {
+  if (n.eggs.length) {
+    /* 뒤에서 앞으로 — 0번(다음에 훔칠 알)이 가장 앞·가장 크게 */
+    const slot = [[-15, -14], [15, -13], [-10, -3], [10, -2]];
+    for (let k = n.eggs.length - 1; k >= 0; k--) {
+      const e = n.eggs[k];
+      const [ex, ey] = slot[k % 4];
+      const front = k === 0;
+      const bob = Math.sin(t * 1.6 + n.i + k) * 1.1;
+      this.egg(ctx, x + ex, y + ey + bob, front ? 22 : 17, e.rarity, e.variant, t, true);
+    }
+    /* 라벨은 전부 둥지 아래로 — 위쪽은 [E] 프롬프트와 💤 자리 */
+    ctx.save();
+    ctx.globalAlpha = 0.92;
+    outlineText(ctx, '🥚 ' + n.eggs.length + '개', x, y + 28, 13, '#ffe8bf', '#000');
+    ctx.restore();
+    const top = this.n_topTier(n);
+    if (top >= ANNOUNCE_TIER) {
       ctx.save();
       ctx.globalAlpha = 0.55 + Math.sin(t * 4 + n.i) * 0.45;
-      outlineText(ctx, r.name + '!', x, y - 48, 14, r.glow, '#000');
+      outlineText(ctx, '🚨 ' + RARITIES[top].name, x, y + 47, 14, RARITIES[top].glow, '#000');
       ctx.restore();
     }
   } else {
     ctx.save();
-    ctx.globalAlpha = 0.45;
-    outlineText(ctx, Math.ceil(n.respawn) + '초', x, y - 16, 13, '#e6ecf5', '#000');
+    ctx.globalAlpha = 0.5;
+    outlineText(ctx, '빈 둥지 · ' + Math.ceil(n.respawn) + '초', x, y + 28, 13, '#e6ecf5', '#000');
     ctx.restore();
   }
+},
+
+n_topTier(n) {
+  let t = -1;
+  for (const e of n.eggs) t = Math.max(t, RARITY_BY_ID[e.rarity].tier);
+  return t;
 },
 
 /* ---------------------------------------------------------
@@ -1633,12 +1660,14 @@ sign(ctx, p, t) {
   ctx.save(); ctx.translate(p.x, p.y);
   shadowEllipse(ctx, 0, 0, 22, 7, 0.25);
   block(ctx, -5, -54, 10, 54, '#7a5230', { outline: true });
-  block(ctx, -70, -108, 140, 56, '#3a4152', { outline: true });
+  const cap = RARITIES[z.maxTier];
+  block(ctx, -76, -124, 152, 72, '#3a4152', { outline: true });
   ctx.strokeStyle = ok ? 'rgba(57,255,154,0.7)' : '#ff9f43';
-  ctx.lineWidth = 3; ctx.strokeRect(-70, -108, 140, 56);
-  outlineText(ctx, z.emoji + ' ' + z.name, 0, -90, 17, '#fff', '#000');
-  outlineText(ctx, '펫 수익 ' + fmtMoney(z.speed) + '/초', 0, -71, 12, '#39ff9a', '#000');
-  outlineText(ctx, '권장 속도 ' + z.need + (ok ? ' ✔' : ' ⚠'), 0, -56, 12, ok ? '#8ed2ff' : '#ff9f43', '#000');
+  ctx.lineWidth = 3; ctx.strokeRect(-76, -124, 152, 72);
+  outlineText(ctx, z.emoji + ' ' + z.name, 0, -106, 17, '#fff', '#000');
+  outlineText(ctx, '펫 수익 ' + fmtMoney(z.speed) + '/초', 0, -87, 12, '#39ff9a', '#000');
+  outlineText(ctx, '최고 등급 ' + cap.name, 0, -72, 12, cap.glow, '#000');
+  outlineText(ctx, '권장 속도 ' + z.need + (ok ? ' ✔' : ' ⚠'), 0, -57, 12, ok ? '#8ed2ff' : '#ff9f43', '#000');
   ctx.restore();
 },
 
@@ -2295,14 +2324,19 @@ const UI = {
       h += `<div class="rarcard var"><div class="rc-name">${v.name || '기본'}</div>
         <div class="rc-m">수익 x${v.mult}</div><div class="rc-p">${(v.weight / vt * 100).toFixed(1)}%</div></div>`;
     }
+    const firstSecret = ZONES.find(z => z.maxTier >= ANNOUNCE_TIER);
     h += `</div><h3 class="sec">구역 — 전부 자유롭게 갈 수 있다</h3>
-      <p class="hint">잠금은 없다. 다만 파수꾼이 빠른 구역은 <b>내 속도가 낮으면 무조건 잡힌다.</b></p><div class="spdlist">`;
+      <p class="hint">잠금은 없다. 다만 파수꾼이 빠른 구역은 <b>내 속도가 낮으면 무조건 잡힌다.</b><br>
+      구역마다 <b>나올 수 있는 최고 등급</b>이 정해져 있다 —
+      <b style="color:#ff2b4d">시크릿은 ${firstSecret.emoji} ${firstSecret.name}부터</b> 나온다.</p><div class="spdlist">`;
     const my = Math.round(Game.speed());
     for (const z of ZONES) {
       const ok = my >= z.need;
+      const cap = RARITIES[z.maxTier];
       h += `<div class="spdrow ${ok ? '' : 'no'}"><b>${z.emoji} ${z.name}</b>` +
         z.mobs.map(m => `<span>${SPECIES[m].name} <em>추격 ${SPECIES[m].chase}</em></span>`).join('') +
         `<span>펫 수익 <em>${fmtMoney(z.speed)}/초</em></span>
+         <span>최고 등급 <em style="color:${cap.glow}">${cap.name}</em></span>
          <span class="req">권장 속도 <em>${z.need}</em> ${ok ? '✔' : '⚠ 부족'}</span></div>`;
     }
     return h + `</div>`;
@@ -2330,8 +2364,10 @@ const UI = {
       <div><kbd>I</kbd> 내 펫 · <kbd>H</kbd> 도움말 · <kbd>ESC</kbd> 닫기</div>
     </div>
     <h3 class="sec">1. 알 훔치기</h3>
-    <p class="hint">구역마다 <b>둥지</b>가 있고 그 옆에서 파수꾼이 자고 있다(💤).
-    둥지 옆에서 <b>E를 꾹</b> 누르면 알을 들어올린다. 알을 드는 순간 <b>파수꾼이 깨어나 쫓아온다.</b></p>
+    <p class="hint">구역마다 <b>둥지</b>가 있고, 둥지 하나에 <b>파수꾼은 딱 한 마리</b>가 자고 있다(💤).
+    <b>둥지에는 알이 4개</b> 들어 있고 알마다 등급이 따로다.
+    둥지 옆에서 <b>E를 꾹</b> 누르면 맨 앞의 알을 들어올리고, <b>그 순간 파수꾼이 깨어나 쫓아온다.</b>
+    한 둥지를 네 번 털 수 있지만 매번 새로 깨우게 된다.</p>
     <h3 class="sec">2. 도망치기</h3>
     <p class="hint">잡히면 <b>알을 뺏기고</b> 튕겨나간다. 알은 원래 둥지로 돌아간다.
     파수꾼은 일정 시간이 지나거나 충분히 멀어지면 포기하고 둥지로 돌아가 다시 잠든다.
@@ -2347,9 +2383,12 @@ const UI = {
     <p class="hint">구역은 <b>전부 자유롭게</b> 갈 수 있다. 잠금은 없다.
     대신 뒤쪽 구역일수록 파수꾼의 <b>추격 속도</b>가 빨라서, 내 속도가 그보다 낮으면 절대 못 도망친다.
     좋은 알 → 좋은 펫 → 더 많은 돈 → 더 높은 속도 → 더 먼 구역, 이게 성장 루프.</p>
-    <h3 class="sec">6. 알림</h3>
-    <p class="hint"><b>시크릿</b> 이상 등급을 발견하거나 부화시키면 화면 위에 <b>전광판 알림</b>이 뜬다.
-    둥지에 그 등급이 놓여 있으면 미니맵에도 크게 표시된다.</p>
+    <h3 class="sec">6. 등급 상한과 알림</h3>
+    <p class="hint">구역마다 <b>나올 수 있는 최고 등급</b>이 다르다.
+    <b>닭의 숲과 오리 연못은 에픽까지</b>만 나오고, <b style="color:#ff2b4d">시크릿은 사막부터</b> 등장한다.
+    그 위 등급도 구역이 뒤로 갈수록 하나씩 풀린다 (정글 디바인 · 바다 코스믹 · 공룡 계곡부터 영원한).<br>
+    <b>시크릿</b> 이상을 발견하거나 부화시키면 화면 위에 <b>전광판 알림</b>이 뜨고,
+    그런 알이 든 둥지는 미니맵에도 크게 표시된다.</p>
     <p class="hint">진행상황은 자동 저장. 껐다 켜면 최대 2시간치 오프라인 수익(50%)을 받는다.</p>`;
   },
 
@@ -2446,7 +2485,8 @@ const Game = {
       const sp = SPECIES[s.spId];
       const n = {
         i, zone: s.zone, spId: s.spId, sp,
-        x: s.x, y: s.y, egg: null, respawn: 0,
+        maxTier: ZONE_BY_ID[s.zone].maxTier,
+        x: s.x, y: s.y, eggs: [], respawn: 0,
         guard: {
           x: s.x + 46, y: s.y + 12, hx: s.x + 46, hy: s.y + 12,
           state: 'sleep', chaseT: 0, sleepT: 0,
@@ -2458,10 +2498,21 @@ const Game = {
     });
   },
 
+  /* 둥지를 알 4개로 채운다. 알마다 등급을 따로 굴린다 */
   rollNest(n) {
-    const r = rollRarity(n.sp.luck);
+    n.eggs = [];
+    for (let k = 0; k < CONFIG.nest.eggs; k++) n.eggs.push(this.rollEgg(n));
+  },
+  rollEgg(n) {
+    const r = rollRarity(n.sp.luck, n.maxTier);
     const v = rollVariant();
-    n.egg = { species: n.spId, rarity: r.id, variant: v.id };
+    return { species: n.spId, rarity: r.id, variant: v.id };
+  },
+  /* 둥지 안에서 가장 높은 등급 (표시용) */
+  nestTopTier(n) {
+    let t = -1;
+    for (const e of n.eggs) t = Math.max(t, RARITY_BY_ID[e.rarity].tier);
+    return t;
   },
 
   /* ================= 저장 ================= */
@@ -2579,7 +2630,7 @@ const Game = {
     let chasing = 0;
 
     for (const n of this.nests) {
-      if (!n.egg) { n.respawn -= dt; if (n.respawn <= 0) this.rollNest(n); }
+      if (!n.eggs.length) { n.respawn -= dt; if (n.respawn <= 0) this.rollNest(n); }
       const g = n.guard, sp = n.sp;
       const far = Math.abs(n.x - this.cam.x) > 1500;
 
@@ -2649,7 +2700,11 @@ const Game = {
     this.caught++;
     if (this.carrying) {
       const home = this.nests.find(q => q.i === this.carrying.fromNest) || n;
-      if (!home.egg) { home.egg = this.carrying; home.respawn = 0; }
+      /* 둥지는 항상 최대 4개까지만 — 그 사이 다시 찼으면 알은 그대로 사라진다 */
+      if (home.eggs.length < CONFIG.nest.eggs) {
+        home.eggs.unshift({ species: this.carrying.species, rarity: this.carrying.rarity, variant: this.carrying.variant });
+        home.respawn = 0;
+      }
       this.carrying = null;
       this.pop(p.x, p.y - 100, '알을 뺏겼다!', '#ff4d4d', 21);
     } else this.pop(p.x, p.y - 100, '잡혔다!', '#ff4d4d', 20);
@@ -2667,7 +2722,7 @@ const Game = {
 
     if (this.stealing) {
       const n = this.stealing.nest;
-      if (!n.egg || !holding || dist(n.x, n.y, p.x, p.y) > CONFIG.steal.reach * 1.4) {
+      if (!n.eggs.length || !holding || dist(n.x, n.y, p.x, p.y) > CONFIG.steal.reach * 1.4) {
         this.stealing = null; return;
       }
       this.stealing.t += dt;
@@ -2682,14 +2737,16 @@ const Game = {
   takeEgg(n) {
     const p = this.player;
     this.stealing = null;
-    this.carrying = Object.assign({}, n.egg, { fromNest: n.i });
-    n.egg = null; n.respawn = CONFIG.steal.respawn;
+    const egg = n.eggs.shift();
+    this.carrying = Object.assign({}, egg, { fromNest: n.i });
+    if (!n.eggs.length) n.respawn = CONFIG.nest.respawn;
     this.stolen++;
     const r = RARITY_BY_ID[this.carrying.rarity];
     this.pop(p.x, p.y - 100, r.name + ' 알 획득!', r.glow, 20);
     this.burst(n.x, n.y - 16, r.glow, 20, 170);
     Sfx.play('get');
     if (r.tier >= ANNOUNCE_TIER) UI.announce(this.carrying, '발견');
+    if (n.eggs.length) this.pop(n.x, n.y - 34, `남은 알 ${n.eggs.length}개`, '#cfd6e0', 13);
     this.wake(n, true);
     UI.refresh();
   },
@@ -2830,10 +2887,10 @@ const Game = {
       if (!best || d < best.dist) best = { kind, ref, label, dist: d, x, y };
     };
     for (const n of this.nests) {
-      if (!n.egg) continue;
+      if (!n.eggs.length) continue;
       if (Math.abs(n.x - this.cam.x) > 1200) continue;
-      const r = RARITY_BY_ID[n.egg.rarity];
-      C('nest', n, n.x, n.y, `${r.name} 알 훔치기`, CONFIG.steal.reach);
+      const r = RARITY_BY_ID[n.eggs[0].rarity];
+      C('nest', n, n.x, n.y, `${r.name} 알 훔치기 (남은 ${n.eggs.length})`, CONFIG.steal.reach);
     }
     const G = World.pen.gate;
     if (this.carrying) C('pen', null, G.x, G.y, '울타리에 넣기', 90);
@@ -2880,7 +2937,7 @@ const Game = {
       case 'steal': {
         let b = null, bd = 1e9;
         for (const n of this.nests) {
-          if (n.zone !== 'farm' || !n.egg) continue;
+          if (n.zone !== 'farm' || !n.eggs.length) continue;
           const d = dist2(n.x, n.y, this.player.x, this.player.y);
           if (d < bd) { bd = d; b = n; }
         }
@@ -3019,10 +3076,10 @@ const Game = {
       g.fillRect(z.x * sx, z.y * sy, z.w * sx, z.h * sy);
     }
     for (const n of this.nests) {
-      if (!n.egg) continue;
-      const r = RARITY_BY_ID[n.egg.rarity];
-      const big = r.tier >= ANNOUNCE_TIER;
-      g.fillStyle = r.glow;
+      if (!n.eggs.length) continue;
+      const t = this.nestTopTier(n);
+      const big = t >= ANNOUNCE_TIER;
+      g.fillStyle = RARITIES[t].glow;
       g.fillRect(n.x * sx - (big ? 2 : 1), n.y * sy - (big ? 2 : 1), big ? 5 : 3, big ? 5 : 3);
     }
     for (const n of this.nests) {

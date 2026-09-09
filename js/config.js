@@ -98,15 +98,18 @@ const SPECIES = {
 };
 const CHICKEN_TYPES = SPECIES;   // 하위 호환
 
-/* ---------- 구역 (전부 자유 이동 · 잠금 없음) ---------- */
+/* ---------- 구역 (전부 자유 이동 · 잠금 없음) ----------
+ *  maxTier : 이 구역에서 나올 수 있는 최고 등급 (RARITIES 의 tier)
+ *            농장·연못은 에픽까지 — 시크릿은 사막부터 나온다.
+ */
 const ZONES = [
-  { id:'farm',   name:'농장',      emoji:'🐔', speed:1,        mobs:['chicken','hen'],           need:0   },
-  { id:'pond',   name:'오리 연못', emoji:'🦆', speed:150,      mobs:['duck','swan'],             need:240 },
-  { id:'desert', name:'사막',      emoji:'🦂', speed:1000,     mobs:['scorpion','kingScorpion'], need:300 },
-  { id:'jungle', name:'정글',      emoji:'🐯', speed:10000,    mobs:['tiger','whiteTiger'],      need:365 },
-  { id:'ocean',  name:'바다',      emoji:'🐋', speed:500000,   mobs:['whale','orca'],            need:400 },
-  { id:'dino',   name:'공룡 계곡', emoji:'🦖', speed:1800000,  mobs:['dino','trex'],             need:460 },
-  { id:'space',  name:'우주',      emoji:'💀', speed:18000000, mobs:['skeleton','skullKing'],    need:545 }
+  { id:'farm',   name:'닭의 숲',   emoji:'🐔', speed:1,        mobs:['chicken','hen'],           need:0,   maxTier:2 },
+  { id:'pond',   name:'오리 연못', emoji:'🦆', speed:150,      mobs:['duck','swan'],             need:240, maxTier:2 },
+  { id:'desert', name:'사막',      emoji:'🦂', speed:1000,     mobs:['scorpion','kingScorpion'], need:300, maxTier:3 },
+  { id:'jungle', name:'정글',      emoji:'🐯', speed:10000,    mobs:['tiger','whiteTiger'],      need:365, maxTier:4 },
+  { id:'ocean',  name:'바다',      emoji:'🐋', speed:500000,   mobs:['whale','orca'],            need:400, maxTier:5 },
+  { id:'dino',   name:'공룡 계곡', emoji:'🦖', speed:1800000,  mobs:['dino','trex'],             need:460, maxTier:6 },
+  { id:'space',  name:'우주',      emoji:'💀', speed:18000000, mobs:['skeleton','skullKing'],    need:545, maxTier:6 }
 ];
 const ZONE_BY_ID = {};
 ZONES.forEach(z => { ZONE_BY_ID[z.id] = z; });
@@ -134,12 +137,16 @@ const CONFIG = {
     cost: n => Math.floor(400 * Math.pow(1.9, n - 4))
   },
 
+  nest: {
+    eggs: 4,            // 둥지 하나에 알 4개 (파수꾼은 둥지마다 딱 한 마리)
+    respawn: 22         // 다 털린 둥지가 알 4개로 다시 차기까지
+  },
+
   steal: {
     startle: 0.75,      // 깨어나서 벌떡 일어나기까지 — 이 틈에 도망쳐야 한다
     reach: 74,          // 둥지에 손이 닿는 거리
     catchDist: 46,      // 파수꾼에게 잡히는 거리
     stun: 1.0,
-    respawn: 12,        // 털린 둥지에 새 알이 생기기까지
     sleepAgain: 3.5     // 추격 포기 후 다시 잠들기까지
   },
 
@@ -154,9 +161,9 @@ const CONFIG = {
 const TUTORIAL = [
   { id:'move',   title:'움직여보기',     body:'WASD / 방향키로 움직여. (모바일은 왼쪽 화면 드래그)' },
   { id:'goFarm', title:'농장 둥지로',    body:'오른쪽 농장에 닭이 자고 있어. 노란 화살표를 따라가.' },
-  { id:'steal',  title:'알 훔치기',      body:'둥지 옆에서 [E] 를 꾹! 알을 들면 닭이 깨서 쫓아온다.' },
+  { id:'steal',  title:'알 훔치기',      body:'둥지엔 알이 4개. 옆에서 [E] 를 꾹! 하나 들 때마다 닭이 깨서 쫓아온다.' },
   { id:'escape', title:'도망쳐!',        body:'잡히면 알을 떨어뜨려. 기지 쪽으로 도망가서 따돌려.' },
   { id:'pen',    title:'울타리에 넣기',  body:'기지 울타리 앞에서 [E]. 알이 부화하면 펫이 돈을 벌어줘.' },
   { id:'run',    title:'러닝머신 타기',  body:'러닝머신 위에서 [E] 를 꾹 눌러 달려. 돈을 써서 내 속도를 올린다.' },
-  { id:'far',    title:'더 먼 구역으로', body:'구역마다 파수꾼이 더 빨라. 속도를 올려야 도망칠 수 있어!' }
+  { id:'far',    title:'더 먼 구역으로', body:'구역마다 파수꾼이 더 빨라. 시크릿은 사막부터 나온다 — 속도를 올려야 갈 수 있어!' }
 ];

@@ -204,14 +204,19 @@ const UI = {
       h += `<div class="rarcard var"><div class="rc-name">${v.name || '기본'}</div>
         <div class="rc-m">수익 x${v.mult}</div><div class="rc-p">${(v.weight / vt * 100).toFixed(1)}%</div></div>`;
     }
+    const firstSecret = ZONES.find(z => z.maxTier >= ANNOUNCE_TIER);
     h += `</div><h3 class="sec">구역 — 전부 자유롭게 갈 수 있다</h3>
-      <p class="hint">잠금은 없다. 다만 파수꾼이 빠른 구역은 <b>내 속도가 낮으면 무조건 잡힌다.</b></p><div class="spdlist">`;
+      <p class="hint">잠금은 없다. 다만 파수꾼이 빠른 구역은 <b>내 속도가 낮으면 무조건 잡힌다.</b><br>
+      구역마다 <b>나올 수 있는 최고 등급</b>이 정해져 있다 —
+      <b style="color:#ff2b4d">시크릿은 ${firstSecret.emoji} ${firstSecret.name}부터</b> 나온다.</p><div class="spdlist">`;
     const my = Math.round(Game.speed());
     for (const z of ZONES) {
       const ok = my >= z.need;
+      const cap = RARITIES[z.maxTier];
       h += `<div class="spdrow ${ok ? '' : 'no'}"><b>${z.emoji} ${z.name}</b>` +
         z.mobs.map(m => `<span>${SPECIES[m].name} <em>추격 ${SPECIES[m].chase}</em></span>`).join('') +
         `<span>펫 수익 <em>${fmtMoney(z.speed)}/초</em></span>
+         <span>최고 등급 <em style="color:${cap.glow}">${cap.name}</em></span>
          <span class="req">권장 속도 <em>${z.need}</em> ${ok ? '✔' : '⚠ 부족'}</span></div>`;
     }
     return h + `</div>`;
@@ -239,8 +244,10 @@ const UI = {
       <div><kbd>I</kbd> 내 펫 · <kbd>H</kbd> 도움말 · <kbd>ESC</kbd> 닫기</div>
     </div>
     <h3 class="sec">1. 알 훔치기</h3>
-    <p class="hint">구역마다 <b>둥지</b>가 있고 그 옆에서 파수꾼이 자고 있다(💤).
-    둥지 옆에서 <b>E를 꾹</b> 누르면 알을 들어올린다. 알을 드는 순간 <b>파수꾼이 깨어나 쫓아온다.</b></p>
+    <p class="hint">구역마다 <b>둥지</b>가 있고, 둥지 하나에 <b>파수꾼은 딱 한 마리</b>가 자고 있다(💤).
+    <b>둥지에는 알이 4개</b> 들어 있고 알마다 등급이 따로다.
+    둥지 옆에서 <b>E를 꾹</b> 누르면 맨 앞의 알을 들어올리고, <b>그 순간 파수꾼이 깨어나 쫓아온다.</b>
+    한 둥지를 네 번 털 수 있지만 매번 새로 깨우게 된다.</p>
     <h3 class="sec">2. 도망치기</h3>
     <p class="hint">잡히면 <b>알을 뺏기고</b> 튕겨나간다. 알은 원래 둥지로 돌아간다.
     파수꾼은 일정 시간이 지나거나 충분히 멀어지면 포기하고 둥지로 돌아가 다시 잠든다.
@@ -256,9 +263,12 @@ const UI = {
     <p class="hint">구역은 <b>전부 자유롭게</b> 갈 수 있다. 잠금은 없다.
     대신 뒤쪽 구역일수록 파수꾼의 <b>추격 속도</b>가 빨라서, 내 속도가 그보다 낮으면 절대 못 도망친다.
     좋은 알 → 좋은 펫 → 더 많은 돈 → 더 높은 속도 → 더 먼 구역, 이게 성장 루프.</p>
-    <h3 class="sec">6. 알림</h3>
-    <p class="hint"><b>시크릿</b> 이상 등급을 발견하거나 부화시키면 화면 위에 <b>전광판 알림</b>이 뜬다.
-    둥지에 그 등급이 놓여 있으면 미니맵에도 크게 표시된다.</p>
+    <h3 class="sec">6. 등급 상한과 알림</h3>
+    <p class="hint">구역마다 <b>나올 수 있는 최고 등급</b>이 다르다.
+    <b>닭의 숲과 오리 연못은 에픽까지</b>만 나오고, <b style="color:#ff2b4d">시크릿은 사막부터</b> 등장한다.
+    그 위 등급도 구역이 뒤로 갈수록 하나씩 풀린다 (정글 디바인 · 바다 코스믹 · 공룡 계곡부터 영원한).<br>
+    <b>시크릿</b> 이상을 발견하거나 부화시키면 화면 위에 <b>전광판 알림</b>이 뜨고,
+    그런 알이 든 둥지는 미니맵에도 크게 표시된다.</p>
     <p class="hint">진행상황은 자동 저장. 껐다 켜면 최대 2시간치 오프라인 수익(50%)을 받는다.</p>`;
   },
 

@@ -55,7 +55,8 @@ const Game = {
       const sp = SPECIES[s.spId];
       const n = {
         i, zone: s.zone, spId: s.spId, sp,
-        x: s.x, y: s.y, egg: null, respawn: 0,
+        maxTier: ZONE_BY_ID[s.zone].maxTier,
+        x: s.x, y: s.y, eggs: [], respawn: 0,
         guard: {
           x: s.x + 46, y: s.y + 12, hx: s.x + 46, hy: s.y + 12,
           state: 'sleep', chaseT: 0, sleepT: 0,
@@ -67,10 +68,21 @@ const Game = {
     });
   },
 
+  /* 둥지를 알 4개로 채운다. 알마다 등급을 따로 굴린다 */
   rollNest(n) {
-    const r = rollRarity(n.sp.luck);
+    n.eggs = [];
+    for (let k = 0; k < CONFIG.nest.eggs; k++) n.eggs.push(this.rollEgg(n));
+  },
+  rollEgg(n) {
+    const r = rollRarity(n.sp.luck, n.maxTier);
     const v = rollVariant();
-    n.egg = { species: n.spId, rarity: r.id, variant: v.id };
+    return { species: n.spId, rarity: r.id, variant: v.id };
+  },
+  /* 둥지 안에서 가장 높은 등급 (표시용) */
+  nestTopTier(n) {
+    let t = -1;
+    for (const e of n.eggs) t = Math.max(t, RARITY_BY_ID[e.rarity].tier);
+    return t;
   },
 
   /* ================= 저장 ================= */
@@ -188,7 +200,7 @@ const Game = {
     let chasing = 0;
 
     for (const n of this.nests) {
-      if (!n.egg) { n.respawn -= dt; if (n.respawn <= 0) this.rollNest(n); }
+      if (!n.eggs.length) { n.respawn -= dt; if (n.respawn <= 0) this.rollNest(n); }
       const g = n.guard, sp = n.sp;
       const far = Math.abs(n.x - this.cam.x) > 1500;
 
@@ -258,7 +270,11 @@ const Game = {
     this.caught++;
     if (this.carrying) {
       const home = this.nests.find(q => q.i === this.carrying.fromNest) || n;
-      if (!home.egg) { home.egg = this.carrying; home.respawn = 0; }
+      /* 둥지는 항상 최대 4개까지만 — 그 사이 다시 찼으면 알은 그대로 사라진다 */
+      if (home.eggs.length < CONFIG.nest.eggs) {
+        home.eggs.unshift({ species: this.carrying.species, rarity: this.carrying.rarity, variant: this.carrying.variant });
+        home.respawn = 0;
+      }
       this.carrying = null;
       this.pop(p.x, p.y - 100, '알을 뺏겼다!', '#ff4d4d', 21);
     } else this.pop(p.x, p.y - 100, '잡혔다!', '#ff4d4d', 20);
@@ -276,7 +292,7 @@ const Game = {
 
     if (this.stealing) {
       const n = this.stealing.nest;
-      if (!n.egg || !holding || dist(n.x, n.y, p.x, p.y) > CONFIG.steal.reach * 1.4) {
+      if (!n.eggs.length || !holding || dist(n.x, n.y, p.x, p.y) > CONFIG.steal.reach * 1.4) {
         this.stealing = null; return;
       }
       this.stealing.t += dt;
@@ -291,14 +307,16 @@ const Game = {
   takeEgg(n) {
     const p = this.player;
     this.stealing = null;
-    this.carrying = Object.assign({}, n.egg, { fromNest: n.i });
-    n.egg = null; n.respawn = CONFIG.steal.respawn;
+    const egg = n.eggs.shift();
+    this.carrying = Object.assign({}, egg, { fromNest: n.i });
+    if (!n.eggs.length) n.respawn = CONFIG.nest.respawn;
     this.stolen++;
     const r = RARITY_BY_ID[this.carrying.rarity];
     this.pop(p.x, p.y - 100, r.name + ' 알 획득!', r.glow, 20);
     this.burst(n.x, n.y - 16, r.glow, 20, 170);
     Sfx.play('get');
     if (r.tier >= ANNOUNCE_TIER) UI.announce(this.carrying, '발견');
+    if (n.eggs.length) this.pop(n.x, n.y - 34, `남은 알 ${n.eggs.length}개`, '#cfd6e0', 13);
     this.wake(n, true);
     UI.refresh();
   },
@@ -439,10 +457,10 @@ const Game = {
       if (!best || d < best.dist) best = { kind, ref, label, dist: d, x, y };
     };
     for (const n of this.nests) {
-      if (!n.egg) continue;
+      if (!n.eggs.length) continue;
       if (Math.abs(n.x - this.cam.x) > 1200) continue;
-      const r = RARITY_BY_ID[n.egg.rarity];
-      C('nest', n, n.x, n.y, `${r.name} 알 훔치기`, CONFIG.steal.reach);
+      const r = RARITY_BY_ID[n.eggs[0].rarity];
+      C('nest', n, n.x, n.y, `${r.name} 알 훔치기 (남은 ${n.eggs.length})`, CONFIG.steal.reach);
     }
     const G = World.pen.gate;
     if (this.carrying) C('pen', null, G.x, G.y, '울타리에 넣기', 90);
@@ -489,7 +507,7 @@ const Game = {
       case 'steal': {
         let b = null, bd = 1e9;
         for (const n of this.nests) {
-          if (n.zone !== 'farm' || !n.egg) continue;
+          if (n.zone !== 'farm' || !n.eggs.length) continue;
           const d = dist2(n.x, n.y, this.player.x, this.player.y);
           if (d < bd) { bd = d; b = n; }
         }
@@ -628,10 +646,10 @@ const Game = {
       g.fillRect(z.x * sx, z.y * sy, z.w * sx, z.h * sy);
     }
     for (const n of this.nests) {
-      if (!n.egg) continue;
-      const r = RARITY_BY_ID[n.egg.rarity];
-      const big = r.tier >= ANNOUNCE_TIER;
-      g.fillStyle = r.glow;
+      if (!n.eggs.length) continue;
+      const t = this.nestTopTier(n);
+      const big = t >= ANNOUNCE_TIER;
+      g.fillStyle = RARITIES[t].glow;
       g.fillRect(n.x * sx - (big ? 2 : 1), n.y * sy - (big ? 2 : 1), big ? 5 : 3, big ? 5 : 3);
     }
     for (const n of this.nests) {

@@ -138,21 +138,40 @@ nest(ctx, n, t) {
   }
   ctx.restore();
 
-  if (n.egg) {
-    this.egg(ctx, x, y - 10 + Math.sin(t * 1.6 + n.i) * 1.2, 24, n.egg.rarity, n.egg.variant, t, true);
-    const r = RARITY_BY_ID[n.egg.rarity];
-    if (r.tier >= ANNOUNCE_TIER) {
+  if (n.eggs.length) {
+    /* 뒤에서 앞으로 — 0번(다음에 훔칠 알)이 가장 앞·가장 크게 */
+    const slot = [[-15, -14], [15, -13], [-10, -3], [10, -2]];
+    for (let k = n.eggs.length - 1; k >= 0; k--) {
+      const e = n.eggs[k];
+      const [ex, ey] = slot[k % 4];
+      const front = k === 0;
+      const bob = Math.sin(t * 1.6 + n.i + k) * 1.1;
+      this.egg(ctx, x + ex, y + ey + bob, front ? 22 : 17, e.rarity, e.variant, t, true);
+    }
+    /* 라벨은 전부 둥지 아래로 — 위쪽은 [E] 프롬프트와 💤 자리 */
+    ctx.save();
+    ctx.globalAlpha = 0.92;
+    outlineText(ctx, '🥚 ' + n.eggs.length + '개', x, y + 28, 13, '#ffe8bf', '#000');
+    ctx.restore();
+    const top = this.n_topTier(n);
+    if (top >= ANNOUNCE_TIER) {
       ctx.save();
       ctx.globalAlpha = 0.55 + Math.sin(t * 4 + n.i) * 0.45;
-      outlineText(ctx, r.name + '!', x, y - 48, 14, r.glow, '#000');
+      outlineText(ctx, '🚨 ' + RARITIES[top].name, x, y + 47, 14, RARITIES[top].glow, '#000');
       ctx.restore();
     }
   } else {
     ctx.save();
-    ctx.globalAlpha = 0.45;
-    outlineText(ctx, Math.ceil(n.respawn) + '초', x, y - 16, 13, '#e6ecf5', '#000');
+    ctx.globalAlpha = 0.5;
+    outlineText(ctx, '빈 둥지 · ' + Math.ceil(n.respawn) + '초', x, y + 28, 13, '#e6ecf5', '#000');
     ctx.restore();
   }
+},
+
+n_topTier(n) {
+  let t = -1;
+  for (const e of n.eggs) t = Math.max(t, RARITY_BY_ID[e.rarity].tier);
+  return t;
 },
 
 /* ---------------------------------------------------------
@@ -935,12 +954,14 @@ sign(ctx, p, t) {
   ctx.save(); ctx.translate(p.x, p.y);
   shadowEllipse(ctx, 0, 0, 22, 7, 0.25);
   block(ctx, -5, -54, 10, 54, '#7a5230', { outline: true });
-  block(ctx, -70, -108, 140, 56, '#3a4152', { outline: true });
+  const cap = RARITIES[z.maxTier];
+  block(ctx, -76, -124, 152, 72, '#3a4152', { outline: true });
   ctx.strokeStyle = ok ? 'rgba(57,255,154,0.7)' : '#ff9f43';
-  ctx.lineWidth = 3; ctx.strokeRect(-70, -108, 140, 56);
-  outlineText(ctx, z.emoji + ' ' + z.name, 0, -90, 17, '#fff', '#000');
-  outlineText(ctx, '펫 수익 ' + fmtMoney(z.speed) + '/초', 0, -71, 12, '#39ff9a', '#000');
-  outlineText(ctx, '권장 속도 ' + z.need + (ok ? ' ✔' : ' ⚠'), 0, -56, 12, ok ? '#8ed2ff' : '#ff9f43', '#000');
+  ctx.lineWidth = 3; ctx.strokeRect(-76, -124, 152, 72);
+  outlineText(ctx, z.emoji + ' ' + z.name, 0, -106, 17, '#fff', '#000');
+  outlineText(ctx, '펫 수익 ' + fmtMoney(z.speed) + '/초', 0, -87, 12, '#39ff9a', '#000');
+  outlineText(ctx, '최고 등급 ' + cap.name, 0, -72, 12, cap.glow, '#000');
+  outlineText(ctx, '권장 속도 ' + z.need + (ok ? ' ✔' : ' ⚠'), 0, -57, 12, ok ? '#8ed2ff' : '#ff9f43', '#000');
   ctx.restore();
 },
 
