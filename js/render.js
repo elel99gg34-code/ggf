@@ -960,7 +960,8 @@ gym(ctx, p, t) {
   ctx.fillRect(-25, -79, 50, 19);
   outlineText(ctx, on ? Math.round(Game.speed()) + ' px/s' : 'READY',
     0, -69.5, on ? 12 : 11, on ? '#39ff9a' : '#5b6472', '#06140d', 900);
-  outlineText(ctx, '🏃 러닝머신', 0, -156, 17, '#ffd54a', '#000');
+  outlineText(ctx, '🏃 러닝머신', 0, -178, 17, '#ffd54a', '#000');
+  outlineText(ctx, '레벨 제한 없음 — 계속 탈 수 있다', 0, -158, 12, '#a9ffd2', '#000');
   // 속도선
   if (on) {
     ctx.save();

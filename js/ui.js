@@ -163,7 +163,7 @@ const UI = {
   viewPets() {
     const g = this.g;
     let h = `<div class="stats">
-      <div><b>${Math.round(g.speed())}</b><span>내 속도 (Lv.${g.speedLv})</span></div>
+      <div><b>${Math.round(g.speed())}</b><span>내 속도 (Lv.${g.speedLv} · 무한)</span></div>
       <div><b>${fmtMoney(g.income())}</b><span>초당 수익</span></div>
       <div><b>${g.penUsed()}/${g.penSlots}</b><span>울타리</span></div>
       <div><b>${g.stolen}</b><span>훔친 알</span></div>
@@ -270,9 +270,11 @@ const UI = {
     <p class="hint">기지 울타리 아래쪽 <b>알 넣는 곳</b>에서 <b>E</b>. 알은 울타리 안에서 자라다 부화하고,
     부화한 펫은 울타리를 돌아다니며 <b>초당 돈을 벌어준다.</b>
     칸이 부족하면 <b>울타리 확장 패드</b>를 밟고 <b>E</b>.</p>
-    <h3 class="sec">4. 러닝머신 = 내 속도</h3>
+    <h3 class="sec">4. 러닝머신 = 내 속도 (무한)</h3>
     <p class="hint">러닝머신은 펫이 아니라 <b>내가 타는 것</b>이다. 올라서서 <b>E를 꾹</b> 누르면
-    돈을 쓰면서 달리고, 게이지가 차면 <b>속도 레벨이 오른다</b>. 레벨당 +10%.</p>
+    돈을 쓰면서 달리고, 게이지가 차면 <b>속도 레벨이 오른다</b>. 레벨당 +10%.<br>
+    <b>레벨 상한은 없다.</b> 돈만 있으면 무한히 계속 올릴 수 있고, 빨라질수록 둥지와 기지를
+    오가는 왕복이 짧아져서 수입도 같이 빨라진다.</p>
     <h3 class="sec">5. 난이도</h3>
     <p class="hint">구역은 <b>전부 자유롭게</b> 갈 수 있다. 잠금은 없다.
     대신 뒤쪽 구역일수록 파수꾼의 <b>추격 속도</b>가 빨라서, 내 속도가 그보다 낮으면 절대 못 도망친다.

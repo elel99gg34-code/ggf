@@ -51,7 +51,7 @@ kbd{display:inline-block;padding:1px 6px;margin-left:5px;border-radius:6px;
 #minimap{display:block;width:260px;height:74px;border-radius:8px;background:#0b0e16}
 
 /* ---------- 상단 중앙 스택 (전광판 · 추격 · 토스트) ---------- */
-#topStack{position:absolute;top:14px;left:50%;transform:translateX(-50%);
+#topStack{position:absolute;top:58px;left:50%;transform:translateX(-50%);
   display:flex;flex-direction:column;align-items:center;gap:9px;
   width:max-content;max-width:92vw;pointer-events:none;z-index:5}
 

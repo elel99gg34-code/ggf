@@ -11,20 +11,23 @@ const dist2 = (ax, ay, bx, by) => { const dx = ax - bx, dy = ay - by; return dx 
 const dist  = (ax, ay, bx, by) => Math.sqrt(dist2(ax, ay, bx, by));
 const now   = () => performance.now() / 1000;
 
-/* 숫자 축약: 12500 -> 12.5K */
+/* 숫자 축약: 12500 -> 1.25만.  러닝머신 레벨이 무한이라 아주 큰 수까지 다룬다 */
+const BIG_UNITS = [
+  [1e48, '극'], [1e44, '재'], [1e40, '정'], [1e36, '간'], [1e32, '구'],
+  [1e28, '양'],  [1e24, '자'], [1e20, '해'], [1e16, '경'], [1e12, '조'],
+  [1e8, '억'],   [1e4, '만'],  [1e3, 'K']
+];
 function fmtMoney(n) {
+  if (!isFinite(n)) return '∞';
   n = Math.floor(n);
   if (n < 1000) return String(n);
-  const units = [
-    [1e15, '경'], [1e12, '조'], [1e8, '억'], [1e4, '만'], [1e3, 'K']
-  ];
-  for (const [d, s] of units) {
-    if (n >= d) {
-      const v = n / d;
-      return (v >= 100 ? v.toFixed(0) : v >= 10 ? v.toFixed(1) : v.toFixed(2)) + s;
-    }
+  for (const [d, suf] of BIG_UNITS) {
+    if (n < d) continue;
+    const v = n / d;
+    if (v >= 10000) break;            // 단위를 넘어서면 지수 표기로
+    return (v >= 100 ? v.toFixed(0) : v >= 10 ? v.toFixed(1) : v.toFixed(2)) + suf;
   }
-  return String(n);
+  return n.toExponential(2).replace('e+', 'e');
 }
 
 function fmtRate(n) { return fmtMoney(n) + '/초'; }

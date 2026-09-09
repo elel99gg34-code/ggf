@@ -454,7 +454,6 @@ const Game = {
 
   updateStations(dt) {
     this.running = false;
-    if (this.speedLv >= CONFIG.treadmill.maxLevel) { this.runFill = 0; return; }
     if (!(this.onTreadmill() && Input.action && this.player.stun <= 0)) { return; }
 
     const cost = this.nextSpeedCost();
@@ -516,8 +515,8 @@ const Game = {
     }
     const G = World.pen.gate;
     if (this.carrying) C('pen', null, G.x, G.y, '울타리에 넣기', 90);
-    if (this.speedLv < CONFIG.treadmill.maxLevel)
-      C('run', null, World.treadmill.x, World.treadmill.y, `달리기 — Lv.${this.speedLv + 1} ${fmtMoney(this.nextSpeedCost())}원`, 62);
+    C('run', null, World.treadmill.x, World.treadmill.y,
+      `달리기 — Lv.${this.speedLv + 1} ${fmtMoney(this.nextSpeedCost())}원`, 62);
     if (this.penSlots < CONFIG.pen.maxSlots)
       C('pad', null, World.penPad.x, World.penPad.y, `울타리 확장 ${fmtMoney(this.nextPenCost())}원`, 66);
     this.target = best;
@@ -647,7 +646,7 @@ const Game = {
     }
 
     /* 러닝머신 게이지 */
-    if (this.onTreadmill() && this.speedLv < CONFIG.treadmill.maxLevel) {
+    if (this.onTreadmill()) {
       const T = World.treadmill;
       Draw.bar(ctx, T.x, T.y - 108, 118, 11, this.runFill, this.running ? '#39ff9a' : '#5b6472');
       outlineText(ctx, `Lv.${this.speedLv} → ${this.speedLv + 1}`, T.x, T.y - 128, 14, '#fff', '#000');

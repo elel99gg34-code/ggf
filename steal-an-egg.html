@@ -60,7 +60,7 @@ kbd{display:inline-block;padding:1px 6px;margin-left:5px;border-radius:6px;
 #minimap{display:block;width:260px;height:74px;border-radius:8px;background:#0b0e16}
 
 /* ---------- 상단 중앙 스택 (전광판 · 추격 · 토스트) ---------- */
-#topStack{position:absolute;top:14px;left:50%;transform:translateX(-50%);
+#topStack{position:absolute;top:58px;left:50%;transform:translateX(-50%);
   display:flex;flex-direction:column;align-items:center;gap:9px;
   width:max-content;max-width:92vw;pointer-events:none;z-index:5}
 
@@ -533,9 +533,9 @@ const CONFIG = {
     respawnGrace: 2.5    // 리스폰 직후 무적 (바로 다시 잡히지 않게)
   },
 
-  /* 러닝머신 — 플레이어가 직접 타서 속도를 올린다 */
+  /* 러닝머신 — 플레이어가 직접 타서 속도를 올린다.
+     레벨 상한은 없다. 돈만 있으면 무한히 계속 올릴 수 있다. */
   treadmill: {
-    maxLevel: 40,
     fillTime: 3.2,                                    // 한 레벨 올리는 데 달려야 하는 시간
     cost: lv => Math.floor(250 * Math.pow(2.9, lv))   // 다음 레벨 비용
   },
@@ -594,20 +594,23 @@ const dist2 = (ax, ay, bx, by) => { const dx = ax - bx, dy = ay - by; return dx 
 const dist  = (ax, ay, bx, by) => Math.sqrt(dist2(ax, ay, bx, by));
 const now   = () => performance.now() / 1000;
 
-/* 숫자 축약: 12500 -> 12.5K */
+/* 숫자 축약: 12500 -> 1.25만.  러닝머신 레벨이 무한이라 아주 큰 수까지 다룬다 */
+const BIG_UNITS = [
+  [1e48, '극'], [1e44, '재'], [1e40, '정'], [1e36, '간'], [1e32, '구'],
+  [1e28, '양'],  [1e24, '자'], [1e20, '해'], [1e16, '경'], [1e12, '조'],
+  [1e8, '억'],   [1e4, '만'],  [1e3, 'K']
+];
 function fmtMoney(n) {
+  if (!isFinite(n)) return '∞';
   n = Math.floor(n);
   if (n < 1000) return String(n);
-  const units = [
-    [1e15, '경'], [1e12, '조'], [1e8, '억'], [1e4, '만'], [1e3, 'K']
-  ];
-  for (const [d, s] of units) {
-    if (n >= d) {
-      const v = n / d;
-      return (v >= 100 ? v.toFixed(0) : v >= 10 ? v.toFixed(1) : v.toFixed(2)) + s;
-    }
+  for (const [d, suf] of BIG_UNITS) {
+    if (n < d) continue;
+    const v = n / d;
+    if (v >= 10000) break;            // 단위를 넘어서면 지수 표기로
+    return (v >= 100 ? v.toFixed(0) : v >= 10 ? v.toFixed(1) : v.toFixed(2)) + suf;
   }
-  return String(n);
+  return n.toExponential(2).replace('e+', 'e');
 }
 
 function fmtRate(n) { return fmtMoney(n) + '/초'; }
@@ -1701,7 +1704,8 @@ gym(ctx, p, t) {
   ctx.fillRect(-25, -79, 50, 19);
   outlineText(ctx, on ? Math.round(Game.speed()) + ' px/s' : 'READY',
     0, -69.5, on ? 12 : 11, on ? '#39ff9a' : '#5b6472', '#06140d', 900);
-  outlineText(ctx, '🏃 러닝머신', 0, -156, 17, '#ffd54a', '#000');
+  outlineText(ctx, '🏃 러닝머신', 0, -178, 17, '#ffd54a', '#000');
+  outlineText(ctx, '레벨 제한 없음 — 계속 탈 수 있다', 0, -158, 12, '#a9ffd2', '#000');
   // 속도선
   if (on) {
     ctx.save();
@@ -2336,7 +2340,7 @@ const UI = {
   viewPets() {
     const g = this.g;
     let h = `<div class="stats">
-      <div><b>${Math.round(g.speed())}</b><span>내 속도 (Lv.${g.speedLv})</span></div>
+      <div><b>${Math.round(g.speed())}</b><span>내 속도 (Lv.${g.speedLv} · 무한)</span></div>
       <div><b>${fmtMoney(g.income())}</b><span>초당 수익</span></div>
       <div><b>${g.penUsed()}/${g.penSlots}</b><span>울타리</span></div>
       <div><b>${g.stolen}</b><span>훔친 알</span></div>
@@ -2443,9 +2447,11 @@ const UI = {
     <p class="hint">기지 울타리 아래쪽 <b>알 넣는 곳</b>에서 <b>E</b>. 알은 울타리 안에서 자라다 부화하고,
     부화한 펫은 울타리를 돌아다니며 <b>초당 돈을 벌어준다.</b>
     칸이 부족하면 <b>울타리 확장 패드</b>를 밟고 <b>E</b>.</p>
-    <h3 class="sec">4. 러닝머신 = 내 속도</h3>
+    <h3 class="sec">4. 러닝머신 = 내 속도 (무한)</h3>
     <p class="hint">러닝머신은 펫이 아니라 <b>내가 타는 것</b>이다. 올라서서 <b>E를 꾹</b> 누르면
-    돈을 쓰면서 달리고, 게이지가 차면 <b>속도 레벨이 오른다</b>. 레벨당 +10%.</p>
+    돈을 쓰면서 달리고, 게이지가 차면 <b>속도 레벨이 오른다</b>. 레벨당 +10%.<br>
+    <b>레벨 상한은 없다.</b> 돈만 있으면 무한히 계속 올릴 수 있고, 빨라질수록 둥지와 기지를
+    오가는 왕복이 짧아져서 수입도 같이 빨라진다.</p>
     <h3 class="sec">5. 난이도</h3>
     <p class="hint">구역은 <b>전부 자유롭게</b> 갈 수 있다. 잠금은 없다.
     대신 뒤쪽 구역일수록 파수꾼의 <b>추격 속도</b>가 빨라서, 내 속도가 그보다 낮으면 절대 못 도망친다.
@@ -2951,7 +2957,6 @@ const Game = {
 
   updateStations(dt) {
     this.running = false;
-    if (this.speedLv >= CONFIG.treadmill.maxLevel) { this.runFill = 0; return; }
     if (!(this.onTreadmill() && Input.action && this.player.stun <= 0)) { return; }
 
     const cost = this.nextSpeedCost();
@@ -3013,8 +3018,8 @@ const Game = {
     }
     const G = World.pen.gate;
     if (this.carrying) C('pen', null, G.x, G.y, '울타리에 넣기', 90);
-    if (this.speedLv < CONFIG.treadmill.maxLevel)
-      C('run', null, World.treadmill.x, World.treadmill.y, `달리기 — Lv.${this.speedLv + 1} ${fmtMoney(this.nextSpeedCost())}원`, 62);
+    C('run', null, World.treadmill.x, World.treadmill.y,
+      `달리기 — Lv.${this.speedLv + 1} ${fmtMoney(this.nextSpeedCost())}원`, 62);
     if (this.penSlots < CONFIG.pen.maxSlots)
       C('pad', null, World.penPad.x, World.penPad.y, `울타리 확장 ${fmtMoney(this.nextPenCost())}원`, 66);
     this.target = best;
@@ -3144,7 +3149,7 @@ const Game = {
     }
 
     /* 러닝머신 게이지 */
-    if (this.onTreadmill() && this.speedLv < CONFIG.treadmill.maxLevel) {
+    if (this.onTreadmill()) {
       const T = World.treadmill;
       Draw.bar(ctx, T.x, T.y - 108, 118, 11, this.runFill, this.running ? '#39ff9a' : '#5b6472');
       outlineText(ctx, `Lv.${this.speedLv} → ${this.speedLv + 1}`, T.x, T.y - 128, 14, '#fff', '#000');
