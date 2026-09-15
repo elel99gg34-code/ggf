@@ -1,0 +1,10 @@
+# 실행에 필요한 것
+google-api-python-client>=2.100
+google-auth-oauthlib>=1.2
+keyring>=25.0
+PyYAML>=6.0
+PySide6>=6.6
+tzdata>=2024.1        # 윈도우에는 tz 데이터베이스가 없어서 필요하다
+
+# AI 분류(선택). 없어도 앱은 규칙 엔진으로 동작한다.
+anthropic>=0.40
