@@ -81,6 +81,22 @@ def is_available() -> bool:
     return bool(load_api_key())
 
 
+def diagnose() -> str:
+    """AI 분류를 쓸 수 있는 상태인지 한 줄로 설명한다.
+
+    설치 파일로 배포하면 anthropic이 번들에서 통째로 빠져도 AI를 켜기 전까지
+    아무도 모른다(함수 안에서 import하기 때문에). 이 줄이 그걸 드러낸다.
+    """
+    try:
+        import anthropic
+    except ImportError:
+        return "쓸 수 없음 — anthropic 패키지가 설치본에 없어"
+    version = getattr(anthropic, "__version__", "?")
+    if not load_api_key():
+        return f"준비됨(anthropic {version}) — API 키만 넣으면 돼"
+    return f"사용 가능 (anthropic {version})"
+
+
 # ---- 응답 스키마 ---------------------------------------------------------
 
 def _schemas():

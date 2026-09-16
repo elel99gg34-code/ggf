@@ -164,13 +164,20 @@ Claude API 키가 있으면 더 똑똑하게 나눈다. 규칙에 없는 주제�
 
 ### 명령줄로도 쓸 수 있다
 
-설치 폴더에서:
+설치 폴더에 `YTOrganizer-cli.exe`가 같이 들어 있다. 화면에 결과를 출력하는
+버전이라 문제를 진단할 때 쓴다 (평소 쓰는 `YTOrganizer.exe`는 창만 띄운다).
+
+설치 폴더에서 명령 프롬프트를 열고:
 
 ```
-YTOrganizer.exe status      # 할당량과 현황
-YTOrganizer.exe demo        # 가짜 계정으로 동작 시연 (내 계정 안 건드림)
-YTOrganizer.exe subs        # 구독 정리 미리보기
-YTOrganizer.exe subs --apply  # 실제로 실행
+YTOrganizer-cli.exe status        # 할당량과 현황
+YTOrganizer-cli.exe demo          # 가짜 계정으로 동작 시연 (내 계정 안 건드림)
+YTOrganizer-cli.exe subs          # 구독 정리 미리보기
+YTOrganizer-cli.exe subs --apply  # 실제로 실행
 ```
 
 `--apply`를 붙이지 않으면 **절대 아무것도 바뀌지 않는다.**
+
+앱이 이상하게 동작하면 `YTOrganizer-cli.exe demo`를 먼저 돌려봐라.
+가짜 계정으로 전체 기능을 돌려보는 거라 내 유튜브 계정은 건드리지 않고,
+프로그램 자체에 문제가 있는지 아니면 계정/네트워크 문제인지 가려낼 수 있다.

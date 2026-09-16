@@ -1,17 +1,19 @@
 """exe 진입점.
 
-PyInstaller가 패키징하는 대상이다. 여기서 하는 일은 두 가지뿐:
-  1. 시작 중 터진 예외를 사용자에게 보여준다. GUI 앱은 콘솔이 없어서
-     그냥 두면 아무 창도 안 뜨고 조용히 죽는다 — 사용자 입장에서는
-     "더블클릭했는데 아무 일도 안 일어남"이 된다.
-  2. 로그 위치를 알려준다.
+두 가지 모드로 동작한다.
+  - 인자 없이 실행(더블클릭) → GUI
+  - 인자를 주고 실행 → CLI (`YTOrganizer-cli.exe status` 등)
+
+GUI 쪽에서 하는 중요한 일은 시작 중 터진 예외를 대화상자로 보여주는 것이다.
+윈도우 GUI 앱은 콘솔이 없어서, 이걸 안 하면 사용자 입장에서 "더블클릭했는데
+아무 일도 안 일어남"이 된다 — 원인을 알 방법이 전혀 없다.
 """
 
 import sys
 import traceback
 
 
-def main() -> int:
+def _run_gui() -> int:
     try:
         from ytorg.ui import run
 
@@ -43,6 +45,14 @@ def main() -> int:
             except OSError:
                 pass
         return 1
+
+
+def main() -> int:
+    if len(sys.argv) > 1:
+        from ytorg.cli import main as cli_main
+
+        return cli_main()
+    return _run_gui()
 
 
 if __name__ == "__main__":

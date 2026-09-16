@@ -109,6 +109,10 @@ def cmd_status(ctx: AppContext, args) -> int:
           f"재생목록 {len(ctx.db.playlists())}개 · "
           f"캐시된 영상 {len(ctx.db.known_video_ids())}개")
 
+    from .ai.classifier import diagnose
+
+    print(f"AI 분류: {diagnose()}")
+
     usage = ctx.ledger.usage_by_method()
     if usage:
         print("\n오늘 유닛 사용처:")
