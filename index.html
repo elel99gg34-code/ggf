@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GGF 게임 허브 — 브라우저 게임 100선</title>
+<meta name="description" content="설치 없이 바로 즐기는 브라우저 게임 100개. 액션, 퍼즐, 보드, 스포츠, 레이싱, 리듬 게임까지.">
+<style>
+:root{--bg:#070914;--panel:#10152b;--line:#232b52;--txt:#e9ecff;--sub:#98a2d6;--acc:#7c6cff;--pink:#ff5ca8;--gold:#ffd166}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font-family:"Pretendard",system-ui,-apple-system,"Segoe UI","Apple SD Gothic Neo","Malgun Gothic",sans-serif;min-height:100vh}
+body:before{content:"";position:fixed;inset:0;background:radial-gradient(800px 500px at 10% -10%,rgba(124,108,255,.25),transparent 60%),radial-gradient(700px 500px at 100% 0,rgba(255,92,168,.18),transparent 60%);pointer-events:none;z-index:-1}
+a{color:inherit;text-decoration:none}
+header{position:sticky;top:0;z-index:20;background:rgba(7,9,20,.82);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.top{max-width:1500px;margin:0 auto;display:flex;align-items:center;gap:16px;padding:14px 20px}
+.logo{font-weight:900;font-size:24px;letter-spacing:-.5px;white-space:nowrap}
+.logo b{background:linear-gradient(90deg,var(--acc),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent}
+.search{flex:1;max-width:520px;position:relative}
+.search input{width:100%;font:inherit;font-size:16px;padding:12px 16px 12px 42px;border-radius:14px;border:1px solid var(--line);background:#0d1226;color:var(--txt);outline:none}
+.search input:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(124,108,255,.25)}
+.search:before{content:"🔍";position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px}
+.rand{font:inherit;font-weight:800;border:0;border-radius:14px;padding:12px 18px;background:linear-gradient(90deg,var(--acc),var(--pink));color:#fff;cursor:pointer;white-space:nowrap}
+.rand:hover{filter:brightness(1.1)}
+.stat{color:var(--sub);font-size:14px;white-space:nowrap;margin-left:auto}
+main{max-width:1500px;margin:0 auto;padding:24px 20px 80px}
+.hero{display:grid;grid-template-columns:2fr 1fr 1fr;gap:16px;margin-bottom:34px}
+.hero a{position:relative;border-radius:24px;overflow:hidden;min-height:200px;padding:24px;display:flex;flex-direction:column;justify-content:flex-end;border:1px solid rgba(255,255,255,.08);transition:transform .2s}
+.hero a:hover{transform:translateY(-4px)}
+.hero a:first-child{grid-row:span 2;min-height:420px}
+.hero .em{position:absolute;right:16px;top:8px;font-size:110px;filter:drop-shadow(0 12px 30px rgba(0,0,0,.5));transition:transform .3s}
+.hero a:first-child .em{font-size:200px;right:30px;top:30px}
+.hero a:hover .em{transform:rotate(-8deg) scale(1.08)}
+.hero .tag{display:inline-block;background:rgba(0,0,0,.35);padding:5px 10px;border-radius:999px;font-size:12px;font-weight:700;margin-bottom:10px;width:max-content}
+.hero h2{font-size:26px;font-weight:900;text-shadow:0 2px 12px rgba(0,0,0,.5)}
+.hero a:first-child h2{font-size:42px}
+.hero p{color:rgba(255,255,255,.85);margin-top:6px;max-width:440px;text-shadow:0 1px 6px rgba(0,0,0,.6)}
+.play{margin-top:14px;display:inline-block;background:#fff;color:#111;font-weight:900;padding:10px 20px;border-radius:12px;width:max-content}
+h3.sec{font-size:22px;margin:0 0 14px;display:flex;align-items:center;gap:10px}
+h3.sec small{color:var(--sub);font-weight:500;font-size:14px}
+.recent{display:flex;gap:12px;overflow-x:auto;padding-bottom:8px;margin-bottom:30px;scrollbar-width:thin}
+.recent a{flex:0 0 auto;display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);padding:10px 16px 10px 10px;border-radius:16px}
+.recent a:hover{border-color:var(--acc)}
+.recent .ic{width:48px;height:48px;border-radius:12px;display:grid;place-items:center;font-size:28px}
+.recent b{display:block;font-size:15px}.recent small{color:var(--sub)}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:20px}
+.chip{font:inherit;font-size:15px;font-weight:700;border:1px solid var(--line);background:var(--panel);color:var(--sub);padding:9px 16px;border-radius:999px;cursor:pointer}
+.chip:hover{color:var(--txt)}
+.chip.on{background:linear-gradient(90deg,var(--acc),var(--pink));color:#fff;border-color:transparent}
+.chip .n{opacity:.7;font-weight:500;margin-left:4px}
+select{font:inherit;margin-left:auto;background:var(--panel);color:var(--txt);border:1px solid var(--line);border-radius:12px;padding:9px 12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px}
+.card{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:22px;overflow:hidden;transition:transform .18s,box-shadow .18s,border-color .18s;display:flex;flex-direction:column}
+.card:hover{transform:translateY(-6px);box-shadow:0 18px 50px rgba(0,0,0,.5);border-color:#3d4890}
+.thumb{height:170px;display:grid;place-items:center;font-size:92px;position:relative;overflow:hidden}
+.thumb:after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(135deg,rgba(255,255,255,.05) 0 12px,transparent 12px 24px)}
+.thumb span{position:relative;z-index:1;filter:drop-shadow(0 10px 20px rgba(0,0,0,.45));transition:transform .25s}
+.card:hover .thumb span{transform:scale(1.15) rotate(-6deg)}
+.thumb .pl{position:absolute;inset:0;display:grid;place-items:center;z-index:2;opacity:0;background:rgba(0,0,0,.35);transition:opacity .2s;font-size:20px;font-weight:900}
+.thumb .pl i{font-style:normal;background:#fff;color:#111;padding:10px 22px;border-radius:999px}
+.card:hover .pl{opacity:1}
+.body{padding:14px 16px 16px;display:flex;flex-direction:column;gap:6px;flex:1}
+.body h4{font-size:19px;font-weight:800}
+.body p{color:var(--sub);font-size:14px;line-height:1.45;flex:1}
+.meta{display:flex;justify-content:space-between;align-items:center;font-size:13px;margin-top:4px}
+.meta .cat{color:#b9c1f2;background:#1a2147;padding:4px 9px;border-radius:999px}
+.meta .best{color:var(--gold);font-weight:700}
+.fav{position:absolute;top:10px;right:10px;z-index:3;border:0;background:rgba(0,0,0,.35);color:#fff;width:38px;height:38px;border-radius:50%;font-size:18px;cursor:pointer}
+.fav.on{color:var(--gold)}
+.hot{position:absolute;top:12px;left:12px;z-index:3;background:#ff3d6e;color:#fff;font-size:12px;font-weight:900;padding:4px 9px;border-radius:999px}
+.empty{color:var(--sub);text-align:center;padding:60px 0;font-size:18px}
+footer{color:#5c6699;text-align:center;font-size:13px;padding:30px}
+@media (max-width:900px){.hero{grid-template-columns:1fr 1fr}.hero a:first-child{grid-column:span 2;grid-row:auto;min-height:280px}.hero a:first-child .em{font-size:140px}.stat{display:none}}
+@media (max-width:560px){.top{flex-wrap:wrap}.search{order:3;max-width:none;flex-basis:100%}.hero{grid-template-columns:1fr}.hero a:first-child{grid-column:auto}.grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}.thumb{height:120px;font-size:64px}.body p{display:none}select{margin-left:0}}
+</style>
+</head>
+<body>
+<header><div class="top">
+  <a class="logo" href="index.html">🎮 <b>GGF</b> 게임 허브</a>
+  <label class="search"><input id="q" type="search" placeholder="게임 검색 ( / )" autocomplete="off"></label>
+  <button class="rand" id="rand">🎲 랜덤 플레이</button>
+  <div class="stat" id="stat"></div>
+</div></header>
+<main>
+  <section class="hero" id="hero"></section>
+  <section id="recentWrap" style="display:none"><h3 class="sec">⏱️ 최근 플레이</h3><div class="recent" id="recent"></div></section>
+  <h3 class="sec">🎮 전체 게임 <small id="count"></small></h3>
+  <div class="bar" id="chips"></div>
+  <div class="grid" id="grid"></div>
+  <div class="empty" id="empty" style="display:none">검색 결과가 없어요 😢</div>
+</main>
+<footer>GGF 게임 허브 · 모든 게임은 설치 없이 브라우저에서 실행됩니다 · 기록은 이 브라우저에 저장돼요</footer>
+<script src="games.js"></script>
+<script>
+(function () {
+  var get = function (k, d) { try { var v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } };
+  var set = function (k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+  var G = window.GAMES, C = window.CATS;
+  var PAL = { arcade: ['#ff8a00', '#e52e71'], action: ['#f12711', '#f5af19'], shooter: ['#2b5876', '#4e4376'], racing: ['#ee0979', '#ff6a00'], sports: ['#11998e', '#38ef7d'], puzzle: ['#8e2de2', '#4a00e0'], board: ['#355c7d', '#c06c84'], card: ['#134e5e', '#71b280'], rhythm: ['#fc466b', '#3f5efb'], casual: ['#f7971e', '#ffd200'] };
+  var grad = function (c, i) { var p = PAL[c] || ['#333', '#555']; return 'linear-gradient(' + (120 + (i * 37) % 120) + 'deg,' + p[0] + ',' + p[1] + ')'; };
+  var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+  var url = function (id) { return 'play.html?g=' + id; };
+  var fav = get('hub_fav', []), cat = get('hub_cat', 'all'), sort = get('hub_sort', 'pop');
+  var plays = get('hub_plays', {});
+
+  /* 히어로 */
+  var featured = G.slice().sort(function (a, b) { return b.p - a.p; }).slice(0, 5);
+  document.getElementById('hero').innerHTML = featured.map(function (g, i) {
+    return '<a href="' + url(g.id) + '" style="background:' + grad(g.c, i) + '"><div class="em">' + g.e + '</div>' +
+      '<span class="tag">' + (i === 0 ? '🔥 인기 1위' : C[g.c]) + '</span><h2>' + esc(g.t) + '</h2>' +
+      (i === 0 ? '<p>' + esc(g.d) + '</p><span class="play">▶ 지금 플레이</span>' : '') + '</a>';
+  }).join('');
+
+  /* 통계 */
+  var totalPlays = Object.keys(plays).reduce(function (s, k) { return s + plays[k]; }, 0);
+  var tried = Object.keys(plays).length;
+  document.getElementById('stat').textContent = '총 ' + G.length + '개 · 내가 해본 게임 ' + tried + '개 · ' + totalPlays + '판';
+
+  /* 최근 */
+  var rec = get('hub_recent', []).map(function (id) { return G.find(function (g) { return g.id === id; }); }).filter(Boolean);
+  if (rec.length) {
+    document.getElementById('recentWrap').style.display = '';
+    document.getElementById('recent').innerHTML = rec.map(function (g, i) {
+      var b = get('hub_best_' + g.id, null);
+      return '<a href="' + url(g.id) + '"><div class="ic" style="background:' + grad(g.c, i) + '">' + g.e + '</div><div><b>' + esc(g.t) + '</b><small>' + (b !== null ? '최고 ' + Number(b).toLocaleString() : '기록 없음') + '</small></div></a>';
+    }).join('');
+  }
+
+  /* 칩 */
+  function chips() {
+    var counts = { all: G.length, fav: fav.length };
+    G.forEach(function (g) { counts[g.c] = (counts[g.c] || 0) + 1; });
+    var list = [['all', '전체'], ['fav', '⭐ 즐겨찾기']].concat(Object.keys(C).map(function (k) { return [k, C[k]]; }));
+    document.getElementById('chips').innerHTML = list.map(function (x) {
+      return '<button class="chip' + (cat === x[0] ? ' on' : '') + '" data-c="' + x[0] + '">' + x[1] + '<span class="n">' + (counts[x[0]] || 0) + '</span></button>';
+    }).join('') + '<select id="sort"><option value="pop">인기순</option><option value="name">이름순</option><option value="played">많이 한 순</option><option value="cat">카테고리순</option></select>';
+    var s = document.getElementById('sort');
+    s.value = sort;
+    s.onchange = function () { sort = s.value; set('hub_sort', sort); render(); };
+    document.querySelectorAll('.chip').forEach(function (b) {
+      b.onclick = function () { cat = b.dataset.c; set('hub_cat', cat); chips(); render(); };
+    });
+  }
+
+  /* 그리드 */
+  var q = document.getElementById('q');
+  function render() {
+    var term = q.value.trim().toLowerCase();
+    var list = G.filter(function (g) {
+      if (cat === 'fav' && fav.indexOf(g.id) < 0) return false;
+      if (cat !== 'all' && cat !== 'fav' && g.c !== cat) return false;
+      if (term && (g.t + ' ' + g.d + ' ' + g.id + ' ' + C[g.c]).toLowerCase().indexOf(term) < 0) return false;
+      return true;
+    });
+    list.sort(function (a, b) {
+      if (sort === 'name') return a.t.localeCompare(b.t, 'ko');
+      if (sort === 'played') return (plays[b.id] || 0) - (plays[a.id] || 0) || b.p - a.p;
+      if (sort === 'cat') return a.c.localeCompare(b.c) || b.p - a.p;
+      return b.p - a.p;
+    });
+    document.getElementById('count').textContent = list.length + '개';
+    document.getElementById('empty').style.display = list.length ? 'none' : '';
+    document.getElementById('grid').innerHTML = list.map(function (g, i) {
+      var b = get('hub_best_' + g.id, null), on = fav.indexOf(g.id) >= 0;
+      return '<a class="card" href="' + url(g.id) + '">' + (g.p >= 90 ? '<span class="hot">HOT</span>' : '') +
+        '<button class="fav' + (on ? ' on' : '') + '" data-id="' + g.id + '" title="즐겨찾기">' + (on ? '★' : '☆') + '</button>' +
+        '<div class="thumb" style="background:' + grad(g.c, G.indexOf(g)) + '"><span>' + g.e + '</span><div class="pl"><i>▶ PLAY</i></div></div>' +
+        '<div class="body"><h4>' + esc(g.t) + '</h4><p>' + esc(g.d) + '</p><div class="meta"><span class="cat">' + C[g.c] + '</span>' +
+        '<span class="best">' + (b !== null ? '🏆 ' + Number(b).toLocaleString() : '') + '</span></div></div></a>';
+    }).join('');
+    document.querySelectorAll('.fav').forEach(function (b) {
+      b.onclick = function (e) {
+        e.preventDefault(); e.stopPropagation();
+        var id = b.dataset.id, i = fav.indexOf(id);
+        if (i >= 0) fav.splice(i, 1); else fav.push(id);
+        set('hub_fav', fav); chips(); render();
+      };
+    });
+  }
+  q.addEventListener('input', render);
+  document.addEventListener('keydown', function (e) {
+    if (e.key === '/' && document.activeElement !== q) { e.preventDefault(); q.focus(); }
+    if (e.key === 'Enter' && document.activeElement === q) { var a = document.querySelector('.card'); if (a) location.href = a.getAttribute('href'); }
+  });
+  document.getElementById('rand').onclick = function () { location.href = url(G[Math.floor(Math.random() * G.length)].id); };
+  chips();
+  render();
+})();
+</script>
+</body>
+</html>

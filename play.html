@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>GGF 게임 허브</title>
+<link rel="stylesheet" href="assets/play.css">
+</head>
+<body>
+<script src="games.js"></script>
+<script src="assets/engine.js"></script>
+<script>
+(function () {
+  var id = new URLSearchParams(location.search).get('g');
+  if (!id || !/^[a-z0-9]+$/.test(id) || !(window.GAMES || []).some(function (x) { return x.id === id; })) {
+    location.replace('index.html');
+    return;
+  }
+  var s = document.createElement('script');
+  s.src = 'games/' + id + '.js';
+  document.body.appendChild(s);
+})();
+</script>
+</body>
+</html>
