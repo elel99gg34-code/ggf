@@ -8,6 +8,7 @@ GAME({
     if (S.end) return;
     if (S.turn === 1) { S.think -= dt; if (S.think <= 0) sow(g, aiPick(), 1); return; }
     S.hl = -1;
+    if (S.turn !== 0) return;
     for (let i = 0; i < 6; i++) { const [x, y] = pit(i); if (U.dist(g.mouse.x, g.mouse.y, x, y) < 52 && S.p[i]) { S.hl = i; if (g.mouse.clicked) sow(g, i, 0); } }
   },
   draw(g, c) {
@@ -49,7 +50,7 @@ function sow(g, i, side) {
     const gain = side === 0 ? r.p[6] - S.p[6] : 0;
     S.p = r.p; if (side === 0 && gain > 0) g.add(gain * 10);
     if (r.over) { S.end = true; const a = S.p[6], b = S.p[13]; if (a > b) { S.msg = `🏆 ${a} : ${b} 승리!`; g.add(1000 + (a - b) * 50); g.later(() => g.win(S.msg), 1); } else { S.msg = a === b ? `무승부 ${a}:${b}` : `${a} : ${b} 패배`; g.later(() => g.over(S.msg), 1); } return; }
-    if (r.extra) { g.float(500, 300, side === 0 ? '한 번 더!' : 'AI 한 번 더!', '#fde047', 30); g.sfx.coin(); } else S.turn = 1 - side;
+    if (r.extra) { g.float(500, 300, side === 0 ? '한 번 더!' : 'AI 한 번 더!', '#fde047', 30); g.sfx.coin(); S.turn = side; } else S.turn = 1 - side;
     if (S.turn === 1) S.think = 0.6;
   });
   S.anim = steps; S.animT = 0; S.turn = -1;
