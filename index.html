@@ -1,0 +1,508 @@
+<title>궤도 점프</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Gowun+Dodum&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+  /* Layout: one square "planetarium dome" stage, HUD strip above, key legend below. Single deliberate night look. */
+  :root {
+    --bg: #15122c;
+    --bg-deep: #0d0b1f;
+    --ink: #f3ead7;
+    --ink-dim: #a69fc4;
+    --sun: #ffb347;
+    --meteor: #ff6b5b;
+    --star: #8fe8cf;
+    --line: rgba(243, 234, 215, 0.14);
+    --f-display: "Black Han Sans", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    --f-body: "Gowun Dodum", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    --f-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+    color-scheme: dark;
+  }
+  html, body { background: var(--bg); color: var(--ink); }
+  body {
+    margin: 0;
+    font-family: var(--f-body);
+    font-size: 15px;
+    line-height: 1.55;
+    padding-inline: 16px;
+    padding-block: 20px 28px;
+    background:
+      radial-gradient(circle at 50% 38%, #221d48 0%, var(--bg) 55%, var(--bg-deep) 100%) fixed,
+      var(--bg);
+    min-height: 100%;
+  }
+  .wrap { max-width: 560px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+  header { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  h1 {
+    margin: 0;
+    font-family: var(--f-display);
+    font-weight: 400;
+    font-size: clamp(30px, 8vw, 44px);
+    letter-spacing: 0.02em;
+    line-height: 1;
+    text-wrap: balance;
+  }
+  h1 span { color: var(--sun); }
+  .hud { display: flex; gap: 18px; font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+  .hud div { display: flex; flex-direction: column; align-items: flex-end; }
+  .hud small { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-dim); }
+  .hud b { font-size: 22px; font-weight: 700; line-height: 1.1; }
+  #mult { color: var(--star); }
+
+  .stage {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    aspect-ratio: 1 / 1;
+    border-radius: 50%;
+    background: radial-gradient(circle, #1d1940 0%, #120f27 70%, #0b0a1a 100%);
+    box-shadow: 0 0 0 1px var(--line), 0 30px 80px -30px rgba(0, 0, 0, 0.8);
+    overflow: hidden;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+    cursor: pointer;
+  }
+  canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+
+  .overlay {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 10px; text-align: center; padding: 18%;
+    background: radial-gradient(circle, rgba(13, 11, 31, 0.55) 0%, rgba(13, 11, 31, 0.86) 70%);
+  }
+  .overlay h2 { margin: 0; font-family: var(--f-display); font-weight: 400; font-size: clamp(24px, 7vw, 36px); line-height: 1.1; }
+  .overlay p { margin: 0; color: var(--ink-dim); max-width: 26ch; font-size: 14px; }
+  .overlay .big { font-family: var(--f-mono); font-size: clamp(34px, 11vw, 54px); font-weight: 700; color: var(--sun); line-height: 1; font-variant-numeric: tabular-nums; }
+  .overlay .new { color: var(--star); font-family: var(--f-mono); font-size: 12px; letter-spacing: 0.14em; }
+  button.go {
+    margin-top: 6px;
+    font: inherit; font-family: var(--f-display); font-size: 18px; letter-spacing: 0.04em;
+    color: var(--bg-deep); background: var(--sun);
+    border: 0; border-radius: 999px; padding: 10px 26px; cursor: pointer;
+    box-shadow: 0 6px 24px -6px var(--sun);
+  }
+  button.go:hover { filter: brightness(1.08); }
+  button:focus-visible { outline: 2px solid var(--star); outline-offset: 3px; }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 8px 18px; justify-content: space-between; align-items: center; color: var(--ink-dim); font-size: 13px; }
+  .keys { display: flex; flex-wrap: wrap; gap: 6px 14px; }
+  kbd {
+    font-family: var(--f-mono); font-size: 11px; color: var(--ink);
+    border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 5px; padding: 1px 6px; margin-right: 4px;
+  }
+  .chip { display: inline-flex; align-items: center; gap: 6px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+  .sound {
+    font: inherit; font-size: 12px; color: var(--ink-dim); background: transparent;
+    border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; cursor: pointer;
+  }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>궤도 <span>점프</span></h1>
+    <div class="hud" aria-live="polite">
+      <div><small>점수</small><b id="score">0</b></div>
+      <div><small>배율</small><b id="mult">×1</b></div>
+      <div><small>최고</small><b id="best">0</b></div>
+    </div>
+  </header>
+
+  <div class="stage" id="stage">
+    <canvas id="cv" aria-label="게임 화면"></canvas>
+    <div class="overlay" id="ready">
+      <h2>달을 지켜라</h2>
+      <p>달은 혼자 공전해. 너는 궤도만 바꿔. 빨간 운석은 피하고 초록 별은 먹어.</p>
+      <button class="go" id="startBtn" type="button">시작</button>
+    </div>
+    <div class="overlay" id="over" hidden>
+      <h2>충돌!</h2>
+      <div class="big" id="finalScore">0</div>
+      <div class="new" id="newBest" hidden>새 최고 기록</div>
+      <p id="overNote">공전 0바퀴 · 별 0개</p>
+      <button class="go" id="againBtn" type="button">다시 하기</button>
+    </div>
+  </div>
+
+  <div class="legend">
+    <div class="keys">
+      <span><kbd>탭</kbd><kbd>Space</kbd>바깥 궤도로 (끝에선 안쪽으로)</span>
+      <span><kbd>↑</kbd><kbd>↓</kbd>궤도 하나씩 이동</span>
+    </div>
+    <div class="keys">
+      <span class="chip"><i class="dot" style="background: var(--meteor)"></i>운석</span>
+      <span class="chip"><i class="dot" style="background: var(--star)"></i>별 +10×배율</span>
+      <button class="sound" id="soundBtn" type="button" aria-pressed="true">소리 켜짐</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const cv = document.getElementById('cv');
+  const ctx = cv.getContext('2d');
+  const stage = document.getElementById('stage');
+  const $ = (id) => document.getElementById(id);
+  const css = getComputedStyle(document.documentElement);
+  const C = {
+    ink: css.getPropertyValue('--ink').trim(),
+    dim: css.getPropertyValue('--ink-dim').trim(),
+    sun: css.getPropertyValue('--sun').trim(),
+    meteor: css.getPropertyValue('--meteor').trim(),
+    star: css.getPropertyValue('--star').trim(),
+  };
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const TAU = Math.PI * 2;
+  const RINGS = [0.19, 0.30, 0.41];
+
+  let W = 0, S = 0, cx = 0, cy = 0;
+  function resize() {
+    const r = stage.getBoundingClientRect();
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    cv.width = Math.round(r.width * dpr);
+    cv.height = Math.round(r.height * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    W = r.width; S = Math.min(r.width, r.height); cx = r.width / 2; cy = r.height / 2;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  // ---------- storage ----------
+  let best = 0;
+  try { best = Number(localStorage.getItem('orbit-hop-best')) || 0; } catch (e) {}
+  function saveBest() { try { localStorage.setItem('orbit-hop-best', String(best)); } catch (e) {} }
+
+  // ---------- sound ----------
+  let audio = null, soundOn = true;
+  function blip(freq, dur = 0.08, type = 'sine', vol = 0.08, slide = 0) {
+    if (!soundOn) return;
+    try {
+      audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+      const t = audio.currentTime;
+      const o = audio.createOscillator(), g = audio.createGain();
+      o.type = type; o.frequency.setValueAtTime(freq, t);
+      if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(40, freq + slide), t + dur);
+      g.gain.setValueAtTime(vol, t);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g).connect(audio.destination);
+      o.start(t); o.stop(t + dur + 0.02);
+    } catch (e) {}
+  }
+  $('soundBtn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    soundOn = !soundOn;
+    e.currentTarget.textContent = soundOn ? '소리 켜짐' : '소리 꺼짐';
+    e.currentTarget.setAttribute('aria-pressed', String(soundOn));
+  });
+
+  // ---------- game state ----------
+  let mode = 'ready';
+  let p, items, parts, time, score, stars, mult, lastStarAt, rockTimer, starTimer, shake, laps, prevAngle;
+  const bgStars = Array.from({ length: 70 }, () => ({ a: Math.random() * TAU, r: Math.random(), s: Math.random() * 1.2 + 0.3, tw: Math.random() * TAU }));
+
+  function reset() {
+    p = { a: -Math.PI / 2, ring: 1, dr: RINGS[1], trail: [] };
+    items = []; parts = [];
+    time = 0; score = 0; stars = 0; mult = 1; lastStarAt = -99;
+    rockTimer = 1.2; starTimer = 0.6; shake = 0; laps = 0; prevAngle = p.a;
+    updateHud();
+  }
+  reset();
+
+  const omega = () => Math.min(1.5 + time * 0.028, 3.4);         // rad/s of the moon
+  const rockEvery = () => Math.max(0.42, 1.35 - time * 0.018);  // seconds between meteors
+
+  function wrapAngle(a) { a = (a + Math.PI) % TAU; if (a < 0) a += TAU; return a - Math.PI; }
+  function pos(ring, a) { const r = RINGS[ring] * S; return [cx + Math.cos(a) * r, cy + Math.sin(a) * r]; }
+
+  function spawn(kind) {
+    for (let tries = 0; tries < 12; tries++) {
+      const ring = (Math.random() * 3) | 0;
+      // place it ahead of the moon so the player has time to react
+      const ahead = kind === 'rock' ? 0.9 + Math.random() * 4.2 : 0.6 + Math.random() * 4.8;
+      const a = wrapAngle(p.a + ahead);
+      const [x, y] = pos(ring, a);
+      const crowded = items.some((it) => it.ring === ring && Math.hypot(it.x - x, it.y - y) < S * 0.09);
+      if (crowded) continue;
+      const drift = kind === 'rock' && time > 15 && Math.random() < Math.min(0.6, time / 90) ? (Math.random() < 0.5 ? -1 : 1) * (0.25 + Math.random() * 0.35) : 0;
+      items.push({
+        kind, ring, a, x, y, drift, age: 0,
+        warn: kind === 'rock' ? 0.85 : 0,
+        life: kind === 'rock' ? 5 + Math.random() * 3 : 6,
+        spin: Math.random() * TAU,
+      });
+      return;
+    }
+  }
+
+  function burst(x, y, color, n, speed) {
+    if (reduceMotion) n = Math.ceil(n / 3);
+    for (let i = 0; i < n; i++) {
+      const ang = Math.random() * TAU, v = (0.3 + Math.random()) * speed;
+      parts.push({ x, y, vx: Math.cos(ang) * v, vy: Math.sin(ang) * v, life: 0.5 + Math.random() * 0.5, age: 0, color });
+    }
+  }
+
+  function hop(dir) {
+    if (mode !== 'play') return;
+    let next = p.ring + dir;
+    if (dir === 0) next = (p.ring + 1) % 3;           // one-button: cycle outward
+    if (next < 0 || next > 2) return;
+    p.ring = next;
+    blip(320 + next * 140, 0.07, 'triangle', 0.06, 120);
+  }
+
+  function start() {
+    reset();
+    mode = 'play';
+    $('ready').hidden = true; $('over').hidden = true;
+    blip(440, 0.1, 'triangle', 0.06, 220);
+  }
+
+  function die() {
+    mode = 'over';
+    const [x, y] = pos(p.ring, p.a);
+    burst(x, y, C.sun, 40, S * 0.5);
+    burst(x, y, C.meteor, 24, S * 0.35);
+    shake = reduceMotion ? 0 : 1;
+    blip(180, 0.45, 'sawtooth', 0.07, -140);
+    const isBest = score > best;
+    if (isBest) { best = score; saveBest(); }
+    $('finalScore').textContent = score;
+    $('newBest').hidden = !isBest;
+    $('overNote').textContent = `공전 ${laps}바퀴 · 별 ${stars}개 · ${time.toFixed(1)}초`;
+    updateHud();
+    setTimeout(() => { if (mode === 'over') { $('over').hidden = false; $('againBtn').focus({ preventScroll: true }); } }, 650);
+  }
+
+  let shownScore = -1, shownMult = -1, shownBest = -1;
+  function updateHud() {
+    if (score !== shownScore) { $('score').textContent = score; shownScore = score; }
+    if (mult !== shownMult) { $('mult').textContent = '×' + mult; shownMult = mult; }
+    if (best !== shownBest) { $('best').textContent = best; shownBest = best; }
+  }
+
+  // ---------- update ----------
+  let secAcc = 0;
+  function update(dt) {
+    // particles always animate
+    for (const q of parts) { q.age += dt; q.x += q.vx * dt; q.y += q.vy * dt; q.vx *= 0.96; q.vy *= 0.96; }
+    parts = parts.filter((q) => q.age < q.life);
+    shake = Math.max(0, shake - dt * 2.5);
+    p.dr += (RINGS[p.ring] - p.dr) * Math.min(1, dt * 18);
+
+    if (mode !== 'play') {
+      if (mode === 'ready') p.a = wrapAngle(p.a + dt * 1.2);
+      return;
+    }
+
+    time += dt;
+    p.a = wrapAngle(p.a + omega() * dt);
+    if (prevAngle < -Math.PI / 2 && p.a >= -Math.PI / 2) laps++;
+    prevAngle = p.a;
+
+    secAcc += dt;
+    if (secAcc >= 1) { secAcc -= 1; score += 1; }
+    if (mult > 1 && time - lastStarAt > 3.2) mult = 1;
+
+    rockTimer -= dt; starTimer -= dt;
+    if (rockTimer <= 0) { spawn('rock'); rockTimer = rockEvery() * (0.7 + Math.random() * 0.6); }
+    if (starTimer <= 0) { if (items.filter((i) => i.kind === 'star').length < 3) spawn('star'); starTimer = 1.1 + Math.random() * 0.8; }
+
+    const [px, py] = pos(p.ring, p.a);
+    const pr = S * 0.024;
+    p.trail.push([p.a, p.dr]); if (p.trail.length > 18) p.trail.shift();
+
+    for (const it of items) {
+      it.age += dt;
+      it.spin += dt * (it.kind === 'rock' ? 1.6 : 2.4);
+      if (it.drift) { it.a = wrapAngle(it.a + it.drift * dt); [it.x, it.y] = pos(it.ring, it.a); }
+      if (it.age > it.life) { it.dead = true; continue; }
+      const armed = it.age > it.warn;
+      const d = Math.hypot(it.x - px, it.y - py);
+      if (it.kind === 'rock' && armed && it.ring === p.ring && d < S * 0.028 + pr * 0.75) { die(); return; }
+      if (it.kind === 'star' && it.ring === p.ring && d < S * 0.022 + pr) {
+        it.dead = true;
+        stars++;
+        mult = time - lastStarAt < 3.2 ? Math.min(5, mult + 1) : 1;
+        lastStarAt = time;
+        score += 10 * mult;
+        burst(it.x, it.y, C.star, 16, S * 0.25);
+        blip(660 + mult * 110, 0.12, 'sine', 0.07, 300);
+      }
+    }
+    items = items.filter((i) => !i.dead);
+    updateHud();
+  }
+
+  // ---------- draw ----------
+  function drawRock(it) {
+    const r = S * 0.028;
+    const armed = it.age > it.warn;
+    const fadeOut = Math.min(1, (it.life - it.age) / 0.4);
+    ctx.save();
+    ctx.translate(it.x, it.y);
+    if (!armed) {
+      // warning: pulsing dashed outline, harmless
+      const k = it.age / it.warn;
+      ctx.globalAlpha = 0.35 + 0.5 * Math.abs(Math.sin(it.age * 14));
+      ctx.strokeStyle = C.meteor; ctx.lineWidth = 1.5;
+      ctx.setLineDash([3, 4]);
+      ctx.beginPath(); ctx.arc(0, 0, r * (1.9 - 0.9 * k), 0, TAU); ctx.stroke();
+      ctx.restore();
+      return;
+    }
+    ctx.globalAlpha = fadeOut;
+    ctx.rotate(it.spin);
+    ctx.shadowColor = C.meteor; ctx.shadowBlur = 14;
+    ctx.fillStyle = C.meteor;
+    ctx.beginPath();
+    for (let i = 0; i < 8; i++) {
+      const ang = (i / 8) * TAU, rr = r * (0.78 + ((i * 37) % 5) * 0.07);
+      i ? ctx.lineTo(Math.cos(ang) * rr, Math.sin(ang) * rr) : ctx.moveTo(Math.cos(ang) * rr, Math.sin(ang) * rr);
+    }
+    ctx.closePath(); ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = 'rgba(13, 11, 31, 0.35)';
+    ctx.beginPath(); ctx.arc(r * 0.25, -r * 0.2, r * 0.22, 0, TAU); ctx.fill();
+    ctx.restore();
+  }
+
+  function drawStar(it) {
+    const r = S * 0.022;
+    const fadeIn = Math.min(1, it.age / 0.25), fadeOut = Math.min(1, (it.life - it.age) / 0.6);
+    ctx.save();
+    ctx.translate(it.x, it.y);
+    ctx.rotate(it.spin * 0.5);
+    ctx.globalAlpha = fadeIn * fadeOut * (it.life - it.age < 1.2 ? 0.55 + 0.45 * Math.abs(Math.sin(it.age * 10)) : 1);
+    ctx.shadowColor = C.star; ctx.shadowBlur = 12;
+    ctx.fillStyle = C.star;
+    ctx.beginPath();
+    for (let i = 0; i < 10; i++) {
+      const ang = (i / 10) * TAU - Math.PI / 2, rr = i % 2 ? r * 0.45 : r;
+      i ? ctx.lineTo(Math.cos(ang) * rr, Math.sin(ang) * rr) : ctx.moveTo(Math.cos(ang) * rr, Math.sin(ang) * rr);
+    }
+    ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
+
+  function draw(now) {
+    const W2 = W;
+    ctx.clearRect(0, 0, W2, W2);
+    ctx.save();
+    if (shake > 0) ctx.translate((Math.random() - 0.5) * 12 * shake, (Math.random() - 0.5) * 12 * shake);
+
+    // background stars
+    for (const b of bgStars) {
+      const r = (0.08 + b.r * 0.42) * S * 1.1;
+      const x = cx + Math.cos(b.a + now * 0.00002) * r, y = cy + Math.sin(b.a + now * 0.00002) * r;
+      ctx.globalAlpha = 0.25 + 0.35 * (reduceMotion ? 0.5 : (Math.sin(now * 0.002 + b.tw) + 1) / 2);
+      ctx.fillStyle = C.ink;
+      ctx.fillRect(x, y, b.s, b.s);
+    }
+    ctx.globalAlpha = 1;
+
+    // orbit rings + degree ticks
+    RINGS.forEach((rf, i) => {
+      const r = rf * S;
+      ctx.strokeStyle = i === p.ring && mode !== 'ready' ? 'rgba(255, 179, 71, 0.38)' : 'rgba(243, 234, 215, 0.13)';
+      ctx.lineWidth = i === p.ring && mode !== 'ready' ? 1.6 : 1;
+      ctx.beginPath(); ctx.arc(cx, cy, r, 0, TAU); ctx.stroke();
+    });
+    ctx.strokeStyle = 'rgba(243, 234, 215, 0.12)';
+    for (let d = 0; d < 360; d += 15) {
+      const a = (d * Math.PI) / 180, r1 = RINGS[2] * S + 10, r2 = r1 + (d % 90 === 0 ? 9 : 4);
+      ctx.beginPath(); ctx.moveTo(cx + Math.cos(a) * r1, cy + Math.sin(a) * r1); ctx.lineTo(cx + Math.cos(a) * r2, cy + Math.sin(a) * r2); ctx.stroke();
+    }
+    ctx.fillStyle = C.dim; ctx.font = `500 ${Math.max(9, S * 0.02)}px "JetBrains Mono", monospace`;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    [['0°', -Math.PI / 2], ['90°', 0], ['180°', Math.PI / 2], ['270°', Math.PI]].forEach(([t, a]) => {
+      const r = RINGS[2] * S + 30;
+      ctx.fillText(t, cx + Math.cos(a) * r, cy + Math.sin(a) * r);
+    });
+
+    // the planet
+    const pr0 = S * 0.075;
+    const g = ctx.createRadialGradient(cx - pr0 * 0.35, cy - pr0 * 0.35, pr0 * 0.1, cx, cy, pr0);
+    g.addColorStop(0, '#ffe2b0'); g.addColorStop(0.55, C.sun); g.addColorStop(1, '#c4562f');
+    ctx.shadowColor = C.sun; ctx.shadowBlur = 40;
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, pr0, 0, TAU); ctx.fill();
+    ctx.shadowBlur = 0;
+
+    for (const it of items) it.kind === 'rock' ? drawRock(it) : drawStar(it);
+
+    // moon trail + moon
+    if (mode !== 'over') {
+      p.trail.forEach(([a, dr], i) => {
+        const r = dr * S;
+        ctx.globalAlpha = (i / p.trail.length) * 0.35;
+        ctx.fillStyle = C.ink;
+        ctx.beginPath(); ctx.arc(cx + Math.cos(a) * r, cy + Math.sin(a) * r, S * 0.024 * (i / p.trail.length), 0, TAU); ctx.fill();
+      });
+      ctx.globalAlpha = 1;
+      const r = p.dr * S, mx = cx + Math.cos(p.a) * r, my = cy + Math.sin(p.a) * r;
+      ctx.shadowColor = C.ink; ctx.shadowBlur = 16;
+      ctx.fillStyle = C.ink; ctx.beginPath(); ctx.arc(mx, my, S * 0.024, 0, TAU); ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = 'rgba(21, 18, 44, 0.25)';
+      ctx.beginPath(); ctx.arc(mx + S * 0.007, my - S * 0.005, S * 0.007, 0, TAU); ctx.fill();
+    }
+
+    for (const q of parts) {
+      ctx.globalAlpha = 1 - q.age / q.life;
+      ctx.fillStyle = q.color;
+      ctx.fillRect(q.x - 1.5, q.y - 1.5, 3, 3);
+    }
+    ctx.globalAlpha = 1;
+
+    // combo ring timer
+    if (mode === 'play' && mult > 1) {
+      const left = Math.max(0, 1 - (time - lastStarAt) / 3.2);
+      ctx.strokeStyle = C.star; ctx.lineWidth = 3; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.arc(cx, cy, pr0 + 10, -Math.PI / 2, -Math.PI / 2 + TAU * left); ctx.stroke();
+      ctx.fillStyle = '#2a1a0c'; ctx.font = `400 ${S * 0.05}px "Black Han Sans", sans-serif`;
+      ctx.fillText('×' + mult, cx, cy + 1);
+    }
+    ctx.restore();
+  }
+
+  // ---------- loop ----------
+  let last = performance.now();
+  function frame(now) {
+    const dt = Math.min(0.05, (now - last) / 1000);
+    last = now;
+    update(dt);
+    draw(now);
+    requestAnimationFrame(frame);
+  }
+
+  // ---------- input ----------
+  stage.addEventListener('pointerdown', (e) => {
+    if (e.target.closest('button')) return;
+    e.preventDefault();
+    if (mode === 'play') hop(0);
+  });
+  window.addEventListener('keydown', (e) => {
+    const k = e.key;
+    if (k === ' ' || k === 'Enter') {
+      if (e.target.closest && e.target.closest('button') && mode !== 'play') return; // let the focused button act
+      e.preventDefault();
+      if (mode === 'play') hop(0); else if (mode === 'ready' || !$('over').hidden) start();
+    } else if (k === 'ArrowUp' || k === 'w' || k === 'W') { e.preventDefault(); hop(1); }
+    else if (k === 'ArrowDown' || k === 's' || k === 'S') { e.preventDefault(); hop(-1); }
+  });
+  $('startBtn').addEventListener('click', start);
+  $('againBtn').addEventListener('click', start);
+
+  window.claude?.hot?.snapshot?.(() => ({ best }));
+  const boot = (data) => {
+    if (data && data.best > best) { best = data.best; saveBest(); }
+    updateHud();
+    requestAnimationFrame((t) => { last = t; frame(t); });
+  };
+  window.claude?.hot?.ready ? window.claude.hot.ready(boot) : boot(window.claude?.hot?.data ?? {});
+})();
+</script>
