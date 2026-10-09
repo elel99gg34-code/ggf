@@ -163,6 +163,7 @@
       get up() { return !!held.up; }, get down() { return !!held.down; },
       get a() { return !!held.a; }, get b() { return !!held.b; },
       lastKey: null,
+      typed: [],
       add(n, x, y) {
         g.score += n;
         if (x !== undefined) g.float(x, y, (n > 0 ? '+' : '') + n, '#ffe066');
@@ -262,11 +263,12 @@
       if (!e.repeat) {
         if (state === 'menu' && (c === 'Space' || c === 'Enter')) { start(); return; }
         if (state === 'over' && (c === 'Space' || c === 'Enter' || c === 'KeyR')) { start(); return; }
-        if (c === 'Escape' || c === 'KeyP') { togglePause(); return; }
+        if (c === 'Escape' || (c === 'KeyP' && !def.typing)) { togglePause(); return; }
         if (state === 'pause' && (c === 'Space' || c === 'Enter')) { togglePause(); return; }
         if (c === 'KeyF' && !def.typing) { toggleFull(); return; }
-        if (c === 'KeyR' && state === 'play' && !def.noRKey) { start(); return; }
+        if (c === 'KeyR' && state === 'play' && !def.noRKey && !def.typing) { start(); return; }
         rawJust[c] = true;
+        g.typed.push(c);
         g.lastKey = e.key;
         (CODE2BTN[c] || []).forEach((b) => (just[b] = true));
       }
@@ -472,6 +474,7 @@
       if (g.score !== lastScore) { elScore.textContent = Math.round(g.score).toLocaleString(); lastScore = g.score; }
       if (g.info !== lastInfo) { elInfo.textContent = g.info; elInfo.style.display = g.info ? '' : 'none'; lastInfo = g.info; }
       clearInput();
+      g.typed.length = 0;
       g.swiped = null;
       requestAnimationFrame(frame);
     }
