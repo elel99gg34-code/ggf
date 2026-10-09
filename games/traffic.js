@@ -44,8 +44,8 @@ GAME({
     g.rect(RX - 10, 0, LANE * LN + 20, g.H, '#9ca3af'); g.rect(RX, 0, LANE * LN, g.H, '#374151');
     for (let l = 1; l < LN; l++) for (let y = -80 + S.scroll; y < g.H; y += 80) g.rect(RX + l * LANE - 3, y, 6, 44, '#f3f4f6');
     for (const it of S.items) g.emoji(it.k, RX + it.lane * LANE + LANE / 2, it.y, 40);
-    for (const car of S.cars) { c.save(); c.translate(car.x, car.y); c.rotate(-Math.PI / 2); g.emoji(car.e, 0, 0, 80); c.restore(); }
-    c.save(); c.translate(S.x, 700); c.rotate(-Math.PI / 2 + (S.x - (RX + S.tx * LANE + LANE / 2)) * -0.004); g.emoji('🏎️', 0, 0, 90); c.restore();
+    for (const car of S.cars) { c.save(); c.translate(car.x, car.y); c.rotate(Math.PI / 2); g.emoji(car.e, 0, 0, 80); c.restore(); }
+    c.save(); c.translate(S.x, 700); c.rotate(Math.PI / 2 + (S.x - (RX + S.tx * LANE + LANE / 2)) * -0.004); g.emoji('🏎️', 0, 0, 90); c.restore();
     g.rrect(10, 10, 200, 70, 10, 'rgba(0,0,0,.6)');
     g.text(`${(S.dist / 1000).toFixed(2)} km`, 20, 30, 20, '#fff', 'left');
     g.rect(20, 48, 180, 8, '#450a0a'); g.rect(20, 48, 1.8 * S.fuel, 8, S.fuel < 25 ? '#ef4444' : '#22c55e');
