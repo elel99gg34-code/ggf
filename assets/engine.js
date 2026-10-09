@@ -504,13 +504,16 @@
       ctx.globalAlpha = 1;
     }
 
-    resize();
-    showBest();
-    g.score = 0;
-    def.init(g);
-    menu();
+    // 게임 스크립트 전체가 평가된 뒤 초기화 (파일 하단의 상수도 사용 가능하게)
+    setTimeout(() => {
+      resize();
+      showBest();
+      g.score = 0;
+      def.init(g);
+      menu();
+      requestAnimationFrame((t) => { last = t; frame(t); });
+    }, 0);
     g.start = start;
-    requestAnimationFrame((t) => { last = t; frame(t); });
     window.__game = g;
     window.__def = def;
     window.__start = start;
