@@ -31,7 +31,7 @@ GAME({
       const R = S.rows[k];
       if (+k < S.row - 10) { delete S.rows[k]; continue; }
       if (R.type === 'rail') { R.t -= dt; if (R.t <= 0 && !R.train) { R.warn = 1; R.t = U.rand(3, 7); } if (R.warn > 0) { R.warn -= dt; if (R.warn <= 0) { R.train = { x: R.dir > 0 ? -12 : COLS + 1 }; g.sfx.tone(180, 0.4, 'sawtooth', 0.05); } } if (R.train) { R.train.x += R.dir * 30 * dt; if (R.train.x < -14 || R.train.x > COLS + 14) R.train = null; } }
-      if (R.objs) for (const o of R.objs) { o.x += R.v * dt; if (R.v > 0 && o.x > COLS + 1) o.x -= COLS + 4; if (R.v < 0 && o.x + o.w < -1) o.x += COLS + 4; }
+      if (R.objs) for (const o of R.objs) { o.x += R.v * dt; if (R.v > 0 && o.x > COLS + 1) o.x -= R.span; if (R.v < 0 && o.x + o.w < -1) o.x += R.span; }
     }
     const R = S.rows[S.row], x = S.px + S.offX;
     if (S.hop <= 0 && R) {
@@ -86,8 +86,9 @@ function makeRow(r) {
   if (type === 'road') {
     R.v = U.choice([-1, 1]) * U.rand(1.5, 3 + d * 3); const truck = Math.random() < 0.3;
     R.objs = []; let x = U.rand(3); while (x < COLS + 3) { R.objs.push({ x, w: truck ? 2 : 1, e: truck ? '🚚' : U.choice(['🚗', '🚕', '🚙', '🚓']) }); x += (truck ? 2 : 1) + U.rand(2.5, 5); }
+    R.span = Math.max(x, COLS + 4);
   }
-  if (type === 'water') { R.v = U.choice([-1, 1]) * U.rand(1, 2.2); R.objs = []; let x = U.rand(2); while (x < COLS + 3) { const w = U.randi(2, 4); R.objs.push({ x, w }); x += w + U.rand(1.2, 2.6); } }
+  if (type === 'water') { R.v = U.choice([-1, 1]) * U.rand(1, 2.2); R.objs = []; let x = U.rand(2); while (x < COLS + 3) { const w = U.randi(2, 4); R.objs.push({ x, w }); x += w + U.rand(1.2, 2.6); } R.span = Math.max(x, COLS + 4); }
   if (type === 'rail') { R.dir = U.choice([-1, 1]); R.t = U.rand(1, 5); R.warn = 0; R.train = null; R.coin = -1; }
   S.rows[r] = R;
 }

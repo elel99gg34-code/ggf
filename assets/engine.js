@@ -149,7 +149,7 @@
     /* 상태 */
     let state = 'menu', scale = 1, shakeT = 0, shakeA = 0, last = performance.now();
     const held = {}, just = {}, rawHeld = {}, rawJust = {};
-    const parts = [], floats = [], timers = [];
+    const parts = [], floats = [], timers = [], emojiCache = new Map();
     const mouse = { x: 0, y: 0, down: false, clicked: false, released: false, rclick: false, moved: false };
 
     const g = {
@@ -209,11 +209,24 @@
         ctx.fillText(s, x, y);
       },
       emoji(s, x, y, size = 32) {
-        ctx.font = `${size}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillStyle = '#fff';
-        ctx.fillText(s, x, y);
+        const sz = Math.max(4, Math.round(size));
+        const key = s + '|' + sz;
+        let im = emojiCache.get(key);
+        if (!im) {
+          const q = 2, w = Math.ceil(sz * 1.5);
+          im = document.createElement('canvas');
+          im.width = im.height = w * q;
+          const ic = im.getContext('2d');
+          ic.scale(q, q);
+          ic.font = `${sz}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`;
+          ic.textAlign = 'center';
+          ic.textBaseline = 'middle';
+          ic.fillText(s, w / 2, w / 2 + sz * 0.06);
+          im.w = w;
+          if (emojiCache.size > 600) emojiCache.clear();
+          emojiCache.set(key, im);
+        }
+        ctx.drawImage(im, x - im.w / 2, y - im.w / 2, im.w, im.w);
       },
       /* 캔버스 안 버튼: draw에서 그리고, update에서 g.btnHit로 판정 */
       button(x, y, w, h, label, c = '#2b3a67', size = 20) {
