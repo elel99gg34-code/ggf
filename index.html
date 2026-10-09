@@ -30,6 +30,7 @@ main{max-width:1500px;margin:0 auto;padding:24px 20px 80px}
 .hero .em{position:absolute;right:16px;top:8px;font-size:110px;filter:drop-shadow(0 12px 30px rgba(0,0,0,.5));transition:transform .3s}
 .hero a:first-child .em{font-size:200px;right:30px;top:30px}
 .hero a:hover .em{transform:rotate(-8deg) scale(1.08)}
+.hero h2,.hero p,.hero .tag,.hero .play{position:relative;z-index:1}
 .hero .tag{display:inline-block;background:rgba(0,0,0,.35);padding:5px 10px;border-radius:999px;font-size:12px;font-weight:700;margin-bottom:10px;width:max-content}
 .hero h2{font-size:26px;font-weight:900;text-shadow:0 2px 12px rgba(0,0,0,.5)}
 .hero a:first-child h2{font-size:42px}
@@ -70,7 +71,7 @@ select{font:inherit;margin-left:auto;background:var(--panel);color:var(--txt);bo
 .empty{color:var(--sub);text-align:center;padding:60px 0;font-size:18px}
 footer{color:#5c6699;text-align:center;font-size:13px;padding:30px}
 @media (max-width:900px){.hero{grid-template-columns:1fr 1fr}.hero a:first-child{grid-column:span 2;grid-row:auto;min-height:280px}.hero a:first-child .em{font-size:140px}.stat{display:none}}
-@media (max-width:560px){.top{flex-wrap:wrap}.search{order:3;max-width:none;flex-basis:100%}.hero{grid-template-columns:1fr}.hero a:first-child{grid-column:auto}.grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}.thumb{height:120px;font-size:64px}.body p{display:none}select{margin-left:0}}
+@media (max-width:560px){.top{flex-wrap:wrap}.search{order:3;max-width:none;flex-basis:100%}.hero{grid-template-columns:1fr 1fr;gap:10px}.hero a{min-height:130px;padding:14px}.hero a:first-child{grid-column:span 2;min-height:230px}.hero a:nth-child(n+4){display:none}.hero .em,.hero a:first-child .em{font-size:64px;right:10px;top:8px;opacity:.85}.hero a:first-child .em{font-size:110px}.hero h2{font-size:18px}.hero a:first-child h2{font-size:30px}.hero p{font-size:13px;max-width:62%}.grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}.thumb{height:120px;font-size:64px}.body p{display:none}select{margin-left:0}}
 </style>
 </head>
 <body>
