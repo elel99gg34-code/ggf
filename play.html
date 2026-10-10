@@ -11,7 +11,7 @@
 <script src="assets/engine.js"></script>
 <script>
 (function () {
-  var id = new URLSearchParams(location.search).get('g');
+  var id = new URLSearchParams(location.search).get('g') || location.hash.slice(1);
   if (!id || !/^[a-z0-9]+$/.test(id) || !(window.GAMES || []).some(function (x) { return x.id === id; })) {
     location.replace('index.html');
     return;

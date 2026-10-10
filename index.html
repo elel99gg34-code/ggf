@@ -99,7 +99,7 @@ footer{color:#5c6699;text-align:center;font-size:13px;padding:30px}
   var PAL = { arcade: ['#ff8a00', '#e52e71'], action: ['#f12711', '#f5af19'], shooter: ['#2b5876', '#4e4376'], racing: ['#ee0979', '#ff6a00'], sports: ['#11998e', '#38ef7d'], puzzle: ['#8e2de2', '#4a00e0'], board: ['#355c7d', '#c06c84'], card: ['#134e5e', '#71b280'], rhythm: ['#fc466b', '#3f5efb'], casual: ['#f7971e', '#ffd200'] };
   var grad = function (c, i) { var p = PAL[c] || ['#333', '#555']; return 'linear-gradient(' + (120 + (i * 37) % 120) + 'deg,' + p[0] + ',' + p[1] + ')'; };
   var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
-  var url = function (id) { return 'play.html?g=' + id; };
+  var url = function (id) { return 'play.html?g=' + id + '#' + id; };
   var fav = get('hub_fav', []), cat = get('hub_cat', 'all'), sort = get('hub_sort', 'pop');
   var plays = get('hub_plays', {});
 

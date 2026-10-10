@@ -117,7 +117,7 @@
   for (const b in MAP) for (const c of MAP[b]) (CODE2BTN[c] = CODE2BTN[c] || []).push(b);
 
   window.GAME = function (def) {
-    const id = new URLSearchParams(location.search).get('g') || def.id || 'game';
+    const id = new URLSearchParams(location.search).get('g') || location.hash.slice(1) || def.id || 'game';
     const meta = (window.GAMES || []).find((x) => x.id === id) || { t: def.title, e: '🎮', d: '' };
     def.w = def.w || 800;
     def.h = def.h || 600;
