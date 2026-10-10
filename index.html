@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>GGF 게임 허브 — 브라우저 게임 100선</title>
-<meta name="description" content="설치 없이 바로 즐기는 브라우저 게임 100개. 액션, 퍼즐, 보드, 스포츠, 레이싱, 리듬 게임까지.">
+<title>GGF 게임 허브 — 브라우저 게임 400선</title>
+<meta name="description" content="설치 없이 바로 즐기는 브라우저 게임 400개. 액션, 퍼즐, 보드, 스포츠, 레이싱, 리듬 게임까지.">
 <style>
 :root{--bg:#070914;--panel:#10152b;--line:#232b52;--txt:#e9ecff;--sub:#98a2d6;--acc:#7c6cff;--pink:#ff5ca8;--gold:#ffd166}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -72,22 +72,74 @@ select{font:inherit;margin-left:auto;background:var(--panel);color:var(--txt);bo
 footer{color:#5c6699;text-align:center;font-size:13px;padding:30px}
 @media (max-width:900px){.hero{grid-template-columns:1fr 1fr}.hero a:first-child{grid-column:span 2;grid-row:auto;min-height:280px}.hero a:first-child .em{font-size:140px}.stat{display:none}}
 @media (max-width:560px){.top{flex-wrap:wrap}.search{order:3;max-width:none;flex-basis:100%}.hero{grid-template-columns:1fr 1fr;gap:10px}.hero a{min-height:130px;padding:14px}.hero a:first-child{grid-column:span 2;min-height:230px}.hero a:nth-child(n+4){display:none}.hero .em,.hero a:first-child .em{font-size:64px;right:10px;top:8px;opacity:.85}.hero a:first-child .em{font-size:110px}.hero h2{font-size:18px}.hero a:first-child h2{font-size:30px}.hero p{font-size:13px;max-width:62%}.grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}.thumb{height:120px;font-size:64px}.body p{display:none}select{margin-left:0}}
+
+.nav{display:flex;gap:6px}
+.nav a{font-weight:800;color:var(--sub);padding:10px 14px;border-radius:12px;white-space:nowrap}
+.nav a:hover{color:var(--txt)}
+.nav a.on{color:#fff;background:#1a2147}
+.sug{position:absolute;left:0;right:0;top:calc(100% + 6px);background:#0d1226;border:1px solid var(--line);border-radius:14px;box-shadow:0 20px 50px rgba(0,0,0,.6);overflow:hidden;display:none;z-index:30}
+.sug.show{display:block}
+.sug a{display:flex;align-items:center;gap:12px;padding:9px 14px;border-top:1px solid #161d3d}
+.sug a:first-child{border-top:0}
+.sug a.sel,.sug a:hover{background:#1a2147}
+.sug .e{font-size:26px;width:34px;text-align:center}
+.sug b{font-size:15px}.sug small{display:block;color:var(--sub);font-size:12px}
+.sug mark,.card mark{background:none;color:var(--gold)}
+.sug .more{padding:9px 14px;color:var(--sub);font-size:13px;border-top:1px solid #161d3d}
+.qhint{color:var(--sub);font-size:13px;margin:-6px 0 14px}
+.qhint b{color:var(--txt)}
+.top50{display:none}
+body.v-top .home{display:none}body.v-top .top50{display:block}
+.tbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:18px}
+.podium{display:grid;grid-template-columns:1fr 1.2fr 1fr;gap:16px;align-items:end;margin-bottom:26px}
+.podium a{border-radius:22px;padding:18px;text-align:center;position:relative;border:1px solid rgba(255,255,255,.1);transition:transform .2s}
+.podium a:hover{transform:translateY(-4px)}
+.podium .e{font-size:84px;filter:drop-shadow(0 10px 24px rgba(0,0,0,.5))}
+.podium .r1 .e{font-size:120px}
+.podium .md{font-size:40px;position:absolute;top:10px;left:14px}
+.podium h2{font-size:22px;font-weight:900;margin-top:6px;text-shadow:0 2px 10px rgba(0,0,0,.5)}
+.podium .r1{min-height:300px}.podium .r2{min-height:250px}.podium .r3{min-height:220px}
+.podium p{font-size:13px;opacity:.9;margin-top:4px}
+.rank{display:grid;grid-template-columns:repeat(auto-fill,minmax(440px,1fr));gap:10px}
+.row{display:flex;align-items:center;gap:14px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:10px 14px;transition:border-color .15s,transform .15s}
+.row:hover{border-color:var(--acc);transform:translateX(4px)}
+.row .n{font-size:22px;font-weight:900;width:40px;text-align:center;color:var(--sub)}
+.row .ic{width:54px;height:54px;border-radius:14px;display:grid;place-items:center;font-size:30px;flex:0 0 auto}
+.row .tx{flex:1;min-width:0}
+.row b{font-size:16px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row small{color:var(--sub);font-size:12px}
+.row .sc{text-align:right;font-size:12px;color:var(--sub);min-width:90px}
+.row .sc i{display:block;height:6px;border-radius:3px;background:linear-gradient(90deg,var(--acc),var(--pink));margin-top:5px;margin-left:auto}
+.row .sc em{font-style:normal;color:var(--gold);font-weight:800;font-size:14px}
+.card{content-visibility:auto;contain-intrinsic-size:auto 300px}
+@media (max-width:900px){.nav a{padding:8px 10px}.rank{grid-template-columns:1fr}}
+@media (max-width:560px){.nav{order:2}.podium{grid-template-columns:1fr 1fr 1fr;gap:8px}.podium a{padding:10px 6px}.podium .e{font-size:44px}.podium .r1 .e{font-size:62px}.podium h2{font-size:14px}.podium p{display:none}.podium .md{font-size:24px;top:6px;left:8px}.podium .r1{min-height:190px}.podium .r2{min-height:160px}.podium .r3{min-height:140px}.row{gap:10px;padding:8px 10px}.row .n{width:28px;font-size:18px}.row .ic{width:44px;height:44px;font-size:24px}.row .sc{min-width:64px}}
 </style>
 </head>
 <body>
 <header><div class="top">
   <a class="logo" href="index.html">🎮 <b>GGF</b> 게임 허브</a>
-  <label class="search"><input id="q" type="search" placeholder="게임 검색 ( / )" autocomplete="off"></label>
+  <nav class="nav"><a href="#" data-v="home" class="on">🏠 홈</a><a href="#top50" data-v="top">🏆 TOP50</a></nav>
+  <div class="search"><input id="q" type="search" placeholder="게임 검색 — 초성도 OK (예: ㅅㄴㅇㅋ)  /" autocomplete="off" aria-label="게임 검색"><div class="sug" id="sug"></div></div>
   <button class="rand" id="rand">🎲 랜덤 플레이</button>
   <div class="stat" id="stat"></div>
 </div></header>
 <main>
+  <div class="top50" id="top50">
+    <h3 class="sec">🏆 인기 게임 TOP 50 <small id="tsub"></small></h3>
+    <div class="tbar" id="tbar"></div>
+    <div class="podium" id="podium"></div>
+    <div class="rank" id="rank"></div>
+  </div>
+  <div class="home">
   <section class="hero" id="hero"></section>
   <section id="recentWrap" style="display:none"><h3 class="sec">⏱️ 최근 플레이</h3><div class="recent" id="recent"></div></section>
   <h3 class="sec">🎮 전체 게임 <small id="count"></small></h3>
+  <div class="qhint" id="qhint" style="display:none"></div>
   <div class="bar" id="chips"></div>
   <div class="grid" id="grid"></div>
   <div class="empty" id="empty" style="display:none">검색 결과가 없어요 😢</div>
+  </div>
 </main>
 <footer>GGF 게임 허브 · 모든 게임은 설치 없이 브라우저에서 실행됩니다 · 기록은 이 브라우저에 저장돼요</footer>
 <script src="games.js"></script>
@@ -96,95 +148,222 @@ footer{color:#5c6699;text-align:center;font-size:13px;padding:30px}
   var get = function (k, d) { try { var v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } };
   var set = function (k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
   var G = window.GAMES, C = window.CATS;
-  var PAL = { arcade: ['#ff8a00', '#e52e71'], action: ['#f12711', '#f5af19'], shooter: ['#2b5876', '#4e4376'], racing: ['#ee0979', '#ff6a00'], sports: ['#11998e', '#38ef7d'], puzzle: ['#8e2de2', '#4a00e0'], board: ['#355c7d', '#c06c84'], card: ['#134e5e', '#71b280'], rhythm: ['#fc466b', '#3f5efb'], casual: ['#f7971e', '#ffd200'] };
+  var PAL = { arcade: ['#ff8a00', '#e52e71'], action: ['#f12711', '#f5af19'], shooter: ['#2b5876', '#4e4376'], racing: ['#ee0979', '#ff6a00'], sports: ['#11998e', '#38ef7d'], puzzle: ['#8e2de2', '#4a00e0'], board: ['#355c7d', '#c06c84'], card: ['#134e5e', '#71b280'], rhythm: ['#fc466b', '#3f5efb'], casual: ['#f7971e', '#ffd200'], rpg: ['#5f2c82', '#49a09d'], sim: ['#1d976c', '#93f9b9'], quiz: ['#4568dc', '#b06ab3'], korean: ['#c31432', '#240b36'] };
   var grad = function (c, i) { var p = PAL[c] || ['#333', '#555']; return 'linear-gradient(' + (120 + (i * 37) % 120) + 'deg,' + p[0] + ',' + p[1] + ')'; };
   var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
   var url = function (id) { return 'play.html?g=' + id + '#' + id; };
   var fav = get('hub_fav', []), cat = get('hub_cat', 'all'), sort = get('hub_sort', 'pop');
   var plays = get('hub_plays', {});
+  var best = function (id) { return get('hub_best_' + id, null); };
+  var IDX = {}; G.forEach(function (g, i) { IDX[g.id] = i; });
 
-  /* 히어로 */
-  var featured = G.slice().sort(function (a, b) { return b.p - a.p; }).slice(0, 5);
-  document.getElementById('hero').innerHTML = featured.map(function (g, i) {
+  /* ---------- 검색 (초성 · 별칭 · 부분 일치) ---------- */
+  var CHO = 'ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ';
+  var ALIAS = {
+    blocks: '테트리스 tetris', tetrisbattle: '테트리스 tetris 99 대전', suika: '수박게임 수박 게임', royale: '클래시로얄 클래시 로얄 clash royale', lol: '롤 리그오브레전드 moba',
+    pvz: '식물 대 좀비 식물대좀비 plants vs zombies', bluemarble: '부루마블', gostop: '고스톱 화투 맞고', amongus: '어몽어스 among us', fallguys: '폴가이즈 fall guys',
+    monster: '포켓몬 포켓몬스터 pokemon', craft: '마인크래프트 테라리아 minecraft terraria', zelda: '젤다 zelda', streetfight: '스트리트파이터 철권 격투', smash: '스매시브라더스 대난투',
+    g2048: '2048', diep: 'diep.io 다이프', brio: '배그 배틀그라운드 포트나이트 pubg', puyo: '뿌요뿌요', kart: '카트라이더 마리오카트 카트', mario: '마리오 슈퍼마리오 mario',
+    sonic: '소닉 sonic', megaman: '록맨 메가맨 megaman', bubblebobble: '보글보글', hollow: '할로우나이트 hollow knight', cuphead: '컵헤드', overwatch: '오버워치',
+    drmario: '닥터마리오', battlecity: '배틀시티 탱크', pang: '슈퍼팡 팡', snowbros: '스노우브라더스 스노우볼', stairs: '무한의계단', crossy: '크로시로드 길건너 친구들',
+    subway: '서브웨이서퍼 subway surfers', slither: '슬리더리오 slither.io', agar: '아가리오 agar.io', paperio: '페이퍼아이오 paper.io', holeio: '홀아이오 hole.io',
+    geodash: '지오메트리대시 geometry dash', flappy: '플래피버드', dino: '크롬 공룡 티라노', redlight: '오징어게임 무궁화', dalgona: '오징어게임 달고나 뽑기',
+    castlevania: '악마성 드라큘라', contra: '콘트라 혼두라', raiden: '라이덴 1945 비행기', gradius: '그라디우스', cuttherope: '컷더로프 cut the rope', zuma: '주마',
+    lemmings: '레밍스', portal: '포탈', unblock: '러시아워 주차', deckbuild: '슬레이더스파이어 slay the spire 덱빌딩', rpgturn: '드래곤퀘스트 jrpg', diablo: '디아블로',
+    farm: '팜빌 스타듀밸리 농사', city: '심시티 도시', factory: '팩토리오', osu: 'osu 오스', taiko: '태고의달인', guitar: '기타히어로', beatsaber: '비트세이버', djmax: '디제이맥스',
+    texas: '포커 홀덤 holdem', catan: '카탄', baduk: '바둑 go', janggi: '장기', yut: '윷놀이 윷', headsoccer: '헤드사커', hillclimb: '힐클라임 레이싱', civ: '문명 civilization',
+    rts: '스타크래프트 starcraft 전략', pacman: '팩맨', invaders: '스페이스 인베이더 갤러그', galaxy: '갤러그 갤라가', breakout: '알카노이드 벽돌', bomber: '봄버맨 크레이지아케이드 물풍선',
+    survivor: '뱀서 뱀파이어서바이버', fps: '둠 doom 울펜슈타인', subwaykr: '지하철', onecard: '원카드', hwatu: '섯다 화투', wordchain: '끝말잇기', mafia: '마피아',
+    escape: '방탈출', idle: '방치형', idlerpg: '방치형', sandbox: '파우더 모래', airport: '플라이트 컨트롤', helix: '헬릭스 점프', stackball: '스택볼', minesweeper: '지뢰찾기',
+    solitaire: '카드놀이 클론다이크', mahjong: '마작 사천성', mahjong4: '마작 리치', chess: '체스', othello: '오셀로 리버시', gomoku: '오목', uno: '우노', billiards: '당구 3쿠션 사구'
+  };
+  var isCho = function (ch) { return CHO.indexOf(ch) >= 0; };
+  var choOf = function (ch) { var c = ch.charCodeAt(0) - 0xac00; return c >= 0 && c < 11172 ? CHO[Math.floor(c / 588)] : ch; };
+  var norm = function (s) { return String(s).toLowerCase().replace(/\s+/g, ''); };
+  // 원문에서 공백을 뺀 문자와 원래 위치
+  function strip(s) { var o = [], pos = []; for (var i = 0; i < s.length; i++) if (!/\s/.test(s[i])) { o.push(s[i].toLowerCase()); pos.push(i); } return { c: o, pos: pos }; }
+  function find(st, q) {
+    var c = st.c, n = q.length;
+    for (var i = 0; i + n <= c.length; i++) {
+      var ok = true;
+      for (var j = 0; j < n; j++) { var a = c[i + j], b = q[j]; if (a !== b && !(isCho(b) && choOf(a) === b)) { ok = false; break; } }
+      if (ok) return i;
+    }
+    return -1;
+  }
+  var PRE = G.map(function (g) { return { t: strip(g.t), al: strip((ALIAS[g.id] || '') + ' ' + g.id), c: strip(C[g.c] || ''), d: strip(g.d) }; });
+  function score(g, q) {
+    var P = PRE[IDX[g.id]], i = find(P.t, q);
+    if (i === 0) return { s: 100 - P.t.c.length * 0.1, h: [0, q.length] };
+    if (i > 0) return { s: 80 - i, h: [i, q.length] };
+    if (find(P.al, q) >= 0) return { s: 60 };
+    if (find(P.c, q) >= 0) return { s: 40 };
+    if (q.length >= 2 && !q.some(isCho) && find(P.d, q) >= 0) return { s: 20 };
+    return null;
+  }
+  function hl(g, h) {
+    if (!h) return esc(g.t);
+    var pos = PRE[IDX[g.id]].t.pos, a = pos[h[0]], b = pos[h[0] + h[1] - 1] + 1;
+    return esc(g.t.slice(0, a)) + '<mark>' + esc(g.t.slice(a, b)) + '</mark>' + esc(g.t.slice(b));
+  }
+  function search(term) {
+    var q = norm(term).split('');
+    if (!q.length) return null;
+    var out = [];
+    G.forEach(function (g) { var r = score(g, q); if (r) out.push({ g: g, s: r.s + g.p * 0.05, h: r.h }); });
+    out.sort(function (a, b) { return b.s - a.s; });
+    return out;
+  }
+
+  /* ---------- 히어로 ---------- */
+  var byPop = G.slice().sort(function (a, b) { return b.p - a.p || IDX[a.id] - IDX[b.id]; });
+  document.getElementById('hero').innerHTML = byPop.slice(0, 5).map(function (g, i) {
     return '<a href="' + url(g.id) + '" style="background:' + grad(g.c, i) + '"><div class="em">' + g.e + '</div>' +
-      '<span class="tag">' + (i === 0 ? '🔥 인기 1위' : C[g.c]) + '</span><h2>' + esc(g.t) + '</h2>' +
+      '<span class="tag">' + (i === 0 ? '🔥 인기 1위' : '🏆 TOP ' + (i + 1)) + '</span><h2>' + esc(g.t) + '</h2>' +
       (i === 0 ? '<p>' + esc(g.d) + '</p><span class="play">▶ 지금 플레이</span>' : '') + '</a>';
   }).join('');
 
-  /* 통계 */
+  /* ---------- 통계 ---------- */
   var totalPlays = Object.keys(plays).reduce(function (s, k) { return s + plays[k]; }, 0);
-  var tried = Object.keys(plays).length;
-  document.getElementById('stat').textContent = '총 ' + G.length + '개 · 내가 해본 게임 ' + tried + '개 · ' + totalPlays + '판';
+  document.getElementById('stat').textContent = '총 ' + G.length + '개 · 해본 게임 ' + Object.keys(plays).length + '개 · ' + totalPlays + '판';
 
-  /* 최근 */
-  var rec = get('hub_recent', []).map(function (id) { return G.find(function (g) { return g.id === id; }); }).filter(Boolean);
+  /* ---------- 최근 ---------- */
+  var rec = get('hub_recent', []).map(function (id) { return G[IDX[id]]; }).filter(Boolean);
   if (rec.length) {
     document.getElementById('recentWrap').style.display = '';
     document.getElementById('recent').innerHTML = rec.map(function (g, i) {
-      var b = get('hub_best_' + g.id, null);
+      var b = best(g.id);
       return '<a href="' + url(g.id) + '"><div class="ic" style="background:' + grad(g.c, i) + '">' + g.e + '</div><div><b>' + esc(g.t) + '</b><small>' + (b !== null ? '최고 ' + Number(b).toLocaleString() : '기록 없음') + '</small></div></a>';
     }).join('');
   }
 
-  /* 칩 */
+  /* ---------- 칩 ---------- */
   function chips() {
     var counts = { all: G.length, fav: fav.length };
     G.forEach(function (g) { counts[g.c] = (counts[g.c] || 0) + 1; });
     var list = [['all', '전체'], ['fav', '⭐ 즐겨찾기']].concat(Object.keys(C).map(function (k) { return [k, C[k]]; }));
     document.getElementById('chips').innerHTML = list.map(function (x) {
       return '<button class="chip' + (cat === x[0] ? ' on' : '') + '" data-c="' + x[0] + '">' + x[1] + '<span class="n">' + (counts[x[0]] || 0) + '</span></button>';
-    }).join('') + '<select id="sort"><option value="pop">인기순</option><option value="name">이름순</option><option value="played">많이 한 순</option><option value="cat">카테고리순</option></select>';
+    }).join('') + '<select id="sort"><option value="pop">인기순</option><option value="name">이름순</option><option value="played">많이 한 순</option><option value="cat">카테고리순</option><option value="new">최신 추가순</option></select>';
     var s = document.getElementById('sort');
     s.value = sort;
     s.onchange = function () { sort = s.value; set('hub_sort', sort); render(); };
-    document.querySelectorAll('.chip').forEach(function (b) {
+    document.querySelectorAll('#chips .chip').forEach(function (b) {
       b.onclick = function () { cat = b.dataset.c; set('hub_cat', cat); chips(); render(); };
     });
   }
 
-  /* 그리드 */
+  /* ---------- 그리드 ---------- */
   var q = document.getElementById('q');
+  function card(g, h) {
+    var b = best(g.id), on = fav.indexOf(g.id) >= 0, r = RANK[g.id];
+    return '<a class="card" href="' + url(g.id) + '">' + (r ? '<span class="hot">🏆 ' + r + '위</span>' : g.p >= 90 ? '<span class="hot">HOT</span>' : '') +
+      '<button class="fav' + (on ? ' on' : '') + '" data-id="' + g.id + '" title="즐겨찾기">' + (on ? '★' : '☆') + '</button>' +
+      '<div class="thumb" style="background:' + grad(g.c, IDX[g.id]) + '"><span>' + g.e + '</span><div class="pl"><i>▶ PLAY</i></div></div>' +
+      '<div class="body"><h4>' + hl(g, h) + '</h4><p>' + esc(g.d) + '</p><div class="meta"><span class="cat">' + C[g.c] + '</span>' +
+      '<span class="best">' + (b !== null ? '🏆 ' + Number(b).toLocaleString() : '') + '</span></div></div></a>';
+  }
   function render() {
-    var term = q.value.trim().toLowerCase();
-    var list = G.filter(function (g) {
+    var term = q.value.trim(), res = search(term), H = {};
+    var list = res ? res.map(function (r) { H[r.g.id] = r.h; return r.g; }) : G.slice();
+    list = list.filter(function (g) {
       if (cat === 'fav' && fav.indexOf(g.id) < 0) return false;
       if (cat !== 'all' && cat !== 'fav' && g.c !== cat) return false;
-      if (term && (g.t + ' ' + g.d + ' ' + g.id + ' ' + C[g.c]).toLowerCase().indexOf(term) < 0) return false;
       return true;
     });
-    list.sort(function (a, b) {
+    if (!res) list.sort(function (a, b) {
       if (sort === 'name') return a.t.localeCompare(b.t, 'ko');
       if (sort === 'played') return (plays[b.id] || 0) - (plays[a.id] || 0) || b.p - a.p;
       if (sort === 'cat') return a.c.localeCompare(b.c) || b.p - a.p;
-      return b.p - a.p;
+      if (sort === 'new') return IDX[b.id] - IDX[a.id];
+      return b.p - a.p || IDX[a.id] - IDX[b.id];
     });
+    var qh = document.getElementById('qhint');
+    if (res) {
+      qh.style.display = '';
+      qh.innerHTML = '“<b>' + esc(term) + '</b>” 검색 결과 ' + list.length + '개 · 관련도순' + (cat !== 'all' ? ' · <b>' + (cat === 'fav' ? '즐겨찾기' : C[cat]) + '</b> 안에서만 (전체에서는 ' + res.length + '개)' : '');
+    } else qh.style.display = 'none';
     document.getElementById('count').textContent = list.length + '개';
     document.getElementById('empty').style.display = list.length ? 'none' : '';
-    document.getElementById('grid').innerHTML = list.map(function (g, i) {
-      var b = get('hub_best_' + g.id, null), on = fav.indexOf(g.id) >= 0;
-      return '<a class="card" href="' + url(g.id) + '">' + (g.p >= 90 ? '<span class="hot">HOT</span>' : '') +
-        '<button class="fav' + (on ? ' on' : '') + '" data-id="' + g.id + '" title="즐겨찾기">' + (on ? '★' : '☆') + '</button>' +
-        '<div class="thumb" style="background:' + grad(g.c, G.indexOf(g)) + '"><span>' + g.e + '</span><div class="pl"><i>▶ PLAY</i></div></div>' +
-        '<div class="body"><h4>' + esc(g.t) + '</h4><p>' + esc(g.d) + '</p><div class="meta"><span class="cat">' + C[g.c] + '</span>' +
-        '<span class="best">' + (b !== null ? '🏆 ' + Number(b).toLocaleString() : '') + '</span></div></div></a>';
-    }).join('');
-    document.querySelectorAll('.fav').forEach(function (b) {
-      b.onclick = function (e) {
-        e.preventDefault(); e.stopPropagation();
-        var id = b.dataset.id, i = fav.indexOf(id);
-        if (i >= 0) fav.splice(i, 1); else fav.push(id);
-        set('hub_fav', fav); chips(); render();
-      };
-    });
+    document.getElementById('grid').innerHTML = list.map(function (g) { return card(g, H[g.id]); }).join('');
   }
-  q.addEventListener('input', render);
+  document.getElementById('grid').addEventListener('click', function (e) {
+    var b = e.target.closest('.fav');
+    if (!b) return;
+    e.preventDefault(); e.stopPropagation();
+    var id = b.dataset.id, i = fav.indexOf(id);
+    if (i >= 0) fav.splice(i, 1); else fav.push(id);
+    set('hub_fav', fav); chips(); render();
+  });
+
+  /* ---------- 자동완성 ---------- */
+  var sug = document.getElementById('sug'), sel = -1, sugList = [];
+  function showSug() {
+    var res = search(q.value.trim());
+    sel = -1;
+    if (!res || document.activeElement !== q) { sug.classList.remove('show'); return; }
+    sugList = res.slice(0, 8);
+    sug.innerHTML = sugList.length ? sugList.map(function (r, i) {
+      return '<a href="' + url(r.g.id) + '" data-i="' + i + '"><span class="e">' + r.g.e + '</span><span><b>' + hl(r.g, r.h) + '</b><small>' + C[r.g.c] + (RANK[r.g.id] ? ' · 🏆 ' + RANK[r.g.id] + '위' : '') + '</small></span></a>';
+    }).join('') + (res.length > 8 ? '<div class="more">Enter: 첫 번째 실행 · 아래 목록에서 ' + res.length + '개 모두 보기</div>' : '') : '<div class="more">일치하는 게임이 없어요</div>';
+    sug.classList.add('show');
+  }
+  function mark() { sug.querySelectorAll('a').forEach(function (a, i) { a.classList.toggle('sel', i === sel); }); }
+  q.addEventListener('input', function () { if (view !== 'home') go('home'); render(); showSug(); });
+  q.addEventListener('focus', showSug);
+  q.addEventListener('blur', function () { setTimeout(function () { sug.classList.remove('show'); }, 150); });
+  q.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); var n = sugList.length; if (n) { if (e.key === 'ArrowDown') sel = sel + 1 >= n ? -1 : sel + 1; else sel = sel - 1 < -1 ? n - 1 : sel - 1; mark(); } }
+    else if (e.key === 'Enter') { var r = sugList[sel >= 0 ? sel : 0]; if (r && sug.classList.contains('show')) location.href = url(r.g.id); }
+    else if (e.key === 'Escape') { sug.classList.remove('show'); q.blur(); }
+  });
   document.addEventListener('keydown', function (e) {
     if (e.key === '/' && document.activeElement !== q) { e.preventDefault(); q.focus(); }
-    if (e.key === 'Enter' && document.activeElement === q) { var a = document.querySelector('.card'); if (a) location.href = a.getAttribute('href'); }
   });
   document.getElementById('rand').onclick = function () { location.href = url(G[Math.floor(Math.random() * G.length)].id); };
+
+  /* ---------- TOP 50 ---------- */
+  var RANK = {};
+  byPop.slice(0, 50).forEach(function (g, i) { RANK[g.id] = i + 1; });
+  var tcat = get('hub_tcat', 'all');
+  function top50() {
+    var mine = tcat === 'mine';
+    var list = G.filter(function (g) { return mine ? plays[g.id] > 0 : tcat === 'all' || g.c === tcat; });
+    list.sort(mine ? function (a, b) { return plays[b.id] - plays[a.id] || b.p - a.p; } : function (a, b) { return b.p - a.p || IDX[a.id] - IDX[b.id]; });
+    list = list.slice(0, 50);
+    var opts = [['all', '🌐 종합'], ['mine', '🙋 내가 많이 한']].concat(Object.keys(C).map(function (k) { return [k, C[k]]; }));
+    document.getElementById('tbar').innerHTML = opts.map(function (x) { return '<button class="chip' + (tcat === x[0] ? ' on' : '') + '" data-t="' + x[0] + '">' + x[1] + '</button>'; }).join('');
+    document.querySelectorAll('#tbar .chip').forEach(function (b) { b.onclick = function () { tcat = b.dataset.t; set('hub_tcat', tcat); top50(); }; });
+    document.getElementById('tsub').textContent = mine ? '내 플레이 횟수 기준' : '인기 지수 기준 · ' + (tcat === 'all' ? '전체 ' + G.length + '개 중' : C[tcat] + ' ' + G.filter(function (g) { return g.c === tcat; }).length + '개 중');
+    var val = function (g) { return mine ? plays[g.id] + '판' : '인기 ' + g.p; };
+    var mx = list.length ? (mine ? plays[list[0].id] : 100) : 1;
+    var MD = ['🥇', '🥈', '🥉'];
+    var pod = [1, 0, 2].filter(function (i) { return list[i]; });
+    document.getElementById('podium').innerHTML = pod.map(function (i) {
+      var g = list[i];
+      return '<a class="r' + (i + 1) + '" href="' + url(g.id) + '" style="background:' + grad(g.c, i) + '"><span class="md">' + MD[i] + '</span><div class="e">' + g.e + '</div><h2>' + esc(g.t) + '</h2><p>' + C[g.c] + ' · ' + val(g) + '</p></a>';
+    }).join('');
+    document.getElementById('rank').innerHTML = list.length ? list.slice(3).map(function (g, k) {
+      var i = k + 3, b = best(g.id), v = mine ? plays[g.id] : g.p;
+      return '<a class="row" href="' + url(g.id) + '"><span class="n">' + (i + 1) + '</span><span class="ic" style="background:' + grad(g.c, i) + '">' + g.e + '</span>' +
+        '<span class="tx"><b>' + esc(g.t) + '</b><small>' + C[g.c] + (b !== null ? ' · 내 최고 ' + Number(b).toLocaleString() : '') + '</small></span>' +
+        '<span class="sc"><em>' + val(g) + '</em><i style="width:' + Math.max(8, Math.round(v / mx * 100)) + '%"></i></span></a>';
+    }).join('') : '<div class="empty">아직 플레이한 게임이 없어요. 하나 골라서 시작해 보세요!</div>';
+  }
+
+  /* ---------- 화면 전환 ---------- */
+  var view = 'home';
+  function go(v) {
+    view = v;
+    document.body.classList.toggle('v-top', v === 'top');
+    document.querySelectorAll('.nav a').forEach(function (a) { a.classList.toggle('on', a.dataset.v === v); });
+    if (v === 'top') top50();
+  }
+  function route() { go(location.hash === '#top50' ? 'top' : 'home'); }
+  window.addEventListener('hashchange', function () { route(); window.scrollTo(0, 0); });
   chips();
   render();
+  route();
 })();
 </script>
 </body>
