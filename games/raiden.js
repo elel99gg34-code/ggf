@@ -1,10 +1,10 @@
 let S;
 const WN = { R: '벌컨', B: '레이저', P: '호밍' }, WC = { R: '#ef4444', B: '#3b82f6', P: '#a855f7' };
 const RSTG = [
-  { n: '평원 기지', base: '#3f6212', alt: '#4d7c0f', deco: ['🌲', '🌳', '🏠'], len: 55 },
-  { n: '해안 요새', base: '#0e4a6e', alt: '#155e75', deco: ['🪨', '🚢', '🏝️'], len: 60 },
-  { n: '사막 공장', base: '#a16207', alt: '#b45309', deco: ['🌵', '🏭', '🪨'], len: 65 },
-  { n: '적 본진', base: '#27272a', alt: '#3f3f46', deco: ['🏢', '🏗️', '🛢️'], len: 70 },
+  { n: '평원 기지', base: '#3f6212', alt: '#456f12', deco: ['🌲', '🌳', '🏠'], len: 55 },
+  { n: '해안 요새', base: '#0e4a6e', alt: '#0f5370', deco: ['🪨', '🚢', '🏝️'], len: 60 },
+  { n: '사막 공장', base: '#a16207', alt: '#a8650a', deco: ['🌵', '🏭', '🪨'], len: 65 },
+  { n: '적 본진', base: '#27272a', alt: '#303034', deco: ['🏢', '🏗️', '🛢️'], len: 70 },
 ];
 GAME({
   title: '라이덴 파이터', w: 600, h: 800, bg: '#000', controls: 'dpad+ab', aLabel: '발사', bLabel: '폭탄',
@@ -111,7 +111,7 @@ GAME({
     const st = RSTG[S.stage];
     g.rect(0, 0, 600, 800, st.base);
     const off = S.scroll % 100;
-    for (let y = -100 + off; y < 800; y += 100) for (let x = 0; x < 600; x += 100) if (((x / 100) + Math.floor((y - S.scroll) / 100)) % 2 === 0) g.rect(x, y, 100, 100, st.alt);
+    for (let y = -100 + off; y < 800; y += 100) for (let x = 0; x < 600; x += 100) if ((((x / 100) + Math.floor((y - S.scroll) / 100)) & 1) === 0) g.rect(x, y, 100, 100, st.alt);
     const ro = S.scroll % 80;
     g.rect(270, 0, 60, 800, 'rgba(0,0,0,.25)');
     for (let y = -80 + ro; y < 800; y += 80) g.rect(297, y, 6, 40, 'rgba(255,255,255,.35)');
