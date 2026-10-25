@@ -136,7 +136,10 @@ def compress(path: str, quality: int = 60, max_px: int = 1600) -> dict:
             except Exception:  # noqa: BLE001 - 바꿀 수 없는 이미지 형식은 그대로 둔다
                 continue
         page.compress_content_streams()
-    writer.compress_identical_objects(remove_identicals=True, remove_orphans=True)
+    try:
+        writer.compress_identical_objects(remove_duplicates=True, remove_unreferenced=True)
+    except TypeError:  # pypdf 5 이하
+        writer.compress_identical_objects(remove_identicals=True, remove_orphans=True)
     dst = output_path(src, "_압축")
     with dst.open("wb") as f:
         writer.write(f)

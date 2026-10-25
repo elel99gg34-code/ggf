@@ -197,7 +197,7 @@ def test_pdf_masks_only_pages_with_pii(tmp_path, korean_font):
     assert doc.get_metadata_value("Author") == ""
     # 가린 쪽은 그림이고, 전화번호 위치가 검게 칠해졌는지 확인
     img = doc[0].render(scale=1).to_pil().convert("L")
-    assert min(img.getdata()) < 30
+    assert min(img.get_flattened_data() if hasattr(img, "get_flattened_data") else img.getdata()) < 30
     doc.close()
 
 

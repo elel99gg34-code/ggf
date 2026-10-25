@@ -5,7 +5,7 @@ import calendar
 import re
 import uuid
 from dataclasses import dataclass
-from datetime import date, datetime, time, timedelta
+from datetime import date, datetime, time, timedelta, timezone
 from pathlib import Path
 
 from fastapi import APIRouter
@@ -292,7 +292,7 @@ VTIMEZONE = [
 
 def to_ics(events: list[dict]) -> str:
     lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//LocalBiseo//KO", "CALSCALE:GREGORIAN", *VTIMEZONE]
-    stamp = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     for ev in events:
         lines += ["BEGIN:VEVENT", f"UID:{uuid.uuid4()}@localbiseo", f"DTSTAMP:{stamp}"]
         if ev.get("all_day"):

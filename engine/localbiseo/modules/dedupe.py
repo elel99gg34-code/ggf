@@ -100,7 +100,7 @@ def _info(p: Path) -> dict:
 def dhash(path: Path, size: int = 8) -> int:
     with Image.open(path) as im:
         im = im.convert("L").resize((size + 1, size), Image.Resampling.LANCZOS)
-        px = list(im.getdata())
+        px = list(im.get_flattened_data() if hasattr(im, "get_flattened_data") else im.getdata())
     bits = 0
     for row in range(size):
         for col in range(size):
