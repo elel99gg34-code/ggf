@@ -22,7 +22,8 @@ SCRIPT = {"en": r"[A-Za-z]{3}", "ko": r"[가-힣]{2}", "ja": r"[぀-ヿ一-鿿]{
 
 class PrintJob:
     def progress(self, value: float, message: str | None = None) -> None:
-        print(f"  {value:4.0%} {message or ''}", flush=True)
+        if message and not message.endswith("MB"):  # 내려받기 진행은 생략
+            print(f"  {value:4.0%} {message}", flush=True)
 
     def check(self) -> None:
         pass
@@ -33,7 +34,7 @@ def main() -> int:
         t = time.time()
         tr.install_pair(PrintJob(), a, b)
         size = sum(f.stat().st_size for f in (tr.packs_dir() / f"{a}_{b}").rglob("*") if f.is_file())
-        print(f"{a}->{b} 설치 {time.time() - t:.1f}s, {size / 1e6:.0f}MB", flush=True)
+        print(f"{a}->{b} 설치 {time.time() - t:.1f}s, 풀린 크기 {size / 1e6:.0f}MB", flush=True)
     failed = 0
     for (a, b), text in SAMPLES.items():
         t = time.time()

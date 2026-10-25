@@ -169,10 +169,8 @@ await session("transcribe", async (h) => {
   await h.caption("받아쓰기 · 요약 · <b>할 일과 일정</b>까지 자동 정리");
   await h.wait(3500);
   await h.scroll(380);
-  await h.wait(2000);
-  await h.click("button:has-text('할 일에 넣기')");
-  await h.caption("할 일은 버튼 한 번으로 <b>할 일 목록</b>에");
-  await h.wait(2200);
+  await h.caption("찾은 할 일은 <b>할 일 목록에 자동 등록</b>");
+  await h.wait(3000);
   await h.click("button:has-text('워드(.docx)')");
   await h.caption("워드·자막 파일로 <b>바로 저장</b>");
   await h.wait(2600);

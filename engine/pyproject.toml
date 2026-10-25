@@ -22,7 +22,7 @@ dependencies = [
 
 [project.optional-dependencies]
 # 무거운 기능은 선택 설치. 설치 안 돼 있으면 해당 기능만 "추가 구성요소 필요"로 표시된다.
-stt = ["faster-whisper>=1.0"]
+stt = ["faster-whisper>=1.1"]  # hotwords
 diarize = ["speechbrain>=1.0", "torch>=2.2"]
 ocr = ["pytesseract>=0.3.10"]
 ocr-paddle = ["paddleocr>=2.7", "paddlepaddle>=2.6"]

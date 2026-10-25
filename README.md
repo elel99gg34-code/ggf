@@ -114,5 +114,5 @@ python tools/license_gen.py batch --private ~/.localbiseo-signing/private.pem ba
 - **화자 분리**: 실험 기능이다. 실제 녹음으로 품질을 확인하지 않았다.
 - **macOS OCR**: `brew install tesseract tesseract-lang`이 필요하다. Windows 설치 파일에는 Tesseract가 들어간다.
 - **코드 서명**: 설치 파일에 서명하지 않아 첫 실행 때 운영체제 경고가 뜬다. Windows는 코드 서명 인증서, macOS는 Apple 공증이 필요하다.
-- **번역**: 언어팩(쌍마다 약 100MB)은 처음 쓸 때 인터넷으로 내려받는다. 한↔일·중은 영어를 거쳐서 품질이 떨어질 수 있다.
+- **번역**: Argos 언어팩 품질이라 뜻 파악용이다(예: "by next Tuesday" → "다음 화요일에 의해"). 언어팩은 처음 쓸 때 인터넷으로 내려받고, 한↔일·중은 영어를 거쳐서 더 거칠다.
 - **로컬 AI**: 용량이 커서 기본 설치 파일에서 뺐다.

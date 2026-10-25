@@ -153,3 +153,8 @@ def test_install_pair_downloads_missing_legs(tmp_path, sp_model, monkeypatch, ap
     assert job["result"]["installed"] == ["en-ja", "ko-en"]
     assert fetched == [tr.INDEX_URL, "https://example.invalid/ko_en.argosmodel", "https://example.invalid/en_ja.argosmodel"]
     assert client.post("/translate", json={"text": "안녕하세요.", "source": "ko", "target": "ja"}).json()["text"] == "안녕하세요."
+
+
+def test_no_space_before_cjk_punctuation(tmp_path, sp_model):
+    tr.install_archive(make_pack(tmp_path, sp_model, "en", "ja"), "en", "ja")
+    assert tr.translate("会議は明日です 。\n\n明日です", "en", "ja")["text"] == "会議は明日です。\n\n明日です"

@@ -14,6 +14,8 @@ from ...core.ffmpeg import find_ffmpeg
 from ...core.jobs import JobContext
 
 SAMPLE_RATE = 16000
+# 한국어 요일을 숫자로 잘못 받아 적기 쉽다(예: 월요일 → 5요일). 30초 구간마다 힌트로 넣는다.
+KO_HOTWORDS = "월요일 화요일 수요일 목요일 금요일 토요일 일요일"
 
 MODEL_SIZES = {
     "base": "빠름 (정확도 보통, 약 150MB)",
@@ -99,6 +101,7 @@ def transcribe(job: JobContext, path: str, size: str = "small", language: str | 
         vad_filter=True,
         beam_size=5,
         condition_on_previous_text=False,
+        hotwords=KO_HOTWORDS if language == "ko" else None,
     )
     duration = float(info.duration or 0) or 1.0
     segments = []

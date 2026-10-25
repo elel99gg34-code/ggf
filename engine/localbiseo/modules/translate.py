@@ -33,6 +33,7 @@ _HEADERS = {"User-Agent": "LocalBiseo"}
 # 띄어쓰기 없이 문장을 잇는 언어
 _NO_SPACE = {"ja", "zh"}
 _SENT_SPLIT = re.compile(r"(?<=[.!?])\s+|(?<=[。！？])")
+_SPACE_BEFORE_CJK_PUNCT = re.compile(r"\s+(?=[。，、！？：；）」』])")
 
 _lock = threading.Lock()
 _loaded: dict[Path, tuple] = {}
@@ -110,8 +111,9 @@ def _translate_pack(path: Path, text: str, dst: str) -> str:
         if prefix and hyp and hyp[0] == prefix:
             hyp = hyp[1:]
         by_line.setdefault(i, []).append(sp.decode_pieces(hyp).replace("▁", " ").strip())
-    glue = "" if dst in _NO_SPACE else " "
-    return "\n".join(glue.join(by_line[i]) if i in by_line else line for i, line in enumerate(lines))
+    if dst in _NO_SPACE:
+        return "\n".join(_SPACE_BEFORE_CJK_PUNCT.sub("", "".join(by_line[i])) if i in by_line else line for i, line in enumerate(lines))
+    return "\n".join(" ".join(by_line[i]) if i in by_line else line for i, line in enumerate(lines))
 
 
 def translate(text: str, src: str, dst: str) -> dict:
