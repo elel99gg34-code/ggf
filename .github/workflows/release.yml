@@ -70,14 +70,22 @@ jobs:
         if: runner.os == 'macOS'
         run: python tools/build_engine.py
 
-      - name: 묶은 엔진이 뜨는지 확인
+      # 뜨는지만 보면 묶을 때 빠진 라이브러리를 못 잡는다. 번역·받아쓰기·이미지 가리기를 실제로 돌린다.
+      - name: 묶은 엔진으로 기능 점검
         shell: bash
         run: |
           exe=app/src-tauri/resources/engine/localbiseo-engine
           [ -f "$exe.exe" ] && exe="$exe.exe"
-          "$exe" --port 8799 --data-dir "$RUNNER_TEMP/lb-home" &
-          for i in $(seq 1 90); do curl -sf http://127.0.0.1:8799/health && exit 0; sleep 1; done
-          echo "엔진이 90초 안에 뜨지 않음"; exit 1
+          res="$PWD/app/src-tauri/resources/tools"
+          command -v cygpath >/dev/null && res=$(cygpath -w "$res")
+          LOCALBISEO_RESOURCES="$res" "$exe" --port 8799 --data-dir "$RUNNER_TEMP/lb-home" &
+          engine=$!
+          for i in $(seq 1 90); do curl -sf http://127.0.0.1:8799/health >/dev/null && break; sleep 1; done
+          curl -sf http://127.0.0.1:8799/health >/dev/null || { echo "엔진이 90초 안에 뜨지 않음"; exit 1; }
+          code=0
+          python tools/smoke_engine.py http://127.0.0.1:8799 ${{ runner.os == 'Windows' && '--need-ocr' || '' }} || code=$?
+          kill $engine 2>/dev/null || true
+          exit $code
 
       - name: 화면 의존성
         working-directory: app
