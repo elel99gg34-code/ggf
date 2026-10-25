@@ -156,7 +156,15 @@ await session("transcribe", async (h) => {
   await h.type("input[placeholder='예: 10월 마케팅 회의']", "와디즈 펀딩 준비 회의", 60);
   await h.click("button:has-text('회의록 만들기')");
   await h.caption("AI가 받아쓰는 중… <b>파일은 PC 밖으로 나가지 않아요</b>");
-  await h.page.waitForSelector("text=전체 내용", { timeout: 300000 });
+  // 받아쓰기가 끝날 때까지 진행 상황을 로그로 남긴다 (실패하면 화면의 오류 문구를 보여 준다).
+  for (let i = 0; ; i++) {
+    if (await h.page.locator("text=전체 내용").count()) break;
+    const err = await h.page.locator(".alert-error").allInnerTexts();
+    if (err.length) throw new Error(`회의록 만들기 실패: ${err.join(" / ")}`);
+    if (i % 10 === 0) console.log("진행:", (await h.page.locator(".jobbar").allInnerTexts()).join(" ").replace(/\s+/g, " ") || "(진행 표시 없음)");
+    if (i > 600) throw new Error("10분 안에 끝나지 않음");
+    await h.wait(1000);
+  }
   await h.wait(800);
   await h.caption("받아쓰기 · 요약 · <b>할 일과 일정</b>까지 자동 정리");
   await h.wait(3500);

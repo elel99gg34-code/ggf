@@ -50,6 +50,9 @@ jobs:
           cat "$RUNNER_TEMP/engine.log"; exit 1
       - name: 녹화
         run: node tools/demo/record.mjs "$RUNNER_TEMP/samples" "$RUNNER_TEMP/videos"
+      - name: (실패 시) 엔진 로그
+        if: failure()
+        run: tail -80 "$RUNNER_TEMP/engine.log"
       - name: MP4로 변환
         run: |
           mkdir -p docs/wadiz/videos
@@ -65,7 +68,9 @@ jobs:
           path: |
             docs/wadiz/videos/*.mp4
             ${{ runner.temp }}/engine.log
+      # 저장소 설정 > Actions > Workflow permissions가 'Read and write'일 때만 커밋된다.
       - name: 영상 커밋
+        continue-on-error: true
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
