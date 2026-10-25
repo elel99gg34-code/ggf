@@ -98,7 +98,10 @@ jobs:
             app/src-tauri/target/release/bundle/dmg/*.dmg
           if-no-files-found: error
 
+      # 저장소 설정 > Actions > Workflow permissions가 'Read and write'여야 올라간다.
+      # 권한이 없으면 건너뛰고, 설치 파일은 위의 아티팩트로 받는다.
       - name: 체험판 다운로드 페이지에 올리기
+        continue-on-error: true
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v0.1.0-trial
