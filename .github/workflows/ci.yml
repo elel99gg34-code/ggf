@@ -17,7 +17,7 @@ jobs:
       - name: OCR·영상 도구 설치
         run: sudo apt-get update && sudo apt-get install -y tesseract-ocr tesseract-ocr-kor fonts-nanum ffmpeg
       - name: 엔진 설치
-        run: pip install "./engine[dev,ocr]" fpdf2
+        run: pip install "./engine[dev,ocr]" fpdf2 numpy
       - name: pytest
         working-directory: engine
         run: python -m pytest -q

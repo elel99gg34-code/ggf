@@ -237,6 +237,7 @@ def test_image_masking_survives_opencv_without_haar(tmp_path, korean_font, monke
 @needs_ffmpeg
 def test_load_audio_uses_ffmpeg(tmp_path):
     """faster-whisper 내장 디코더(PyAV)에 기대지 않고 16kHz 모노로 푼다."""
+    pytest.importorskip("numpy")
     from localbiseo.modules.transcribe.stt import SAMPLE_RATE, load_audio
 
     src = tmp_path / "녹음.mp3"
@@ -250,6 +251,7 @@ def test_load_audio_uses_ffmpeg(tmp_path):
 def test_load_audio_reports_broken_file(tmp_path):
     import shutil as _sh
 
+    pytest.importorskip("numpy")
     from localbiseo.core.errors import AppError
     from localbiseo.modules.transcribe.stt import load_audio
 
