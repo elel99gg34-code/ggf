@@ -232,3 +232,30 @@ def test_image_masking_survives_opencv_without_haar(tmp_path, korean_font, monke
     res = mask_file(src, None, "partial", faces=True)
     assert res["by_kind"] == {"phone": 1}
     assert "얼굴 검출기가 없어" in res["note"]
+
+
+@needs_ffmpeg
+def test_load_audio_uses_ffmpeg(tmp_path):
+    """faster-whisper 내장 디코더(PyAV)에 기대지 않고 16kHz 모노로 푼다."""
+    from localbiseo.modules.transcribe.stt import SAMPLE_RATE, load_audio
+
+    src = tmp_path / "녹음.mp3"
+    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-f", "lavfi", "-i", "sine=f=300:d=2", "-ac", "2", "-ar", "44100", str(src)], check=True)
+    audio = load_audio(str(src))
+    assert audio.dtype.name == "float32"
+    assert abs(len(audio) - 2 * SAMPLE_RATE) < SAMPLE_RATE * 0.1
+    assert 0.05 < float(abs(audio).max()) <= 1.0
+
+
+def test_load_audio_reports_broken_file(tmp_path):
+    import shutil as _sh
+
+    from localbiseo.core.errors import AppError
+    from localbiseo.modules.transcribe.stt import load_audio
+
+    if not _sh.which("ffmpeg"):
+        pytest.skip("ffmpeg 없음")
+    bad = tmp_path / "깨진파일.m4a"
+    bad.write_bytes(b"not audio")
+    with pytest.raises(AppError):
+        load_audio(str(bad))

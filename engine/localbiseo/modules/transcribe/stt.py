@@ -2,12 +2,18 @@
 from __future__ import annotations
 
 import os
+import subprocess
+import sys
 import threading
 from pathlib import Path
 
 from ...core import optional
 from ...core.config import sub_dir
+from ...core.errors import AppError
+from ...core.ffmpeg import find_ffmpeg
 from ...core.jobs import JobContext
+
+SAMPLE_RATE = 16000
 
 MODEL_SIZES = {
     "base": "빠름 (정확도 보통, 약 150MB)",
@@ -57,11 +63,38 @@ def download_model(job: JobContext, size: str) -> dict:
     return {"size": size, "installed": installed_models()}
 
 
+def load_audio(path: str):
+    """16kHz 모노 float32 배열.
+
+    faster-whisper 내장 디코더는 PyAV 버전에 따라 깨진다(예: faster-whisper 1.2 + PyAV 19).
+    배포판에 같이 넣는 ffmpeg로 직접 풀면 그 조합에 영향을 받지 않는다.
+    """
+    import numpy as np
+
+    exe = find_ffmpeg()
+    if exe:
+        flags = subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0  # type: ignore[attr-defined]
+        res = subprocess.run(
+            [exe, "-nostdin", "-v", "error", "-i", path, "-f", "f32le", "-ac", "1", "-ar", str(SAMPLE_RATE), "-"],
+            capture_output=True,
+            creationflags=flags,
+        )
+        if res.returncode != 0 or not res.stdout:
+            msg = res.stderr.decode("utf-8", "replace").strip().splitlines()[-1:] or ["알 수 없는 오류"]
+            raise AppError(f"오디오를 읽지 못했어요: {msg[0]}")
+        return np.frombuffer(res.stdout, np.float32).copy()
+    from faster_whisper.audio import decode_audio
+
+    return decode_audio(path, sampling_rate=SAMPLE_RATE)
+
+
 def transcribe(job: JobContext, path: str, size: str = "small", language: str | None = "ko") -> dict:
     model = _model(size)
+    job.progress(0.01, "오디오 읽는 중")
+    audio = load_audio(path)
     job.progress(0.02, "음성 분석 시작")
     segments_iter, info = model.transcribe(
-        path,
+        audio,
         language=language or None,
         vad_filter=True,
         beam_size=5,
@@ -80,15 +113,14 @@ def diarize(job: JobContext, path: str, segments: list[dict], max_speakers: int 
     optional.require("diarize")
     import numpy as np
     import torch
-    from faster_whisper.audio import decode_audio
     from speechbrain.inference.speaker import EncoderClassifier
 
     job.progress(0.96, "화자 구분 중")
     encoder = EncoderClassifier.from_hparams(
         source="speechbrain/spkrec-ecapa-voxceleb", savedir=str(sub_dir("ecapa", sub_dir("models")))
     )
-    sr = 16000
-    wave = decode_audio(path, sampling_rate=sr)
+    sr = SAMPLE_RATE
+    wave = load_audio(path)
     embs: list = []
     for seg in segments:
         a, b = int(seg["start"] * sr), int(seg["end"] * sr)
