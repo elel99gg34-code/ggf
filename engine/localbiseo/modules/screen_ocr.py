@@ -45,3 +45,24 @@ def status():
 @router.post("/image")
 def image(body: OcrIn):
     return read_image(body.path, body.crop, body.upscale)
+
+
+class PreviewIn(BaseModel):
+    path: str
+    max_size: int = 1600
+
+
+@router.post("/preview")
+def preview(body: PreviewIn):
+    """화면에 띄울 미리보기(data URL). 원본 크기도 같이 돌려줘서 선택 영역을 원본 좌표로 바꿀 수 있게 한다."""
+    import base64
+    import io
+
+    if not Path(body.path).exists():
+        raise AppError(f"파일을 찾을 수 없어요: {body.path}")
+    img = ImageOps.exif_transpose(Image.open(body.path)).convert("RGB")
+    width, height = img.size
+    img.thumbnail((body.max_size, body.max_size))
+    buf = io.BytesIO()
+    img.save(buf, "JPEG", quality=85)
+    return {"data_url": "data:image/jpeg;base64," + base64.b64encode(buf.getvalue()).decode(), "width": width, "height": height}

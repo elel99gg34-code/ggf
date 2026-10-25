@@ -36,7 +36,9 @@ def _assignee(sentence: str) -> str | None:
         return m.group(1) or m.group(2)
     m = ASSIGNEE_RE.search(sentence[:30])
     if m and looks_like_name(m.group(1)) and (m.group(2) or len(m.group(1)) == 3):
-        return m.group(1) + (m.group(2) or "")
+        title = m.group(2) or ""
+        # '홍길동님'은 붙이고 '김민수 대리'는 띄운다.
+        return m.group(1) + (title if title in ("님", "씨") else f" {title}" if title else "")
     if SELF_RE.search(sentence):
         return "나"
     return None

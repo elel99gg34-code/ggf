@@ -8,6 +8,7 @@ from pathlib import Path
 from PIL import Image
 
 from . import optional
+from .tools import find_tool
 
 Box = tuple[int, int, int, int]  # left, top, right, bottom
 
@@ -61,6 +62,10 @@ def ocr_image(image: Image.Image | str | Path) -> list[OcrLine]:
 
 def _tesseract(img: Image.Image) -> list[OcrLine]:
     import pytesseract
+
+    cmd = find_tool("tesseract")
+    if cmd:
+        pytesseract.pytesseract.tesseract_cmd = cmd
 
     langs = pytesseract.get_languages(config="")
     lang = "kor+eng" if "kor" in langs else "eng"

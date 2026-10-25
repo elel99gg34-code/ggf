@@ -1,24 +1,15 @@
 from __future__ import annotations
 
-import os
-import shutil
 import subprocess
 import sys
-from pathlib import Path
 
 from .errors import FeatureUnavailable
+from .tools import find_tool
 
 
 def find_ffmpeg() -> str | None:
-    env = os.environ.get("LOCALBISEO_FFMPEG")
-    if env and Path(env).exists():
-        return env
-    # 배포판에서는 엔진 실행 파일 옆에 ffmpeg를 같이 넣는다.
-    exe_dir = Path(sys.executable).parent
-    for name in ("ffmpeg.exe", "ffmpeg"):
-        if (exe_dir / name).exists():
-            return str(exe_dir / name)
-    found = shutil.which("ffmpeg")
+    # 배포판에서는 엔진 옆(또는 앱 리소스 폴더)에 ffmpeg를 같이 넣는다.
+    found = find_tool("ffmpeg")
     if found:
         return found
     try:

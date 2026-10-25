@@ -18,7 +18,7 @@ POLICIES = ("mask", "skip", "raw")  # 민감정보: 가려서 저장 / 저장 �
 
 def add_clip(db: Database, text: str) -> dict | None:
     text = text.strip("\x00")
-    if not text.strip() or len(text) > MAX_CHARS:
+    if not text.strip() or len(text) > MAX_CHARS or not db.get_setting("clipboard_enabled", True):
         return None
     policy = db.get_setting("clipboard_sensitive", "mask")
     findings = detect(text)

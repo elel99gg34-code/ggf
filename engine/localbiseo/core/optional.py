@@ -6,10 +6,10 @@
 from __future__ import annotations
 
 import importlib.util
-import shutil
 from dataclasses import dataclass
 
 from .errors import FeatureUnavailable
+from .tools import find_tool
 
 
 @dataclass(frozen=True)
@@ -46,7 +46,7 @@ def available(key: str) -> bool:
     comp = COMPONENTS[key]
     if key == "ocr" and has_module("pytesseract") and not has_module("paddleocr") and not has_module("rapidocr_onnxruntime"):
         # pytesseract는 tesseract 실행 파일도 있어야 한다.
-        return shutil.which("tesseract") is not None
+        return find_tool("tesseract") is not None
     return any(has_module(m) for m in comp.modules)
 
 

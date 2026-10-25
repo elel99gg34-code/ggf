@@ -68,6 +68,13 @@ def test_parse_events_times_and_titles():
     assert ev[5]["start"] == "2026-10-21T14:00:00" and ev[5]["end"] == "2026-10-21T16:00:00"
 
 
+def test_events_skip_chatter_and_clean_titles():
+    text = "오늘 회의 안건은 펀딩 준비입니다.\n김민수 대리가 금요일까지 시안을 공유하기로 했습니다.\n지난주 화요일에 촬영했어요."
+    ev = [e.to_dict() for e in parse_events(text, NOW)]
+    assert len(ev) == 1
+    assert ev[0]["title"] == "김민수 대리가 시안을 공유하기로 했습니다" and ev[0]["start"] == "2026-10-23"
+
+
 def test_time_variants():
     ev = parse_events("오전 9시 회의. 12시 점심. 정오 회의. 밤 11시 배포. 15:30 통화. 8시 출근", NOW)
     starts = [e.start.strftime("%H:%M") for e in ev]
@@ -98,7 +105,7 @@ def test_extract_actions():
     items = extract_actions(text, NOW)
     texts = [i["text"] for i in items]
     assert len(items) == 5, texts
-    assert items[0]["assignee"] == "김민수대리" and items[0]["due"] == "2026-10-23"
+    assert items[0]["assignee"] == "김민수 대리" and items[0]["due"] == "2026-10-23"
     assert items[1]["assignee"] == "박지영님" and items[1]["due"] == "2026-10-27"
     assert items[2]["assignee"] == "나" and items[2]["due"] == "2026-10-22"
     assert items[3]["text"] == "서버 비용 정리" and items[3]["due"] is None
@@ -108,7 +115,7 @@ def test_extract_actions():
 def test_actions_api_saves_todos(client):
     r = client.post("/actions/extract", json={"text": "이영희 과장이 내일까지 예산안을 보내기로 함.", "now": NOW.isoformat()})
     items = r.json()["items"]
-    assert items[0]["assignee"] == "이영희과장"
+    assert items[0]["assignee"] == "이영희 과장"
     r = client.post("/actions/save", json={"items": items, "source": "test"})
     assert len(r.json()["ids"]) == 1
     todos = client.get("/todos").json()

@@ -23,3 +23,6 @@ private.pem
 signing/
 
 .DS_Store
+
+# 배포용으로 같이 묶는 외부 도구
+app/src-tauri/resources/tools/

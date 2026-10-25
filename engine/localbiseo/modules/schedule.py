@@ -218,6 +218,16 @@ def _title(sentence: str, spans: list[tuple[int, int]]) -> str:
     return (t[:60] or "일정").strip()
 
 
+_FOLLOW_PARTICLE = re.compile(r"\s*(?:까지|에는|에|부터|중으로|중에|중|안에|안으로|내로|내에|쯤|경)(?![가-힣])")
+# 날짜만 있고 시각이 없으면 일정이 아니라 그냥 '오늘은~' 같은 말일 때가 많다.
+_NOT_EVENT_DAYS = {"오늘", "금일", "당일", "어제", "그제", "그저께"}
+
+
+def _span_with_particle(sentence: str, start: int, end: int) -> tuple[int, int]:
+    m = _FOLLOW_PARTICLE.match(sentence, end)
+    return (start, m.end()) if m else (start, end)
+
+
 def parse_events(text: str, now: datetime | None = None) -> list[Event]:
     now = now or datetime.now()
     today = now.date()
@@ -228,12 +238,16 @@ def parse_events(text: str, now: datetime | None = None) -> list[Event]:
         if not dm and not times:
             continue
         day = dm.value if dm else today
-        spans = [(dm.start, dm.end)] if dm else []
+        if day < today:
+            continue  # 지난 일을 말하는 문장
+        spans = [_span_with_particle(sentence, dm.start, dm.end)] if dm else []
         if not times:
+            if sentence[dm.start : dm.end].strip() in _NOT_EVENT_DAYS:
+                continue
             events.append(Event(_title(sentence, spans), day, None, True, sentence))
             continue
         start_t = times[0]
-        spans.append((start_t.start, start_t.end))
+        spans.append(_span_with_particle(sentence, start_t.start, start_t.end))
         start = datetime.combine(day, start_t.value)
         end = None
         if len(times) > 1 and RANGE_SEP_RE.match(sentence[start_t.end : times[1].start] + " "):
