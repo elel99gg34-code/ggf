@@ -15,7 +15,7 @@ from ...core.errors import AppError, NotFound
 from ...core.korean import split_sentences
 from ..actions import extract_actions
 from ..masking.detect import mask_text
-from ..notes import add_todo
+from ..notes import add_todo, find_open_todo
 from ..schedule import parse_events
 from . import export, stt
 from .summary import summarize
@@ -61,7 +61,7 @@ def _post_process(db: Database, tid: int, auto_todos: bool) -> dict:
     events = [e.to_dict() for e in parse_events(text)]
     added = []
     if auto_todos:
-        added = [add_todo(db, a["text"], a["due"], a["assignee"], f"transcript:{tid}") for a in actions]
+        added = [add_todo(db, a["text"], a["due"], a["assignee"], f"transcript:{tid}") for a in actions if not find_open_todo(db, a["text"])]
     return {"transcript_id": tid, "actions": actions, "events": events, "todos_added": len(added)}
 
 

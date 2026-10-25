@@ -179,8 +179,8 @@ function Detail({ id, onBack }: { id: number; onBack: () => void }) {
   };
   const addTodos = async () => {
     if (!ins.data?.actions.length) return;
-    await act.run(() => api.post("/actions/save", { items: ins.data!.actions, source: `transcript:${id}` }));
-    toast(`할 일 ${ins.data.actions.length}개를 등록했어요`);
+    const r = await act.run(() => api.post<{ ids: number[]; skipped: number }>("/actions/save", { items: ins.data!.actions, source: `transcript:${id}` }));
+    if (r) toast(r.ids.length ? `할 일 ${r.ids.length}개를 등록했어요` : "이미 할 일 목록에 있어요");
   };
   const saveIcs = async () => {
     const r = await act.run(() => api.post<{ path: string }>("/schedule/ics", { events: ins.data?.events ?? [] }));

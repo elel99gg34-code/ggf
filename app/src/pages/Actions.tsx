@@ -25,8 +25,8 @@ export default function Actions() {
   };
   const save = async () => {
     if (!items?.length) return;
-    const r = await act.run(() => api.post<{ ids: number[] }>("/actions/save", { items, source: "actions" }));
-    if (r) setSaved(r.ids.length);
+    const r = await act.run(() => api.post<{ ids: number[]; skipped: number }>("/actions/save", { items, source: "actions" }));
+    if (r) setSaved(r.ids.length || -1);
   };
   const update = (i: number, patch: Partial<Item>) => setItems((xs) => xs!.map((x, j) => (j === i ? { ...x, ...patch } : x)));
   return (
@@ -47,9 +47,9 @@ export default function Actions() {
         <Card title={items ? `찾은 할 일 ${items.length}개` : "결과"} right={items?.length ? <Button small variant="primary" onClick={save}>할 일 목록에 넣기</Button> : null}>
           {!items && <Empty>왼쪽에 글을 넣고 '할 일 찾기'를 눌러 주세요.</Empty>}
           {items && !items.length && <Empty>해야 할 일로 보이는 문장이 없어요.</Empty>}
-          {saved > 0 && (
+          {saved !== 0 && (
             <Notice tone="ok">
-              {saved}개를 넣었어요. <button className="linklike" onClick={() => navigate("notes")}>할 일 보기</button>
+              {saved > 0 ? `${saved}개를 넣었어요.` : "이미 할 일 목록에 있어요."} <button className="linklike" onClick={() => navigate("notes")}>할 일 보기</button>
             </Notice>
           )}
           <div className="stack">

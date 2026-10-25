@@ -28,6 +28,11 @@ def add_note(db: Database, title: str, body: str, tags: str = "", pinned: bool =
     return nid
 
 
+def find_open_todo(db: Database, text: str) -> int | None:
+    row = db.one("SELECT id FROM todos WHERE done=0 AND text=?", (text.strip(),))
+    return row["id"] if row else None
+
+
 def add_todo(db: Database, text: str, due: str | None = None, assignee: str | None = None, source: str | None = None) -> int:
     tid = db.insert(
         "INSERT INTO todos(text, due, assignee, source, created_at) VALUES(?,?,?,?,?)",

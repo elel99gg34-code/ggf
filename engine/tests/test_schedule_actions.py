@@ -127,3 +127,18 @@ def test_schedule_api_ics(client, tmp_path):
     out = tmp_path / "a.ics"
     r = client.post("/schedule/ics", json={"events": ev, "out_path": str(out)})
     assert r.json()["count"] == 1 and out.read_text(encoding="utf-8").count("BEGIN:VEVENT") == 1
+
+
+def test_request_phrases_become_actions():
+    text = "박지영 과장은 다음 주 월요일까지 견적을 받아주세요. 자료를 보내 주시기 바랍니다. 내일 확인해 주십시오. 날씨가 좋네요."
+    items = extract_actions(text, NOW)
+    assert [i["text"][:6] for i in items] == ["박지영 과장", "자료를 보내", "내일 확인해"]
+    assert items[0]["assignee"] == "박지영 과장" and items[0]["due"] == "2026-10-26"
+
+
+def test_saving_same_actions_twice_does_not_duplicate(client):
+    items = [{"text": "견적서 보내기", "due": None, "assignee": None}]
+    assert len(client.post("/actions/save", json={"items": items}).json()["ids"]) == 1
+    r = client.post("/actions/save", json={"items": items}).json()
+    assert r["ids"] == [] and r["skipped"] == 1
+    assert len(client.get("/todos").json()) == 1

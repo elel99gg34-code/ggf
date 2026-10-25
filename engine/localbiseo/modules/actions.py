@@ -9,7 +9,7 @@ from pydantic import BaseModel
 
 from ..core.context import Ctx
 from ..core.korean import looks_like_name, split_sentences
-from .notes import add_todo
+from .notes import add_todo, find_open_todo
 from .schedule import find_date
 
 router = APIRouter(prefix="/actions", tags=["액션아이템"])
@@ -17,7 +17,9 @@ router = APIRouter(prefix="/actions", tags=["액션아이템"])
 ACTION_PATTERNS = [re.compile(p) for p in [
     r"기로\s?(?:했|함|하였|합의|결정|정했|정함)",
     r"(?:해야|돼야|되어야|드려야|보내야|받아야|가야|봐야|챙겨야)\s?(?:함|한다|합니다|해요|하고|할|겠|돼|된다|됩니다)?",
-    r"(?:할 것|하실 것|해 주세요|해주세요|해 주시기|해주시기|부탁드립니다|부탁드려요|부탁해요|바랍니다|요청드립니다|요청합니다|해 주십시오|해주십시오)",
+    r"(?:할 것|하실 것|부탁드립니다|부탁드려요|부탁해요|바랍니다|요청드립니다|요청합니다)",
+    # '해 주세요', '받아주세요', '보내 주시기 바랍니다', '확인해 주십시오' 같은 요청
+    r"[가-힣]\s?주(?:세요|시기|십시오|실래요|시겠어요)",
     r"(?:까지|전까지)\s?(?:\S+\s?){0,3}(?:제출|보고|공유|전달|완료|마감|회신|보내|올려|업로드|정리|확인|준비|작성|검토)",
     r"(?:하겠습니다|드리겠습니다|할게요|할께요|드릴게요|드릴께요|보겠습니다|진행하겠|챙기겠|맡겠|처리하겠)",
     r"(?:제가|저희가|내가|우리가|제 쪽에서)\s.*(?:하겠|할게|할께|드리겠|드릴게|볼게|보겠|맡을|챙길)",
@@ -85,5 +87,12 @@ def extract_api(body: ExtractIn):
 
 @router.post("/save")
 def save_api(body: SaveIn, ctx: Ctx):
-    ids = [add_todo(ctx.db, i["text"], i.get("due"), i.get("assignee"), body.source) for i in body.items if i.get("text")]
-    return {"ids": ids}
+    added, skipped = [], 0
+    for i in body.items:
+        if not i.get("text"):
+            continue
+        if find_open_todo(ctx.db, i["text"]):
+            skipped += 1  # 이미 남은 할 일에 있으면 또 넣지 않는다
+            continue
+        added.append(add_todo(ctx.db, i["text"], i.get("due"), i.get("assignee"), body.source))
+    return {"ids": added, "skipped": skipped}
