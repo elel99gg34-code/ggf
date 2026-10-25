@@ -28,7 +28,8 @@
 | pytesseract | Apache-2.0 | |
 | rembg, U²-Net 모델 | MIT, Apache-2.0 | 배경 제거 (모델은 처음 쓸 때 내려받음) |
 | OpenCV | Apache-2.0 | 얼굴 감지 |
-| Argos Translate | MIT | 언어팩마다 라이선스가 달라서 확인 필요 |
+| CTranslate2, SentencePiece | MIT, Apache-2.0 | 번역 (CTranslate2는 음성 인식과 같이 씀) |
+| Argos Translate 언어팩 | 언어팩마다 다름 | 설치 파일에 넣지 않음. 사용자가 번역 화면에서 내려받음 |
 | llama.cpp / llama-cpp-python | MIT | 모델(GGUF)은 각 모델의 라이선스를 따름 |
 | SpeechBrain, ECAPA 모델 | Apache-2.0 | 화자 분리(실험) |
 

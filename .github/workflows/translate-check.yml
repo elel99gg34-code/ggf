@@ -1,0 +1,25 @@
+name: 번역 확인
+
+# 실제 Argos 언어팩(한·영·일·중)을 내려받아 번역해 본다. 언어팩 서버가 필요해서 GitHub에서 돌린다.
+on:
+  workflow_dispatch:
+  push:
+    branches: ["claude/**"]
+
+env:
+  PYTHONUTF8: "1"
+  LOCALBISEO_HOME: ${{ github.workspace }}/../lb-home
+
+jobs:
+  translate:
+    if: github.event_name != 'push' || contains(github.event.head_commit.message, '[translate]')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 엔진 설치 (번역만)
+        run: pip install "./engine[translate]"
+      - name: 언어팩 받고 번역
+        run: python tools/translate_check.py

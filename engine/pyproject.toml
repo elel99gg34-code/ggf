@@ -28,7 +28,7 @@ ocr = ["pytesseract>=0.3.10"]
 ocr-paddle = ["paddleocr>=2.7", "paddlepaddle>=2.6"]
 rembg = ["rembg>=2.0.50", "onnxruntime>=1.17"]
 face = ["opencv-python-headless>=4.9,<5"]  # 5.x에서 Haar 얼굴 검출기가 빠졌다
-translate = ["argostranslate>=1.9"]
+translate = ["ctranslate2>=4,<5", "sentencepiece>=0.2,<0.3"]  # Argos 언어팩을 직접 돌린다 (torch 불필요)
 llm = ["llama-cpp-python>=0.2.60"]
 ffmpeg = ["imageio-ffmpeg>=0.5"]
 all = ["localbiseo-engine[stt,ocr,rembg,face,translate,ffmpeg]"]

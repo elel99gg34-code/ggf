@@ -10,7 +10,7 @@
 한 파일(onefile)로 묶으면 실행할 때마다 수백 MB를 임시 폴더에 풀어서 느리다.
 그래서 폴더째(onedir) 앱 리소스로 넣는다.
 
-미리 설치할 것: pip install "./engine[stt,ocr,rembg,face,ffmpeg]" pyinstaller
+미리 설치할 것: pip install "./engine[stt,ocr,rembg,face,translate,ffmpeg]" pyinstaller
 """
 from __future__ import annotations
 
@@ -34,7 +34,7 @@ HIDDEN = [
     "uvicorn.logging", "uvicorn.loops.auto", "uvicorn.protocols.http.auto", "uvicorn.protocols.websockets.auto",
     "uvicorn.lifespan.on", "pypdfium2", "pypdfium2_raw", "olefile", "openpyxl", "docx",
 ]
-COLLECT = ["faster_whisper", "ctranslate2", "rembg", "pytesseract", "cv2", "pypdfium2", "pypdfium2_raw", "docx", "imageio_ffmpeg"]
+COLLECT = ["faster_whisper", "ctranslate2", "sentencepiece", "rembg", "pytesseract", "cv2", "pypdfium2", "pypdfium2_raw", "docx", "imageio_ffmpeg"]
 
 
 def target_triple() -> str:

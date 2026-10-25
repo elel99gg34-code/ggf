@@ -17,7 +17,7 @@
 | 비서 | 클립보드 | 복사 기록. 민감정보는 가려서 저장 |
 | 비서 | 화면 글자 인식 | Ctrl+Shift+O로 캡처 → 영역 선택 → OCR |
 | 비서 | 영수증·명함 | 영수증 → 경비 엑셀, 명함 → vCard 연락처 |
-| 비서 | 번역 | Argos Translate 오프라인 번역 (한·영·일·중) |
+| 비서 | 번역 | Argos 언어팩(CTranslate2)으로 오프라인 번역 (한·영·일·중, 한↔일·중은 영어 경유) |
 | 비서 | 글다듬기 | 자주 틀리는 맞춤법, 해요체/합니다체/공문체 변환, 메일 틀 |
 | 비서 | 이름 일괄 변경 | 규칙·번호·날짜·EXIF, 미리보기와 되돌리기 |
 | 비서 | 중복 정리 | 같은 파일(해시)·비슷한 사진(dHash). 보관함으로 옮기고 되돌리기 |
@@ -58,7 +58,7 @@ docs/                와디즈 자료, 오픈소스 고지
 | OCR | `[ocr]` + Tesseract(한국어 데이터) | 화면 OCR, 영수증·명함, 이미지·스캔 PDF 마스킹 |
 | 배경 제거 | `[rembg]` | 이미지 |
 | 얼굴 감지 | `[face]` | 이미지 마스킹 |
-| 번역 | `[translate]` (언어팩은 앱에서 내려받음) | 번역 |
+| 번역 | `[translate]` (CTranslate2·SentencePiece, 언어팩은 앱에서 내려받음, torch 불필요) | 번역 |
 | 로컬 AI | `[llm]` + `models/llm/*.gguf` | 요약·문체 품질 향상 |
 | 화자 분리 | `[diarize]` (실험) | 회의록 |
 | ffmpeg | 시스템 ffmpeg 또는 `[ffmpeg]` | 무음 컷, 자막 |
@@ -114,4 +114,5 @@ python tools/license_gen.py batch --private ~/.localbiseo-signing/private.pem ba
 - **화자 분리**: 실험 기능이다. 실제 녹음으로 품질을 확인하지 않았다.
 - **macOS OCR**: `brew install tesseract tesseract-lang`이 필요하다. Windows 설치 파일에는 Tesseract가 들어간다.
 - **코드 서명**: 설치 파일에 서명하지 않아 첫 실행 때 운영체제 경고가 뜬다. Windows는 코드 서명 인증서, macOS는 Apple 공증이 필요하다.
-- **번역·로컬 AI**: 용량이 커서 기본 설치 파일에서 뺐다.
+- **번역**: 언어팩(쌍마다 약 100MB)은 처음 쓸 때 인터넷으로 내려받는다. 한↔일·중은 영어를 거쳐서 품질이 떨어질 수 있다.
+- **로컬 AI**: 용량이 커서 기본 설치 파일에서 뺐다.

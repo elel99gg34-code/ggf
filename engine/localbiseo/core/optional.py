@@ -29,7 +29,7 @@ COMPONENTS: dict[str, Component] = {
         Component("ocr", "문자 인식 (OCR)", ("paddleocr", "pytesseract", "rapidocr_onnxruntime"), "ocr", "화면 OCR, 영수증·명함, 이미지 마스킹"),
         Component("rembg", "배경 제거", ("rembg",), "rembg", "이미지 일괄 처리"),
         Component("face", "얼굴 감지", ("cv2",), "face", "이미지 마스킹"),
-        Component("translate", "오프라인 번역", ("argostranslate",), "translate", "번역"),
+        Component("translate", "오프라인 번역", ("sentencepiece",), "translate", "번역"),
         Component("llm", "로컬 AI 문장 생성", ("llama_cpp",), "llm", "요약·문장 다듬기 품질 향상"),
     ]
 }
@@ -47,6 +47,8 @@ def available(key: str) -> bool:
     if key == "ocr" and has_module("pytesseract") and not has_module("paddleocr") and not has_module("rapidocr_onnxruntime"):
         # pytesseract는 tesseract 실행 파일도 있어야 한다.
         return find_tool("tesseract") is not None
+    if key == "translate":
+        return has_module("ctranslate2") and has_module("sentencepiece")
     return any(has_module(m) for m in comp.modules)
 
 

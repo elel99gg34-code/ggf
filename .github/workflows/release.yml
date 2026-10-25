@@ -46,7 +46,7 @@ jobs:
           workspaces: app/src-tauri
 
       - name: 엔진 의존성
-        run: pip install "./engine[stt,ocr,rembg,face,ffmpeg]" pyinstaller
+        run: pip install "./engine[stt,ocr,rembg,face,translate,ffmpeg]" pyinstaller
 
       - name: (Windows) ffmpeg LGPL 빌드와 Tesseract(한국어) 준비
         if: runner.os == 'Windows'
