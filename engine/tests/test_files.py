@@ -213,3 +213,22 @@ def test_screen_ocr_selection_keeps_numbers_and_spacing(client, tmp_path, korean
     text = client.post("/ocr/image", json={"path": str(src), "crop": [56, 180, 994, 200]}).json()["text"]
     assert "11월 3일(화) 오후 2시 ~ 4시" in text
     assert "정보보안팀 (내선 1234)" in text
+
+
+@needs_ocr
+def test_image_masking_survives_opencv_without_haar(tmp_path, korean_font, monkeypatch):
+    """OpenCV 5.x에는 CascadeClassifier가 없다. 그래도 글자 마스킹은 끝까지 돼야 한다."""
+    import sys
+    import types
+
+    from localbiseo.core import optional
+    from localbiseo.modules.masking.files import mask_file
+
+    monkeypatch.setitem(sys.modules, "cv2", types.SimpleNamespace(__version__="5.0.0"))
+    real = optional.available
+    monkeypatch.setattr(optional, "available", lambda key: True if key == "face" else real(key))
+    src = tmp_path / "송장.png"
+    _text_image(src, korean_font, ["받는 분 연락처 010-5555-7777"])
+    res = mask_file(src, None, "partial", faces=True)
+    assert res["by_kind"] == {"phone": 1}
+    assert "얼굴 검출기가 없어" in res["note"]

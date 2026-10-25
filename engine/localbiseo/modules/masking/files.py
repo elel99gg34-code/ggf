@@ -267,9 +267,13 @@ def _mask_pdf(src: Path, kinds, out_dir) -> dict:
     return _result(src, dst, findings, note)
 
 
-def detect_faces(img: Image.Image) -> list[tuple[int, int, int, int]]:
+def detect_faces(img: Image.Image) -> list[tuple[int, int, int, int]] | None:
+    """얼굴 영역 목록. 이 OpenCV에 Haar 검출기가 없으면 None."""
     import cv2
     import numpy as np
+
+    if not hasattr(cv2, "CascadeClassifier"):
+        return None
 
     gray = cv2.cvtColor(np.array(img.convert("RGB")), cv2.COLOR_RGB2GRAY)
     cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
@@ -301,7 +305,10 @@ def _mask_image(src: Path, kinds, out_dir, faces: bool) -> dict:
         notes.append("OCR 구성요소가 없어 글자는 찾지 못했어요.")
     face_count = 0
     if faces and optional.available("face"):
-        for box in detect_faces(img):
+        boxes = detect_faces(img)
+        if boxes is None:
+            notes.append("설치된 OpenCV에 얼굴 검출기가 없어 얼굴은 가리지 못했어요.")
+        for box in boxes or []:
             _pixelate(img, box)
             face_count += 1
     elif faces:

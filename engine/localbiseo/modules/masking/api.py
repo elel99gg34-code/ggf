@@ -57,6 +57,8 @@ def run_files(job, paths, kinds, mode, out_dir, faces):
             results.append(mask_file(path, kinds, mode, out_dir, faces))
         except AppError as e:
             results.append({"src": path, "error": e.message})
+        except Exception as e:  # noqa: BLE001 - 파일 하나가 실패해도 나머지는 계속 처리한다
+            results.append({"src": path, "error": f"처리하지 못했어요: {e}"})
     total = sum(r.get("count", 0) for r in results)
     return {"results": results, "total": total}
 
