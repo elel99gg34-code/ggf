@@ -52,17 +52,17 @@ impl EngineState {
     }
 }
 
-/// 엔진 실행 명령. 배포판은 앱 옆의 `localbiseo-engine`, 개발 중에는 `python -m localbiseo`.
+/// 엔진 실행 명령. 배포판은 리소스의 `engine/localbiseo-engine`, 개발 중에는 `python -m localbiseo`.
 fn engine_command(app: &AppHandle) -> Command {
     let exe_name = if cfg!(windows) { "localbiseo-engine.exe" } else { "localbiseo-engine" };
     let mut candidates: Vec<PathBuf> = Vec::new();
+    if let Ok(res) = app.path().resource_dir() {
+        candidates.push(res.join("engine").join(exe_name));
+    }
     if let Ok(exe) = std::env::current_exe() {
         if let Some(dir) = exe.parent() {
             candidates.push(dir.join(exe_name));
         }
-    }
-    if let Ok(res) = app.path().resource_dir() {
-        candidates.push(res.join(exe_name));
     }
     if let Some(bin) = candidates.into_iter().find(|p| p.exists()) {
         return Command::new(bin);

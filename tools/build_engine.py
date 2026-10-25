@@ -4,8 +4,11 @@
   python tools/build_engine.py --ffmpeg C:/ffmpeg/bin/ffmpeg.exe --tesseract "C:/Program Files/Tesseract-OCR"
 
 결과:
-  app/src-tauri/binaries/localbiseo-engine-<target-triple>[.exe]
+  app/src-tauri/resources/engine/localbiseo-engine[.exe] (+ _internal 폴더)
   app/src-tauri/resources/tools/ffmpeg/…, tools/tesseract/… (넘긴 경우)
+
+한 파일(onefile)로 묶으면 실행할 때마다 수백 MB를 임시 폴더에 풀어서 느리다.
+그래서 폴더째(onedir) 앱 리소스로 넣는다.
 
 미리 설치할 것: pip install "./engine[stt,ocr,rembg,face,ffmpeg]" pyinstaller
 """
@@ -59,7 +62,7 @@ def main() -> None:
     sep = ";" if sys.platform == "win32" else ":"
 
     cmd = [
-        sys.executable, "-m", "PyInstaller", "--noconfirm", "--clean", "--onefile",
+        sys.executable, "-m", "PyInstaller", "--noconfirm", "--clean", "--onedir",
         "--name", "localbiseo-engine",
         "--distpath", str(work / "dist"), "--workpath", str(work / "work"), "--specpath", str(work),
         "--add-data", f"{ENGINE / 'localbiseo' / 'core' / 'license_pubkey.pem'}{sep}localbiseo/core",
@@ -78,11 +81,11 @@ def main() -> None:
     print(" ".join(cmd))
     subprocess.run(cmd, check=True, cwd=ENGINE)
 
-    binaries = TAURI / "binaries"
-    binaries.mkdir(exist_ok=True)
-    dst = binaries / f"localbiseo-engine-{triple}{ext}"
-    shutil.copy2(work / "dist" / f"localbiseo-engine{ext}", dst)
-    print(f"엔진: {dst}")
+    engine_dst = TAURI / "resources" / "engine"
+    if engine_dst.exists():
+        shutil.rmtree(engine_dst)
+    shutil.copytree(work / "dist" / "localbiseo-engine", engine_dst)
+    print(f"엔진: {engine_dst} ({triple})")
 
     tools = TAURI / "resources" / "tools"
     tools.mkdir(parents=True, exist_ok=True)

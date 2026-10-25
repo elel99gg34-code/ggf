@@ -1,9 +1,11 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "bundle": {
-    "externalBin": ["binaries/localbiseo-engine"],
+    "targets": ["nsis", "app", "dmg"],
     "resources": {
-      "resources/tools/": "tools/"
+      "resources/engine/": "engine/",
+      "resources/tools/": "tools/",
+      "resources/THIRD_PARTY_NOTICES.txt": "THIRD_PARTY_NOTICES.txt"
     }
   }
 }

@@ -6,6 +6,11 @@ import { api } from "../lib/api";
 import { useAction, useData } from "../lib/hooks";
 import { isTauri, openPath } from "../lib/platform";
 
+async function openNotices() {
+  const { resourceDir, join } = await import("@tauri-apps/api/path");
+  await openPath(await join(await resourceDir(), "THIRD_PARTY_NOTICES.txt"));
+}
+
 export default function Settings() {
   const { status, reload } = useSystem();
   const settings = useData(() => api.get<Record<string, unknown>>("/system/settings"));
@@ -98,6 +103,11 @@ export default function Settings() {
               {isTauri && status && <button className="linklike" onClick={() => openPath(status.data_dir)}>열기</button>}
             </p>
             <p className="small muted">모든 기록(메모, 회의록, 클립보드 등)은 이 폴더 안의 파일 하나에 저장돼요. 백업하려면 폴더째 복사하면 돼요.</p>
+            {isTauri && (
+              <button className="linklike small" onClick={openNotices}>
+                오픈소스 라이선스 고지
+              </button>
+            )}
           </Card>
         </div>
       </div>
