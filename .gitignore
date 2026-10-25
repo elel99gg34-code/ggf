@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+engine/build/
+engine/dist/
+
+# Node / 프론트엔드
+node_modules/
+app/dist/
+
+# Tauri
+app/src-tauri/target/
+app/src-tauri/binaries/
+app/src-tauri/gen/
+
+# 서명 개인키는 절대 커밋하지 않는다
+*.private.pem
+private.pem
+signing/
+
+.DS_Store
