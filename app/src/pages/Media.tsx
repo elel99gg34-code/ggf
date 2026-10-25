@@ -1,7 +1,7 @@
 import { Images, Scissors, Subtitles } from "lucide-react";
 import { useState } from "react";
 import { NeedsComponent, useSystem } from "../components/system";
-import { Button, Card, ErrorBox, Field, JobBar, Notice, Page, PathLink, PathPicker, Tabs, Toggle } from "../components/ui";
+import { Button, Card, ErrorBox, Field, JobBar, Notice, Page, PathLink, PathPicker, Tabs, Thumb, Toggle } from "../components/ui";
 import { api } from "../lib/api";
 import { baseName, clock } from "../lib/format";
 import { useAction, useData, useJob } from "../lib/hooks";
@@ -56,14 +56,14 @@ function ImageBatch({ info }: { info: PresetsResp | null }) {
         {job.job?.status === "done" && job.job.result && (
           <div className="results">
             <Notice tone="ok">{job.job.result.results.filter((r) => r.dst).length}장을 저장했어요.</Notice>
-            <ul className="list compact">
+            <div className="thumbs">
               {job.job.result.results.map((r) => (
-                <li key={r.src} className="list-row">
-                  <span className="grow">{baseName(r.src)}</span>
-                  {r.dst ? <PathLink path={r.dst} /> : <span className="error-text small">{r.error}</span>}
-                </li>
+                <figure key={r.src}>
+                  {r.dst ? <Thumb path={r.dst} /> : <span className="error-text small">{r.error}</span>}
+                  <figcaption className="small">{r.dst ? <PathLink path={r.dst} /> : baseName(r.src)}</figcaption>
+                </figure>
               ))}
-            </ul>
+            </div>
           </div>
         )}
       </Card>

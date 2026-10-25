@@ -1,6 +1,6 @@
 import { CircleAlert, FolderOpen, Copy, Loader2, Plus, Upload, X } from "lucide-react";
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
-import type { Job } from "../lib/api";
+import { api, type Job } from "../lib/api";
 import { baseName } from "../lib/format";
 import { copyText, isTauri, onFileDrop, openPath, pickFiles, reveal, type Filter } from "../lib/platform";
 
@@ -125,6 +125,22 @@ export function JobBar({ job, error, onCancel }: { job: Job | null; error?: stri
       </div>
     </div>
   );
+}
+
+/** 엔진이 만든 이미지 파일의 작은 미리보기. */
+export function Thumb({ path, size = 220 }: { path: string; size?: number }) {
+  const [src, setSrc] = useState<string | null>(null);
+  useEffect(() => {
+    let alive = true;
+    api
+      .post<{ data_url: string }>("/ocr/preview", { path, max_size: size * 2 })
+      .then((r) => alive && setSrc(r.data_url))
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [path, size]);
+  return src ? <img className="thumb" src={src} alt={baseName(path)} style={{ maxWidth: size, maxHeight: size }} /> : <div className="thumb thumb-empty" style={{ width: size * 0.75, height: size * 0.75 }} />;
 }
 
 export function PathLink({ path, label }: { path: string; label?: string }) {

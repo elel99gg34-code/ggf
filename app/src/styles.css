@@ -210,6 +210,13 @@ input[type="checkbox"] { accent-color: var(--accent); width: 15px; height: 15px;
 .feature div { flex: 1; display: flex; flex-direction: column; min-width: 0; }
 .feature:hover { border-color: var(--accent); }
 
+/* 결과 미리보기 */
+.thumbs { display: flex; flex-wrap: wrap; gap: 14px; }
+.thumbs figure { margin: 0; display: flex; flex-direction: column; gap: 6px; max-width: 220px; }
+.thumb { display: block; border-radius: 8px; border: 1px solid var(--border); background: var(--surface-2); object-fit: contain; }
+.thumb-empty { animation: pulse 1.2s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: 0.5; } }
+
 /* 회의록 */
 .segments { display: flex; flex-direction: column; gap: 8px; max-height: 560px; overflow-y: auto; }
 .segment { display: flex; gap: 8px; align-items: baseline; }

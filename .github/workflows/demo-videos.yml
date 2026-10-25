@@ -1,0 +1,75 @@
+name: 시연 영상 만들기
+
+# 실제 앱을 띄우고 회의록(녹음→받아쓰기), 개인정보 가리기, 이미지 일괄 처리를 녹화한다.
+# 음성 인식 모델은 인터넷에서 받아야 해서 GitHub에서 만든다.
+# 결과 MP4는 docs/wadiz/videos/에 커밋된다.
+on:
+  workflow_dispatch:
+  push:
+    branches: ["claude/**"]
+
+permissions:
+  contents: write
+
+env:
+  PYTHONUTF8: "1"
+  LOCALBISEO_HOME: ${{ github.workspace }}/../lb-home
+
+jobs:
+  record:
+    if: github.event_name != 'push' || contains(github.event.head_commit.message, '[demo]')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: 시스템 도구 (한국어 OCR, 글꼴, ffmpeg)
+        run: sudo apt-get update && sudo apt-get install -y tesseract-ocr tesseract-ocr-kor fonts-nanum ffmpeg
+      - name: 엔진과 예시 파일 도구
+        run: pip install "./engine[stt,ocr,face]" fpdf2 edge-tts
+      - name: 녹화 도구 (Playwright)
+        working-directory: tools/demo
+        run: npm init -y >/dev/null && npm install playwright && npx playwright install --with-deps chromium
+      - name: 화면 빌드
+        working-directory: app
+        run: npm ci && npm run build
+      - name: 예시 파일과 회의 녹음(음성 합성)
+        run: python tools/demo/make_samples.py "$RUNNER_TEMP/samples" --audio
+      - name: 음성 인식 모델 미리 받기
+        working-directory: engine
+        run: python -c "from localbiseo.modules.transcribe import stt; from localbiseo.core.jobs import NullContext; print(stt.download_model(NullContext(), 'small'))"
+      - name: 엔진과 화면 띄우기
+        run: |
+          (cd engine && nohup python -m localbiseo --port 8765 --data-dir "$LOCALBISEO_HOME" > "$RUNNER_TEMP/engine.log" 2>&1 &)
+          (cd app && nohup npx vite preview --port 1420 > "$RUNNER_TEMP/preview.log" 2>&1 &)
+          for i in $(seq 1 60); do curl -sf localhost:8765/health && curl -sf -o /dev/null localhost:1420 && exit 0; sleep 1; done
+          cat "$RUNNER_TEMP/engine.log"; exit 1
+      - name: 녹화
+        run: node tools/demo/record.mjs "$RUNNER_TEMP/samples" "$RUNNER_TEMP/videos"
+      - name: MP4로 변환
+        run: |
+          mkdir -p docs/wadiz/videos
+          conv() { ffmpeg -v error -y -i "$RUNNER_TEMP/videos/$1.webm" -c:v libx264 -preset slow -crf 21 -pix_fmt yuv420p -movflags +faststart "docs/wadiz/videos/$2.mp4"; }
+          conv transcribe 시연1_회의록
+          conv mask 시연2_개인정보가리기
+          conv media 시연3_이미지일괄처리
+          ls -la docs/wadiz/videos
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: demo-videos
+          path: |
+            docs/wadiz/videos/*.mp4
+            ${{ runner.temp }}/engine.log
+      - name: 영상 커밋
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/wadiz/videos
+          git commit -m "시연 영상 갱신 (자동 녹화)" || exit 0
+          git pull --rebase origin "${GITHUB_REF_NAME}"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
