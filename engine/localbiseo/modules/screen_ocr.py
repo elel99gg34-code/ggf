@@ -32,9 +32,7 @@ def read_image(path: str, crop: list[int] | None = None, upscale: bool = True) -
     # 화면 글자는 작아서 2배로 키우면 인식률이 확 오른다.
     if upscale and img.width < 1600:
         img = img.resize((img.width * 2, img.height * 2), Image.Resampling.LANCZOS)
-    lines = ocr.ocr_image(img)
-    text = "\n".join(l.text for l in lines)
-    return {"text": text, "lines": [l.to_dict() for l in lines], "backend": ocr.backend_name()}
+    return {"text": ocr.ocr_text(img, block=bool(crop)), "backend": ocr.backend_name()}
 
 
 @router.get("/status")

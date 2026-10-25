@@ -1,0 +1,473 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>로컬비서 와디즈 스토리 이미지</title>
+<style>
+@font-face { font-family: P; font-weight: 400; src: url("node_modules/pretendard/dist/web/static/woff2/Pretendard-Regular.woff2"); }
+@font-face { font-family: P; font-weight: 500; src: url("node_modules/pretendard/dist/web/static/woff2/Pretendard-Medium.woff2"); }
+@font-face { font-family: P; font-weight: 600; src: url("node_modules/pretendard/dist/web/static/woff2/Pretendard-SemiBold.woff2"); }
+@font-face { font-family: P; font-weight: 700; src: url("node_modules/pretendard/dist/web/static/woff2/Pretendard-Bold.woff2"); }
+@font-face { font-family: P; font-weight: 800; src: url("node_modules/pretendard/dist/web/static/woff2/Pretendard-ExtraBold.woff2"); }
+@font-face { font-family: P; font-weight: 900; src: url("node_modules/pretendard/dist/web/static/woff2/Pretendard-Black.woff2"); }
+
+:root {
+  --blue: #2f6bed; --blue-2: #5b8cff; --blue-soft: #e9f0ff; --navy: #0b1630; --navy-2: #13224a;
+  --ink: #141b2b; --sub: #5d6880; --line: #e3e7ef; --bg: #f4f6fb; --yellow: #ffd84d; --mint: #12b886; --red: #f0504f;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: P, sans-serif; color: var(--ink); background: #888; word-break: keep-all; -webkit-font-smoothing: antialiased; }
+.slide { width: 1080px; padding: 110px 80px; background: #fff; position: relative; overflow: hidden; margin-bottom: 40px; }
+.slide.bg { background: var(--bg); }
+.slide.dark { background: var(--navy); color: #fff; }
+.slide.blue { background: linear-gradient(160deg, #2f6bed 0%, #1d4fc4 100%); color: #fff; }
+svg { width: 1em; height: 1em; stroke-width: 2; }
+
+.eyebrow { display: inline-flex; align-items: center; gap: 12px; font-size: 30px; font-weight: 700; color: var(--blue); letter-spacing: -0.01em; margin-bottom: 26px; }
+.eyebrow .num { display: inline-grid; place-items: center; min-width: 54px; height: 44px; padding: 0 14px; border-radius: 22px; background: var(--blue); color: #fff; font-size: 24px; font-weight: 800; }
+.dark .eyebrow, .blue .eyebrow { color: #9fbcff; }
+h1 { font-size: 82px; line-height: 1.22; font-weight: 800; letter-spacing: -0.035em; }
+h2 { font-size: 70px; line-height: 1.24; font-weight: 800; letter-spacing: -0.035em; }
+h3 { font-size: 40px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.3; }
+.lead { font-size: 36px; line-height: 1.6; color: var(--sub); margin-top: 30px; font-weight: 500; letter-spacing: -0.015em; }
+.dark .lead, .blue .lead, .cover .lead, .sq .lead { color: #c3cfee; }
+.hl { background: linear-gradient(transparent 62%, var(--yellow) 62%, var(--yellow) 92%, transparent 92%); padding: 0 4px; }
+.dark .hl { background: none; color: var(--yellow); padding: 0; }
+.c-blue { color: var(--blue); }
+.center { text-align: center; }
+.mt-l { margin-top: 70px; } .mt-m { margin-top: 44px; } .mt-s { margin-top: 24px; }
+
+/* 창 모양 틀 */
+.window { border-radius: 22px; background: #fff; box-shadow: 0 30px 80px rgba(11, 22, 48, 0.28), 0 0 0 1px rgba(11, 22, 48, 0.08); overflow: hidden; }
+.window .bar { height: 38px; background: #eef1f6; display: flex; align-items: center; gap: 9px; padding: 0 18px; }
+.window .bar i { width: 13px; height: 13px; border-radius: 50%; background: #ff5f57; display: block; }
+.window .bar i:nth-child(2) { background: #febc2e; } .window .bar i:nth-child(3) { background: #28c840; }
+.window .bar span { margin-left: 14px; font-size: 17px; color: #7a849a; font-weight: 600; }
+.window img { display: block; width: 100%; }
+.crop { overflow: hidden; }
+.crop img { display: block; }
+
+.pill { display: inline-flex; align-items: center; gap: 12px; padding: 14px 26px; border-radius: 999px; font-size: 30px; font-weight: 700; }
+.pill.y { background: var(--yellow); color: var(--navy); }
+.pill.w { background: rgba(255,255,255,0.12); color: #fff; border: 2px solid rgba(255,255,255,0.25); }
+.pill.b { background: var(--blue-soft); color: var(--blue); }
+.chips { display: flex; flex-wrap: wrap; gap: 14px; }
+.chip { padding: 12px 22px; border-radius: 14px; background: #fff; border: 2px solid var(--line); font-size: 28px; font-weight: 700; color: var(--ink); }
+.chip.b { background: var(--blue-soft); border-color: transparent; color: var(--blue); }
+
+/* 카드 */
+.card { background: #fff; border-radius: 28px; padding: 40px 44px; box-shadow: 0 10px 30px rgba(11, 22, 48, 0.06); border: 1px solid var(--line); }
+.icon { display: inline-grid; place-items: center; width: 84px; height: 84px; border-radius: 24px; background: var(--blue-soft); color: var(--blue); font-size: 44px; flex: none; }
+.icon.red { background: #ffecec; color: var(--red); }
+.icon.w { background: rgba(255,255,255,0.14); color: #fff; }
+
+/* 02 고민 */
+.pains { display: flex; flex-direction: column; gap: 22px; }
+.pain { display: flex; align-items: center; gap: 30px; padding: 34px 40px; }
+.pain p { font-size: 36px; font-weight: 600; line-height: 1.45; letter-spacing: -0.02em; }
+.pain p b { color: var(--red); font-weight: 800; }
+
+/* 03 해결 */
+.promises { display: grid; grid-template-columns: 1fr; gap: 24px; }
+.promise { display: flex; align-items: center; gap: 36px; padding: 44px; border-radius: 30px; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.18); }
+.promise .icon { width: 110px; height: 110px; font-size: 58px; border-radius: 30px; background: #fff; color: var(--blue); }
+.promise h3 { font-size: 46px; }
+.promise p { font-size: 32px; color: #d5e0ff; margin-top: 8px; font-weight: 500; }
+.counter { display: flex; align-items: center; justify-content: center; gap: 26px; margin-top: 70px; }
+.counter .box { text-align: center; padding: 34px 40px; background: #fff; color: var(--navy); border-radius: 28px; min-width: 330px; }
+.counter .box b { display: block; font-size: 88px; font-weight: 900; color: var(--blue); line-height: 1; letter-spacing: -0.04em; }
+.counter .box span { font-size: 32px; font-weight: 700; }
+.counter .plus { font-size: 70px; font-weight: 900; }
+
+/* 04 회의록 흐름 */
+.flow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; position: relative; }
+.flow .step { text-align: center; position: relative; }
+.flow .step .icon { width: 120px; height: 120px; border-radius: 36px; font-size: 60px; background: var(--blue); color: #fff; box-shadow: 0 14px 30px rgba(47, 107, 237, 0.35); }
+.flow .step:not(:last-child)::after { content: ""; position: absolute; top: 60px; left: calc(50% + 72px); width: calc(100% - 144px); border-top: 4px dashed #b8c8f2; }
+.flow .step b { display: block; margin-top: 22px; font-size: 32px; font-weight: 800; }
+.flow .step > span:not(.icon) { display: block; font-size: 25px; color: var(--sub); margin-top: 6px; font-weight: 500; }
+.checklist { display: flex; flex-direction: column; gap: 20px; }
+.checklist div { display: flex; gap: 18px; align-items: flex-start; font-size: 33px; font-weight: 600; line-height: 1.45; letter-spacing: -0.02em; }
+.checklist div svg { flex: none; color: var(--blue); font-size: 38px; margin-top: 4px; stroke-width: 3; }
+.dark .checklist div svg, .blue .checklist div svg { color: var(--yellow); }
+
+/* 05 개인정보 */
+.ba { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; align-items: stretch; position: relative; }
+.doc { border-radius: 26px; padding: 36px 34px; background: #fff; border: 2px solid var(--line); box-shadow: 0 16px 40px rgba(11,22,48,0.08); }
+.doc .tag { display: inline-block; font-size: 24px; font-weight: 800; padding: 8px 16px; border-radius: 10px; margin-bottom: 22px; }
+.doc.before .tag { background: #ffecec; color: var(--red); }
+.doc.after { border-color: var(--blue); box-shadow: 0 16px 40px rgba(47,107,237,0.18); }
+.doc.after .tag { background: var(--blue); color: #fff; }
+.doc h4 { font-size: 28px; font-weight: 800; margin-bottom: 16px; }
+.doc .line { font-size: 23.5px; line-height: 1.95; font-weight: 500; white-space: nowrap; letter-spacing: -0.02em; }
+.doc .line em { font-style: normal; color: var(--sub); }
+.doc.before .line mark { background: #ffe3e3; color: #c92a2a; border-radius: 6px; padding: 1px 4px; font-weight: 700; }
+.doc.after .line mark { background: var(--blue-soft); color: var(--blue); border-radius: 6px; padding: 1px 4px; font-weight: 800; }
+.ba .arrow { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 76px; height: 76px; border-radius: 50%; background: var(--blue); color: #fff; display: grid; place-items: center; font-size: 40px; box-shadow: 0 8px 20px rgba(47,107,237,0.4); }
+.fmt { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.fmt div { background: #fff; border: 2px solid var(--line); border-radius: 22px; padding: 26px 28px; }
+.fmt b { font-size: 34px; font-weight: 900; color: var(--blue); letter-spacing: -0.02em; }
+.fmt span { display: block; font-size: 24px; color: var(--sub); margin-top: 6px; font-weight: 600; line-height: 1.4; }
+
+/* 06 이미지 */
+.before-after-img { display: flex; align-items: center; gap: 26px; }
+.before-after-img .src { flex: 1.25; }
+.before-after-img .src img, .outs img { width: 100%; display: block; border-radius: 18px; box-shadow: 0 12px 30px rgba(11,22,48,0.14); }
+.cap { font-size: 24px; font-weight: 700; color: var(--sub); margin-top: 14px; text-align: center; }
+.outs { display: grid; grid-template-columns: 1fr 0.8fr 0.62fr; gap: 22px; align-items: end; }
+.big-arrow { font-size: 64px; color: var(--blue); flex: none; }
+.timeline { display: flex; height: 120px; border-radius: 18px; overflow: hidden; gap: 4px; }
+.timeline div { border-radius: 10px; }
+.timeline .s { background: repeating-linear-gradient(90deg, #c2ccdf 0 6px, transparent 6px 12px); position: relative; }
+.timeline .s::after { content: "✂"; position: absolute; inset: 0; display: grid; place-items: center; font-size: 40px; color: var(--red); }
+.timeline .v { background: linear-gradient(180deg, var(--blue-2), var(--blue)); }
+.wave { height: 100%; width: 100%; background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.35) 2px, transparent 3px) 0 0/14px 14px; }
+
+/* 07 비서 13 */
+.grid13 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.tile { display: flex; gap: 24px; align-items: flex-start; padding: 32px 30px; border-radius: 26px; background: #fff; border: 1px solid var(--line); }
+.tile .icon { width: 76px; height: 76px; font-size: 40px; border-radius: 22px; }
+.tile b { display: block; font-size: 33px; font-weight: 800; letter-spacing: -0.02em; }
+.tile > div > span { display: block; font-size: 25px; color: var(--sub); margin-top: 6px; line-height: 1.45; font-weight: 500; letter-spacing: -0.02em; }
+.tile.wide { grid-column: span 2; }
+
+/* 08 비교 */
+.cmp { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 31px; }
+.cmp th { font-size: 32px; font-weight: 800; padding: 28px 22px; text-align: center; }
+.cmp th.us { background: var(--blue); color: #fff; border-radius: 26px 26px 0 0; }
+.cmp th.them { color: var(--sub); }
+.cmp td { padding: 30px 22px; border-bottom: 2px solid var(--line); text-align: center; font-weight: 600; letter-spacing: -0.02em; }
+.cmp td:first-child { text-align: left; font-weight: 800; color: var(--ink); width: 30%; }
+.cmp td.them { color: var(--sub); }
+.cmp td.us { background: var(--blue-soft); color: var(--blue); font-weight: 800; }
+.cmp tr:last-child td.us { border-radius: 0 0 26px 26px; }
+
+/* 09 이런 분께 */
+.personas { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+.persona { padding: 44px 40px; border-radius: 30px; background: #fff; border: 1px solid var(--line); }
+.persona .icon { margin-bottom: 26px; }
+.persona b { font-size: 36px; font-weight: 800; display: block; letter-spacing: -0.02em; line-height: 1.35; }
+.persona > span:not(.icon) { font-size: 27px; color: var(--sub); display: block; margin-top: 14px; line-height: 1.5; font-weight: 500; }
+
+/* 10 단축키 */
+.keys { display: flex; align-items: center; gap: 12px; }
+.key { display: inline-grid; place-items: center; min-width: 96px; height: 84px; padding: 0 22px; border-radius: 18px; background: #fff; color: var(--navy); font-size: 32px; font-weight: 800; box-shadow: 0 6px 0 #b9c6e6, 0 10px 24px rgba(0,0,0,0.25); }
+.keys .plus { font-size: 36px; font-weight: 800; color: #9fbcff; }
+.shortcut { display: flex; align-items: center; justify-content: space-between; padding: 36px 40px; border-radius: 28px; background: rgba(255,255,255,0.08); border: 2px solid rgba(255,255,255,0.14); }
+.shortcut p { font-size: 32px; font-weight: 700; line-height: 1.4; }
+.shortcut p span { display: block; font-size: 25px; color: #a9b8dc; font-weight: 500; }
+
+/* 11 리워드 */
+.rewards { display: flex; flex-direction: column; gap: 20px; }
+.reward { display: flex; align-items: center; justify-content: space-between; padding: 38px 44px; border-radius: 28px; background: #fff; border: 2px solid var(--line); }
+.reward.best { border-color: var(--blue); box-shadow: 0 14px 36px rgba(47,107,237,0.22); position: relative; }
+.reward .name { font-size: 36px; font-weight: 800; letter-spacing: -0.02em; }
+.reward .desc { font-size: 26px; color: var(--sub); margin-top: 6px; font-weight: 600; }
+.reward .price { font-size: 52px; font-weight: 900; letter-spacing: -0.03em; color: var(--ink); }
+.reward .price small { font-size: 30px; font-weight: 800; }
+.reward .flag { position: absolute; top: -20px; left: 40px; background: var(--yellow); color: var(--navy); font-size: 24px; font-weight: 800; padding: 6px 16px; border-radius: 10px; }
+.common { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+
+/* 12 사양 */
+.spec { width: 100%; border-collapse: collapse; }
+.spec td { padding: 30px 6px; border-bottom: 2px solid var(--line); font-size: 31px; vertical-align: top; letter-spacing: -0.02em; line-height: 1.45; }
+.spec td:first-child { width: 230px; font-weight: 800; color: var(--blue); }
+.spec td:last-child { font-weight: 600; }
+.trial { display: flex; align-items: center; gap: 30px; padding: 44px; border-radius: 30px; background: var(--navy); color: #fff; }
+.trial .icon { background: var(--yellow); color: var(--navy); width: 100px; height: 100px; font-size: 52px; }
+.trial b { font-size: 42px; font-weight: 800; display: block; }
+.trial > div > span { font-size: 28px; color: #c3cfee; display: block; margin-top: 8px; font-weight: 500; }
+
+/* 표지 */
+.cover { width: 1200px; height: 675px; padding: 0; display: flex; background: linear-gradient(135deg, #0b1630 0%, #17306e 100%); color: #fff; margin-bottom: 40px; position: relative; overflow: hidden; }
+.cover .text { padding: 70px 0 70px 70px; width: 560px; display: flex; flex-direction: column; justify-content: center; z-index: 1; }
+.cover h1 { font-size: 66px; line-height: 1.2; }
+.cover .lead { font-size: 27px; margin-top: 22px; }
+.cover .brand, .sq .brand { display: flex; align-items: center; gap: 14px; font-size: 32px; font-weight: 800; margin-bottom: 30px; }
+.brand .mark { width: 54px; height: 54px; border-radius: 15px; background: var(--blue); display: grid; place-items: center; font-size: 30px; font-weight: 900; color: #fff; }
+.cover .shot { position: absolute; right: -150px; top: 95px; width: 820px; transform: rotate(-4deg); }
+.cover .pills { display: flex; gap: 12px; margin-top: 34px; flex-wrap: wrap; }
+.cover .pill { font-size: 22px; padding: 11px 20px; }
+.sq { width: 1080px; height: 1080px; padding: 90px 80px 0; background: linear-gradient(160deg, #0b1630 0%, #1a3a86 100%); color: #fff; position: relative; overflow: hidden; margin-bottom: 40px; }
+.sq h1 { font-size: 84px; line-height: 1.18; }
+.sq .shot { position: absolute; left: 80px; right: -160px; top: 660px; }
+.glow { position: absolute; width: 700px; height: 700px; border-radius: 50%; background: radial-gradient(circle, rgba(91,140,255,0.45), transparent 65%); }
+.foot-note { font-size: 24px; color: var(--sub); margin-top: 26px; line-height: 1.5; font-weight: 500; }
+.dark .foot-note { color: #93a3c9; }
+</style>
+</head>
+<body>
+
+<!-- ===================== 표지 16:9 ===================== -->
+<section class="cover" data-out="00_대표이미지_16x9">
+  <div class="glow" style="right:-120px; top:-200px"></div>
+  <div class="text">
+    <div class="brand"><span class="mark">비</span>로컬비서</div>
+    <h1>구독료 0원,<br>인터넷 없이<br><span style="color:var(--yellow)">내 PC에서.</span></h1>
+    <p class="lead">회의록부터 개인정보 가리기까지<br>업무 비서 16가지 기능</p>
+    <div class="pills">
+      <span class="pill w"><i data-icon="wifi-off"></i>오프라인</span>
+      <span class="pill w"><i data-icon="lock"></i>업로드 0번</span>
+      <span class="pill w"><i data-icon="infinity"></i>평생 소장</span>
+    </div>
+  </div>
+  <div class="shot window"><div class="bar"><i></i><i></i><i></i><span>로컬비서</span></div><img src="shots/transcript.png"></div>
+</section>
+
+<!-- ===================== 표지 1:1 ===================== -->
+<section class="sq" data-out="00_대표이미지_1x1">
+  <div class="glow" style="left:-200px; top:-250px"></div>
+  <div class="brand"><span class="mark">비</span>로컬비서</div>
+  <h1>인터넷 없이<br><span style="color:var(--yellow)">내 PC에서</span> 끝내는<br>업무 비서</h1>
+  <p class="lead" style="font-size:36px">회의록 · 개인정보 가리기 · 이미지 편집 + 비서 기능 13가지</p>
+  <div class="shot window"><div class="bar"><i></i><i></i><i></i><span>로컬비서</span></div><img src="shots/home.png"></div>
+</section>
+
+<!-- ===================== 01 인트로 ===================== -->
+<section class="slide dark" data-out="01_인트로">
+  <div class="glow" style="right:-300px; top:-300px"></div>
+  <div class="eyebrow">LOCAL BISEO · 로컬비서</div>
+  <h1>회의 녹음,<br>아직도 <span class="hl">클라우드에</span><br>올리시나요?</h1>
+  <p class="lead">녹음을 회의록으로 바꾸는 것도,<br>문서 속 주민번호를 가리는 것도<br><b style="color:#fff">지금 쓰는 PC 안에서 끝납니다.</b></p>
+  <div class="mt-m"><span class="pill y"><i data-icon="plane"></i>비행기 모드에서도 됩니다</span></div>
+  <div class="window mt-l"><div class="bar"><i></i><i></i><i></i><span>로컬비서 · 회의록</span></div><img src="shots/transcript.png"></div>
+</section>
+
+<!-- ===================== 02 고민 ===================== -->
+<section class="slide bg" data-out="02_고민">
+  <div class="eyebrow">이런 적, 있으셨죠?</div>
+  <h2>정리하고, 지우고, 맞추느라<br><span class="hl">하루가 다 갔다면</span></h2>
+  <div class="pains mt-l">
+    <div class="card pain"><span class="icon red"><i data-icon="clock"></i></span><p>1시간 회의 녹음을<br><b>정리하느라 2시간</b>을 썼다</p></div>
+    <div class="card pain"><span class="icon red"><i data-icon="shield-alert"></i></span><p>문서를 보내기 전에<br><b>주민번호·전화번호를 하나하나</b> 지웠다</p></div>
+    <div class="card pain"><span class="icon red"><i data-icon="images"></i></span><p>상품 사진 30장을<br><b>마켓 규격에 맞추느라</b> 하루를 보냈다</p></div>
+    <div class="card pain"><span class="icon red"><i data-icon="credit-card"></i></span><p>쓰는 서비스마다<br><b>매달 구독료</b>가 빠져나간다</p></div>
+    <div class="card pain"><span class="icon red"><i data-icon="cloud-upload"></i></span><p>회사 자료를 외부 서버에<br><b>올려도 되는지</b> 늘 찜찜하다</p></div>
+  </div>
+</section>
+
+<!-- ===================== 03 해결 ===================== -->
+<section class="slide blue" data-out="03_해결">
+  <div class="glow" style="left:-300px; bottom:-300px; opacity:.6"></div>
+  <div class="eyebrow" style="color:#d5e0ff">그래서 만들었습니다</div>
+  <h2>로컬비서 하나로<br>해결하세요</h2>
+  <div class="promises mt-l">
+    <div class="promise"><span class="icon"><i data-icon="wifi-off"></i></span><div><h3>인터넷 없이</h3><p>비행기 모드에서도 돌아갑니다</p></div></div>
+    <div class="promise"><span class="icon"><i data-icon="lock"></i></span><div><h3>파일이 밖으로 나가지 않게</h3><p>서버 업로드 0번, 모든 처리는 내 PC 안에서</p></div></div>
+    <div class="promise"><span class="icon"><i data-icon="infinity"></i></span><div><h3>한 번 결제로 평생</h3><p>월 구독료가 없습니다</p></div></div>
+  </div>
+  <div class="counter">
+    <div class="box"><b>3</b><span>핵심 기능</span></div>
+    <div class="plus">+</div>
+    <div class="box"><b>13</b><span>비서 기능</span></div>
+  </div>
+</section>
+
+<!-- ===================== 04 회의록 ===================== -->
+<section class="slide" data-out="04_핵심기능1_회의록">
+  <div class="eyebrow"><span class="num">01</span>핵심 기능 · 회의록</div>
+  <h2>녹음을 넣으면<br><span class="hl">회의록이 됩니다</span></h2>
+  <p class="lead">받아쓰기부터 요약, 할 일, 일정까지 한 번에.</p>
+  <div class="flow mt-l">
+    <div class="step"><span class="icon"><i data-icon="mic"></i></span><b>녹음 넣기</b><span>mp3·m4a·wav·mp4</span></div>
+    <div class="step"><span class="icon"><i data-icon="file-text"></i></span><b>받아쓰기</b><span>AI 음성 인식</span></div>
+    <div class="step"><span class="icon"><i data-icon="sparkles"></i></span><b>요약</b><span>핵심 문장 정리</span></div>
+    <div class="step"><span class="icon"><i data-icon="list-checks"></i></span><b>할 일·일정</b><span>담당·기한 자동</span></div>
+  </div>
+  <div class="window mt-l"><div class="bar"><i></i><i></i><i></i><span>로컬비서 · 회의록</span></div><img src="shots/transcript.png"></div>
+  <div class="checklist mt-l">
+    <div><i data-icon="check"></i>"김 대리가 금요일까지 시안 공유" → 할 일·담당·기한으로 정리</div>
+    <div><i data-icon="check"></i>"다음 주 화요일 오후 2시 촬영" → 캘린더 파일로</div>
+    <div><i data-icon="check"></i>워드(docx)·텍스트·자막(SRT)으로 저장</div>
+    <div><i data-icon="check"></i>개인정보를 가린 사본으로도 저장</div>
+  </div>
+</section>
+
+<!-- ===================== 05 개인정보 ===================== -->
+<section class="slide bg" data-out="05_핵심기능2_개인정보가리기">
+  <div class="eyebrow"><span class="num">02</span>핵심 기능 · 개인정보 가리기</div>
+  <h2>문서 속 개인정보,<br><span class="hl">자동으로 찾아 가립니다</span></h2>
+  <p class="lead">원본은 그대로 두고, 가린 사본을 새로 만들어요.</p>
+  <div class="ba mt-l">
+    <div class="doc before">
+      <span class="tag">원본</span>
+      <h4>고객 상담 기록</h4>
+      <div class="line"><em>성명</em> <mark>홍길동</mark></div>
+      <div class="line"><em>연락처</em> <mark>010-1234-5678</mark></div>
+      <div class="line"><em>주민번호</em> <mark>900101-1234567</mark></div>
+      <div class="line"><em>주소</em> 서울특별시 강남구 <mark>테헤란로 123</mark></div>
+      <div class="line"><em>계좌</em> 국민은행 <mark>123456-01-234567</mark></div>
+      <div class="line"><em>메일</em> <mark>gildong.hong@example.com</mark></div>
+    </div>
+    <div class="doc after">
+      <span class="tag">로컬비서가 가린 사본</span>
+      <h4>고객 상담 기록</h4>
+      <div class="line"><em>성명</em> <mark>홍*동</mark></div>
+      <div class="line"><em>연락처</em> <mark>010-****-5678</mark></div>
+      <div class="line"><em>주민번호</em> <mark>900101-1******</mark></div>
+      <div class="line"><em>주소</em> 서울특별시 강남구 <mark>**** ***</mark></div>
+      <div class="line"><em>계좌</em> 국민은행 <mark>******-**-**4567</mark></div>
+      <div class="line"><em>메일</em> <mark>gi**********@example.com</mark></div>
+    </div>
+    <span class="arrow"><i data-icon="arrow-right"></i></span>
+  </div>
+  <h3 class="mt-l">찾아내는 항목</h3>
+  <div class="chips mt-s">
+    <span class="chip b">주민등록번호</span><span class="chip b">전화번호</span><span class="chip b">카드번호</span><span class="chip b">계좌번호</span>
+    <span class="chip b">이메일</span><span class="chip b">여권번호</span><span class="chip b">운전면허번호</span><span class="chip b">차량번호</span>
+    <span class="chip b">이름</span><span class="chip b">주소</span><span class="chip b">사업자번호</span><span class="chip b">얼굴</span>
+  </div>
+  <h3 class="mt-l">이런 파일을 넣으세요</h3>
+  <div class="fmt mt-s">
+    <div><b>HWPX</b><span>한글 서식 그대로</span></div>
+    <div><b>DOCX</b><span>워드 표·머리글까지</span></div>
+    <div><b>PDF</b><span>글자까지 지워서 복사해도 안 나옴</span></div>
+    <div><b>이미지</b><span>사진 속 글자 칠하기, 얼굴 모자이크</span></div>
+    <div><b>TXT·CSV</b><span>명단·로그 파일</span></div>
+    <div><b>여러 개</b><span>한 번에 끌어다 놓기</span></div>
+  </div>
+  <p class="foot-note">※ 자동 탐지는 사람의 최종 확인을 대신하지 않습니다. 구형 HWP는 본문 글자만 가린 텍스트로 저장됩니다.</p>
+</section>
+
+<!-- ===================== 06 이미지·영상 ===================== -->
+<section class="slide" data-out="06_핵심기능3_이미지영상">
+  <div class="eyebrow"><span class="num">03</span>핵심 기능 · 이미지·영상</div>
+  <h2>상품 사진 규격 맞추기,<br><span class="hl">폴더째 한 번에</span></h2>
+  <p class="lead">마켓 규격을 고르고 워터마크 글자만 적으세요.</p>
+  <div class="before-after-img mt-l">
+    <div class="src"><img src="assets/product.jpg"><p class="cap">원본 (가로 사진)</p></div>
+    <span class="big-arrow"><i data-icon="arrow-right"></i></span>
+    <div style="flex:1"><img src="assets/product_smartstore.jpg" style="width:100%; border-radius:18px; box-shadow:0 12px 30px rgba(11,22,48,0.14); display:block"><p class="cap">스마트스토어 1000×1000<br>+ 워터마크</p></div>
+  </div>
+  <div class="outs mt-m">
+    <div><img src="assets/product_insta.jpg"><p class="cap">인스타 세로 1080×1350<br>+ 바둑판 워터마크</p></div>
+    <div><img src="assets/product_smartstore.jpg"><p class="cap">쿠팡 대표 1000×1000</p></div>
+    <div><img src="assets/product_thumb.jpg"><p class="cap">썸네일 500×500</p></div>
+  </div>
+  <div class="chips mt-m">
+    <span class="chip">스마트스토어</span><span class="chip">쿠팡</span><span class="chip">상세페이지 860</span><span class="chip">인스타그램</span><span class="chip">썸네일</span><span class="chip">직접 입력</span><span class="chip b">배경 지우기</span><span class="chip b">JPG·PNG·WEBP</span>
+  </div>
+
+  <h2 class="mt-l" style="font-size:58px">영상은 <span class="hl">말 없는 구간</span>을<br>자동으로 잘라냅니다</h2>
+  <div class="mt-m">
+    <div class="timeline">
+      <div class="v" style="flex:3"><div class="wave"></div></div><div class="s" style="flex:1.6"></div>
+      <div class="v" style="flex:2.2"><div class="wave"></div></div><div class="s" style="flex:1.2"></div>
+      <div class="v" style="flex:3.4"><div class="wave"></div></div><div class="s" style="flex:1.4"></div>
+      <div class="v" style="flex:1.8"><div class="wave"></div></div>
+    </div>
+    <div class="timeline mt-s" style="width:74%">
+      <div class="v" style="flex:3"><div class="wave"></div></div><div class="v" style="flex:2.2"><div class="wave"></div></div><div class="v" style="flex:3.4"><div class="wave"></div></div><div class="v" style="flex:1.8"><div class="wave"></div></div>
+    </div>
+  </div>
+  <div class="checklist mt-m">
+    <div><i data-icon="scissors"></i>자르기 전에 몇 분이 줄어드는지 미리 계산</div>
+    <div><i data-icon="subtitles"></i>영상 속 말을 받아써 자막(SRT) 파일로</div>
+  </div>
+</section>
+
+<!-- ===================== 07 비서 13 ===================== -->
+<section class="slide bg" data-out="07_비서기능13가지">
+  <div class="eyebrow">그리고</div>
+  <h2>비서 기능 <span class="c-blue">13가지</span>가<br>더 들어 있습니다</h2>
+  <div class="grid13 mt-l">
+    <div class="tile"><span class="icon"><i data-icon="list-checks"></i></span><div><b>할 일 뽑기</b><span>글에서 할 일·담당·기한 찾기</span></div></div>
+    <div class="tile"><span class="icon"><i data-icon="calendar-plus"></i></span><div><b>일정 뽑기</b><span>"다음 주 화 3시" → 캘린더</span></div></div>
+    <div class="tile"><span class="icon"><i data-icon="notebook-pen"></i></span><div><b>메모·할 일</b><span>기한 알림, 고정 메모</span></div></div>
+    <div class="tile"><span class="icon"><i data-icon="clipboard-list"></i></span><div><b>클립보드 기록</b><span>민감정보는 가려서 저장</span></div></div>
+    <div class="tile"><span class="icon"><i data-icon="scan-text"></i></span><div><b>화면 글자 인식</b><span>캡처하고 끌어서 글자로</span></div></div>
+    <div class="tile"><span class="icon"><i data-icon="receipt"></i></span><div><b>영수증·명함</b><span>경비 엑셀, 연락처 파일로</span></div></div>
+    <div class="tile"><span class="icon"><i data-icon="languages"></i></span><div><b>번역</b><span>한·영·일·중 오프라인</span></div></div>
+    <div class="tile"><span class="icon"><i data-icon="spell-check"></i></span><div><b>글다듬기</b><span>맞춤법, 문체, 메일 틀</span></div></div>
+    <div class="tile"><span class="icon"><i data-icon="file-pen"></i></span><div><b>이름 일괄 변경</b><span>번호·날짜로 한 번에</span></div></div>
+    <div class="tile"><span class="icon"><i data-icon="copy"></i></span><div><b>중복 정리</b><span>같은 파일, 비슷한 사진</span></div></div>
+    <div class="tile"><span class="icon"><i data-icon="file-text"></i></span><div><b>PDF 도구</b><span>합치기·나누기·압축</span></div></div>
+    <div class="tile"><span class="icon"><i data-icon="timer"></i></span><div><b>집중 타이머</b><span>뽀모도로, 주간 리포트</span></div></div>
+    <div class="tile wide"><span class="icon"><i data-icon="search"></i></span><div><b>통합 검색</b><span>회의록·메모·클립보드·한글·워드·PDF 속 글자까지 한 번에</span></div></div>
+  </div>
+</section>
+
+<!-- ===================== 08 비교 ===================== -->
+<section class="slide" data-out="08_비교">
+  <div class="eyebrow">무엇이 다른가요?</div>
+  <h2>클라우드 서비스 vs<br><span class="hl">로컬비서</span></h2>
+  <table class="cmp mt-l">
+    <thead><tr><th></th><th class="them">일반 클라우드 서비스</th><th class="us">로컬비서</th></tr></thead>
+    <tbody>
+      <tr><td>파일 처리</td><td class="them">서버에 업로드</td><td class="us">내 PC 안에서</td></tr>
+      <tr><td>인터넷</td><td class="them">꼭 필요</td><td class="us">없어도 됨</td></tr>
+      <tr><td>비용</td><td class="them">대부분 월 구독</td><td class="us">한 번 결제, 평생</td></tr>
+      <tr><td>회사 보안 규정</td><td class="them">외부 전송 검토 필요</td><td class="us">밖으로 안 나감</td></tr>
+      <tr><td>기능</td><td class="them">서비스마다 따로</td><td class="us">16가지를 한 프로그램에</td></tr>
+    </tbody>
+  </table>
+  <p class="foot-note">※ 서비스마다 정책이 다를 수 있습니다.</p>
+</section>
+
+<!-- ===================== 09 이런 분께 ===================== -->
+<section class="slide bg" data-out="09_이런분께">
+  <div class="eyebrow">이런 분들께 꼭 필요합니다</div>
+  <h2>매일 문서와 녹음을<br><span class="hl">다루는 분이라면</span></h2>
+  <div class="personas mt-l">
+    <div class="persona"><span class="icon"><i data-icon="mic"></i></span><b>녹음 정리가<br>많은 분</b><span>기자, 학생, 상담사, 연구자</span></div>
+    <div class="persona"><span class="icon"><i data-icon="building-2"></i></span><b>개인정보 문서를<br>다루는 곳</b><span>학교, 병원, 공공기관, 노무·세무 사무실</span></div>
+    <div class="persona"><span class="icon"><i data-icon="store"></i></span><b>상품 사진을<br>매일 만드는 셀러</b><span>스마트스토어, 쿠팡, 인스타 마켓</span></div>
+    <div class="persona"><span class="icon"><i data-icon="briefcase"></i></span><b>혼자 다 해야 하는<br>1인 사업자</b><span>프리랜서, 소상공인, 작은 사무실</span></div>
+  </div>
+</section>
+
+<!-- ===================== 10 편의 기능 ===================== -->
+<section class="slide dark" data-out="10_편의기능">
+  <div class="glow" style="right:-300px; top:-200px"></div>
+  <div class="eyebrow">쓰기 편하게</div>
+  <h2>단축키 한 번이면<br><span class="hl">어디서든 바로</span></h2>
+  <div class="mt-l" style="display:flex; flex-direction:column; gap:22px">
+    <div class="shortcut"><p>화면 캡처해서 글자 읽기<span>보이는 화면 그대로 끌어서 고르면 끝</span></p><div class="keys"><span class="key">Ctrl</span><span class="plus">+</span><span class="key">Shift</span><span class="plus">+</span><span class="key">O</span></div></div>
+    <div class="shortcut"><p>어디서든 열고 찾기<span>회의록·메모·문서 속 글자까지</span></p><div class="keys"><span class="key">Ctrl</span><span class="plus">+</span><span class="key">Shift</span><span class="plus">+</span><span class="key">Space</span></div></div>
+  </div>
+  <div class="window mt-l"><div class="bar"><i></i><i></i><i></i><span>로컬비서 · 찾기</span></div><div class="crop" style="height:560px"><img src="shots/palette.png" style="width:100%"></div></div>
+  <div class="checklist mt-l">
+    <div><i data-icon="check"></i>창을 닫아도 작업 표시줄에서 조용히 대기</div>
+    <div><i data-icon="check"></i>복사한 글은 자동 기록, 주민번호·카드번호는 가려서 저장</div>
+    <div><i data-icon="check"></i>파일은 끌어다 놓기만 하면 끝</div>
+  </div>
+</section>
+
+<!-- ===================== 11 리워드 ===================== -->
+<section class="slide bg" data-out="11_리워드">
+  <div class="eyebrow">리워드</div>
+  <h2>한 번 결제로<br><span class="hl">평생 쓰세요</span></h2>
+  <div class="common mt-m">
+    <span class="pill b"><i data-icon="infinity"></i>평생 라이선스</span>
+    <span class="pill b"><i data-icon="laptop"></i>PC 2대까지</span>
+    <span class="pill b"><i data-icon="download"></i>1년 무료 업데이트</span>
+  </div>
+  <div class="rewards mt-l">
+    <div class="reward best"><span class="flag">선착순 100명</span><div><div class="name">슈퍼얼리버드</div><div class="desc">라이선스 1개</div></div><div class="price">29,000<small>원</small></div></div>
+    <div class="reward"><div><div class="name">얼리버드</div><div class="desc">라이선스 1개 · 선착순 300명</div></div><div class="price">39,000<small>원</small></div></div>
+    <div class="reward"><div><div class="name">기본</div><div class="desc">라이선스 1개</div></div><div class="price">49,000<small>원</small></div></div>
+    <div class="reward"><div><div class="name">2인 팩</div><div class="desc">라이선스 2개 (PC 4대)</div></div><div class="price">89,000<small>원</small></div></div>
+    <div class="reward"><div><div class="name">팀 5인 팩</div><div class="desc">라이선스 5개 (PC 10대) · 50팀 한정</div></div><div class="price">199,000<small>원</small></div></div>
+  </div>
+  <p class="foot-note center">모든 리워드는 디지털 제공(배송 없음) · 라이선스 키를 이메일로 보내 드립니다</p>
+</section>
+
+<!-- ===================== 12 사양 ===================== -->
+<section class="slide" data-out="12_사양과이용조건">
+  <div class="eyebrow">사양과 이용 조건</div>
+  <h2>설치 전에<br><span class="hl">확인해 주세요</span></h2>
+  <table class="spec mt-l">
+    <tr><td>운영체제</td><td>Windows 10 / 11 (64비트)</td></tr>
+    <tr><td>메모리</td><td>8GB 이상<br><span style="color:var(--sub); font-weight:500">회의록 기능은 16GB 권장</span></td></tr>
+    <tr><td>저장 공간</td><td>2GB + AI 모델 1~3GB</td></tr>
+    <tr><td>인터넷</td><td>설치·AI 모델 첫 다운로드 때만</td></tr>
+    <tr><td>라이선스</td><td>1인 사용 · PC 2대 · 평생 사용</td></tr>
+    <tr><td>업데이트</td><td>1년 무료</td></tr>
+    <tr><td>제공 방식</td><td>이메일로 라이선스 키 발송<br><span style="color:var(--sub); font-weight:500">인터넷 없이 키 입력만으로 인증</span></td></tr>
+  </table>
+  <div class="trial mt-l"><span class="icon"><i data-icon="gift"></i></span><div><b>14일 무료 체험판</b><span>모든 기능을 먼저 써 보고 결정하세요</span></div></div>
+  <p class="foot-note">※ 인식 속도와 정확도는 녹음 품질, 문서 상태, PC 사양에 따라 다를 수 있습니다.</p>
+</section>
+
+</body>
+</html>

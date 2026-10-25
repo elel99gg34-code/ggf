@@ -196,3 +196,20 @@ def test_receipt_from_image(client, tmp_path, korean_font):
     _text_image(src, korean_font, ["김밥천국 역삼점", "2026-10-20 12:31", "합계금액 14,000원"])
     f = client.post("/receipts/parse", json={"path": str(src)}).json()["fields"]
     assert f["amount"] == 14000 and f["date"] == "2026-10-20" and f["category"] == "식비"
+
+
+@needs_ocr
+def test_screen_ocr_selection_keeps_numbers_and_spacing(client, tmp_path, korean_font):
+    from PIL import ImageFont
+
+    src = tmp_path / "공지.png"
+    img = Image.new("RGB", (1400, 820), (246, 247, 249))
+    d = ImageDraw.Draw(img)
+    d.rectangle((0, 0, 1400, 70), fill=(52, 58, 72))
+    f = ImageFont.truetype(korean_font, 30)
+    for i, line in enumerate(["점검 일시: 11월 3일(화) 오후 2시 ~ 4시", "문의: 정보보안팀 (내선 1234)"]):
+        d.text((80, 220 + i * 62), line, font=f, fill=(40, 46, 60))
+    img.save(src)
+    text = client.post("/ocr/image", json={"path": str(src), "crop": [56, 180, 994, 200]}).json()["text"]
+    assert "11월 3일(화) 오후 2시 ~ 4시" in text
+    assert "정보보안팀 (내선 1234)" in text

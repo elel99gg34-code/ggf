@@ -26,3 +26,6 @@ signing/
 
 # 배포용으로 같이 묶는 외부 도구
 app/src-tauri/resources/tools/
+
+# 와디즈 이미지 렌더링 중간 파일
+tools/wadiz/.story.built.html

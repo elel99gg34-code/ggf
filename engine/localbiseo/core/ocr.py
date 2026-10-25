@@ -1,6 +1,7 @@
 """OCR 백엔드 묶음. PaddleOCR > Tesseract > RapidOCR 순서로 있는 걸 쓴다."""
 from __future__ import annotations
 
+import re
 import threading
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -48,19 +49,60 @@ def backend_name() -> str | None:
     return None
 
 
-def ocr_image(image: Image.Image | str | Path) -> list[OcrLine]:
+def ocr_image(image: Image.Image | str | Path, block: bool = False) -> list[OcrLine]:
+    """block=True: 사용자가 고른 영역처럼 글 덩어리 하나라고 보고 읽는다 (화면 OCR에서 정확도가 높다)."""
     optional.require("ocr")
     img = Image.open(image) if isinstance(image, (str, Path)) else image
     img = img.convert("RGB")
     name = backend_name()
     if name == "paddleocr":
-        return _paddle(img)
-    if name == "pytesseract":
-        return _tesseract(img)
-    return _rapid(img)
+        lines = _paddle(img)
+    elif name == "pytesseract":
+        lines = _tesseract(img, block)
+    else:
+        lines = _rapid(img)
+    return [l for l in lines if not _is_noise(l)]
 
 
-def _tesseract(img: Image.Image) -> list[OcrLine]:
+_JAMO = re.compile(r"^[\u3131-\u318E]+$")
+
+
+def _psm(block: bool) -> str:
+    # psm 6: 글 덩어리 하나(고른 영역), psm 4: 크기가 다른 줄이 세로로 이어진 문서.
+    # 기본값(psm 3)은 화면 캡처나 영수증에서 줄을 통째로 빠뜨리거나 숫자·괄호를 자주 틀린다.
+    return "--psm 6" if block else "--psm 4"
+
+
+def ocr_text(image: Image.Image, block: bool = False) -> str:
+    """글자만 필요할 때. Tesseract는 자체 출력이 띄어쓰기를 더 정확하게 살린다."""
+    optional.require("ocr")
+    img = image.convert("RGB")
+    if backend_name() != "pytesseract":
+        return "\n".join(l.text for l in ocr_image(img, block))
+    import pytesseract
+
+    cmd = find_tool("tesseract")
+    if cmd:
+        pytesseract.pytesseract.tesseract_cmd = cmd
+    lang = "kor+eng" if "kor" in pytesseract.get_languages(config="") else "eng"
+    raw = pytesseract.image_to_string(img, lang=lang, config=_psm(block))
+    lines = []
+    for line in raw.splitlines():
+        t = line.strip()
+        compact = t.replace(" ", "")
+        if not t or _JAMO.match(compact) or (len(compact) <= 2 and not re.search(r"[가-힣0-9]", compact)):
+            continue
+        lines.append(t)
+    return "\n".join(lines)
+
+
+def _is_noise(line: OcrLine) -> bool:
+    # 테두리·그림자에서 생기는 낱자모('ㄱ', 'ㅋ')나 신뢰도 낮은 한 글자 줄은 버린다.
+    text = line.text.strip()
+    return not text or bool(_JAMO.match(text.replace(" ", ""))) or (len(text) == 1 and line.conf < 0.85)
+
+
+def _tesseract(img: Image.Image, block: bool = False) -> list[OcrLine]:
     import pytesseract
 
     cmd = find_tool("tesseract")
@@ -69,11 +111,12 @@ def _tesseract(img: Image.Image) -> list[OcrLine]:
 
     langs = pytesseract.get_languages(config="")
     lang = "kor+eng" if "kor" in langs else "eng"
-    data = pytesseract.image_to_data(img, lang=lang, output_type=pytesseract.Output.DICT)
+    config = _psm(block)
+    data = pytesseract.image_to_data(img, lang=lang, config=config, output_type=pytesseract.Output.DICT)
     groups: dict[tuple, list[int]] = {}
     for i, word in enumerate(data["text"]):
-        # 신뢰도가 아주 낮은 조각은 잡음(테두리, 얼룩)인 경우가 많다.
-        if word and word.strip() and float(data["conf"][i]) >= 35:
+        # 신뢰도가 아주 낮은 조각이나 낱자모는 잡음(테두리, 얼룩)인 경우가 많다.
+        if word and word.strip() and float(data["conf"][i]) >= 35 and not _JAMO.match(word.strip()):
             key = (data["block_num"][i], data["par_num"][i], data["line_num"][i])
             groups.setdefault(key, []).append(i)
     lines = []
