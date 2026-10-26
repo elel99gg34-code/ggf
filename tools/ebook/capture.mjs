@@ -53,7 +53,7 @@ const primary = async () => {
 
 // 0) 키 등록 전 화면
 await shot("00_gate", async () => {
-  await go("home");
+  await page.goto(APP + "home");
   await page.waitForSelector(".gate");
 });
 await call("POST", "/license", { key: readFileSync(keyFile, "utf8").trim() });
@@ -170,9 +170,9 @@ await shot("12_writing", async () => {
 await shot("13_rename", async () => {
   await go("rename");
   await choose(".dropzone", ["머그컵_그린.jpg", "머그컵_블루.jpg", "머그컵_코랄.jpg"].map((f) => join(samples, "상품사진", f)));
-  const tpl = page.locator("main input").first();
-  await page.waitForTimeout(800);
-  await tpl.isVisible();
+  const tpl = page.locator("main input[value='{name}']").first();
+  await tpl.fill("상품사진_{n:03}");
+  await page.waitForTimeout(1200);
 });
 await shot("14_dedupe", async () => {
   await go("dedupe");
@@ -191,7 +191,7 @@ await shot("17_search", async () => {
   await page.waitForTimeout(1200);
 });
 // 아래쪽 '정보' 칸에는 녹화한 PC의 경로가 나와서 위쪽만 찍는다
-await shot("18_settings", () => go("settings"), { x: 0, y: 0, width: 1360, height: 640 });
+await shot("18_settings", () => go("settings"), { x: 0, y: 0, width: 1360, height: 520 });
 await shot("19_palette", async () => {
   await go("home");
   await page.keyboard.press("Control+k");
