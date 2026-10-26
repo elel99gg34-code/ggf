@@ -47,7 +47,7 @@ GAME({
     P.vy = Math.min(P.vy + 1500 * dt, 1100);
     physics(g, P, dt);
     // carry
-    if (g.pressed('b') || g.keyp('KeyF')) toggleCarry(g);
+    if (g.pressed('b')) toggleCarry(g);
     for (const c of S.cubes) {
       if (c === S.carry) { c.x = P.x + P.w / 2 - c.w / 2 + P.face * 24; c.y = P.y + 2; c.vx = P.vx; c.vy = P.vy; continue; }
       c.vy = Math.min(c.vy + 1500 * dt, 1100);
@@ -73,7 +73,6 @@ GAME({
     if (touches(P, 'E', 6)) { S.clear = 1.6; const pts = Math.max(200, 1500 - Math.floor(S.t) * 10 - S.lvDeaths * 100); g.add(pts, P.x, P.y + PT_OY - 20); g.sfx.win(); g.burst(P.x + 10, P.y + PT_OY, PT_PCOL, 40, 300, 1); return; }
     for (const s of S.shots) s.t -= dt;
     S.shots = S.shots.filter((s) => s.t > 0);
-    if (P.tcd > 0) P.tcd -= dt;
     g.info = `${S.lvl + 1}/10 · ${PT_LV[S.lvl].name}`;
   },
   draw(g, c) {
@@ -148,6 +147,7 @@ function touches(b, ch, inset = 0) {
 }
 function portalOn(tx, ty, nx, ny) { for (let i = 0; i < 2; i++) { const p = S.portals[i]; if (p && p.tx === tx && p.ty === ty && p.nx === nx && p.ny === ny) return i; } return -1; }
 function physics(g, b, dt) {
+  if (b.tcd > 0) b.tcd -= dt;
   // X axis
   b.x += b.vx * dt;
   let hit = collide(b);
