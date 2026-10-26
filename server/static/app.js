@@ -82,6 +82,9 @@ function showAdmin() {
   $("#lock").hidden = true;
   $("#admin").hidden = false;
   openTab("issue");
+  api("GET", "/api/info")
+    .then((i) => ($("#storage-warning").hidden = i.durable))
+    .catch(() => {});
 }
 
 $("#unlock-form").addEventListener("submit", async (e) => {

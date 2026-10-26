@@ -39,6 +39,7 @@ button:disabled { opacity: 0.6; cursor: default; }
 .small { font-size: 13px; }
 .muted { color: var(--muted); }
 .error { color: var(--danger); margin: 0; min-height: 1.2em; }
+.warn { color: var(--danger); border-color: var(--danger); margin: 0; }
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px; }
 .stack { display: flex; flex-direction: column; gap: 14px; }
 .row { display: flex; gap: 8px; align-items: center; }

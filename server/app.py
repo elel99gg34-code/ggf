@@ -42,6 +42,7 @@ MAX_FAILS_PER_IP = 5
 MAX_FAILS_TOTAL = 20  # 주소를 바꿔 가며 찍어 보는 경우를 막는다
 LOCK_MINUTES = 15
 HERE = Path(__file__).parent
+DEFAULT_DB = HERE / "licenses.db"
 
 metadata = MetaData()
 licenses = Table(
@@ -73,7 +74,7 @@ def sign(payload: dict, key: Ed25519PrivateKey) -> str:
 
 def database_url(url: str | None) -> str:
     if not url:
-        return f"sqlite:///{HERE / 'licenses.db'}"
+        return f"sqlite:///{DEFAULT_DB}"
     # Render는 postgres:// 형태로 준다. SQLAlchemy에는 드라이버(psycopg)를 적어 줘야 한다.
     for old in ("postgres://", "postgresql://"):
         if url.startswith(old):
@@ -213,6 +214,7 @@ def create_app(pin: str, private_key_pem: str, db_url: str | None = None) -> Fas
     public_pem = signing_key.public_key().public_bytes(serialization.Encoding.PEM, serialization.PublicFormat.SubjectPublicKeyInfo).decode()
     fingerprint = hashlib.sha256(public_pem.encode()).hexdigest()[:16]
     engine = create_engine(database_url(db_url), pool_pre_ping=True)
+    durable = engine.dialect.name != "sqlite" or bool(db_url)  # DATABASE_URL 없이 쓰는 SQLite는 Render에서 재시작하면 사라진다
     metadata.create_all(engine)
     guard = Guard(pin)
 
@@ -286,7 +288,7 @@ def create_app(pin: str, private_key_pem: str, db_url: str | None = None) -> Fas
 
     @app.get("/api/info")
     def info(_: str = Depends(admin)):
-        return {"public_key": public_pem, "fingerprint": fingerprint, "editions": EDITIONS}
+        return {"public_key": public_pem, "fingerprint": fingerprint, "editions": EDITIONS, "durable": durable}
 
     @app.get("/api/licenses")
     def list_licenses(q: str = "", edition: str = "", limit: int = 300, _: str = Depends(admin)):

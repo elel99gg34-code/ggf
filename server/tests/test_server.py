@@ -116,6 +116,16 @@ def test_bulk_issue_with_and_without_header(admin, key):
     assert len(ids) == len(set(ids)) == 3
 
 
+def test_info_reports_storage(admin, key, tmp_path, monkeypatch):
+    info = admin.get("/api/info").json()
+    assert info["durable"] is True and "BEGIN PUBLIC KEY" in info["public_key"]
+    pem = key.private_bytes(serialization.Encoding.PEM, serialization.PrivateFormat.PKCS8, serialization.NoEncryption()).decode()
+    monkeypatch.setattr(server, "DEFAULT_DB", tmp_path / "local.db")  # DATABASE_URL 없이 쓰면 임시 SQLite
+    with TestClient(server.create_app(PIN, pem, None)) as c:
+        c.post("/api/unlock", json={"pin": PIN})
+        assert c.get("/api/info").json()["durable"] is False
+
+
 def test_lock_ends_session(admin):
     assert admin.get("/api/licenses").status_code == 200
     admin.post("/api/lock")
