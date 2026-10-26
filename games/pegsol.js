@@ -13,7 +13,7 @@ const PG_LEVELS = [
   { name: '삼각 21', board: 'tri', pegs: ['#', '##', '###', '#.##', '#####', '######'] },
   { name: '다이아몬드', board: 'eng', pegs: ['  .#.  ', '  ###  ', '.#####.', '###.###', '.#####.', '  ###  ', '  .#.  '], target: [3, 3] },
   { name: '클래식 33', board: 'eng', pegs: ['  ###  ', '  ###  ', '#######', '###.###', '#######', '  ###  ', '  ###  '], target: [3, 3] },
-  { name: '유럽식 37', board: 'eur', pegs: ['  #.#  ', ' ##### ', '#######', '#######', '#######', ' ##### ', '  ###  '] },
+  { name: '유럽식 대형', gen: [1, 28] },
 ];
 const PG_RANDOM = 4; // 고정 레벨 뒤 무작위 도전 수
 GAME({
@@ -148,11 +148,11 @@ function buildBoard(lv) {
   return { holes, pegs, jumps, tri, idx };
 }
 // 무작위 레벨: 한 개의 말에서 거꾸로 뛰기를 반복해 풀 수 있는 배치 생성
-function randomLevel(k) {
-  const shape = k % 2 ? PG_EUR : PG_ENG;
+function randomLevel(k, forceEur, forceWant) {
+  const shape = forceEur || k % 2 ? PG_EUR : PG_ENG;
   const base = { board: 'eng', pegs: shape.map((r) => r.replace(/o/g, '.')) };
   const B = buildBoard(base);
-  const want = 10 + k * 4;
+  const want = forceWant || 12 + k * 4;
   for (let att = 0; att < 200; att++) {
     const pegs = B.pegs.map(() => false);
     const start = U.randi(0, B.holes.length - 1);
@@ -165,13 +165,14 @@ function randomLevel(k) {
       pegs[t] = false; pegs[o] = true; pegs[a] = true; cnt++;
     }
     if (cnt >= want) {
-      return { name: `무작위 ${k + 1}`, board: 'eng', pegs: base.pegs.map((row, r) => [...row].map((ch, c) => (ch === ' ' ? ' ' : pegs[B.idx[r + ',' + c]] ? '#' : '.')).join('')), targetIdx: start };
+      return { name: forceWant ? '유럽식 대형' : `무작위 ${k + 1}`, board: 'eng', pegs: base.pegs.map((row, r) => [...row].map((ch, c) => (ch === ' ' ? ' ' : pegs[B.idx[r + ',' + c]] ? '#' : '.')).join('')), targetIdx: start };
     }
   }
   return PG_LEVELS[0];
 }
 function loadLevel(g) {
-  const lv = S.lvl < PG_LEVELS.length ? PG_LEVELS[S.lvl] : randomLevel(S.lvl - PG_LEVELS.length);
+  let lv = S.lvl < PG_LEVELS.length ? PG_LEVELS[S.lvl] : randomLevel(S.lvl - PG_LEVELS.length);
+  if (lv.gen) lv = randomLevel(0, lv.gen[0], lv.gen[1]);
   const B = buildBoard(lv);
   S.holes = B.holes; S.pegs = B.pegs; S.jumps = B.jumps; S.start = B.pegs.slice();
   S.name = lv.name;

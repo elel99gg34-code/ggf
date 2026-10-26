@@ -84,14 +84,14 @@ function makePath(type) {
   const pts = [];
   const cx = 480, cy = 340;
   if (type === 0) { // spiral
-    for (let t = 0; t <= 1; t += 0.0015) { const a = t * Math.PI * 5.2 + Math.PI, r = 300 * (1 - t) + 85; pts.push([cx + Math.cos(a) * r * 1.4, cy + Math.sin(a) * r * 0.85]); }
+    for (let t = 0; t <= 1; t += 0.0015) { const a = t * Math.PI * 5.2 + Math.PI, r = 255 * (1 - t) + 82; pts.push([cx + Math.cos(a) * r * 1.4, cy + Math.sin(a) * r * 0.85]); }
   } else if (type === 1) { // serpentine
-    const rows = 5;
-    for (let t = 0; t <= 1; t += 0.001) { const f = t * rows, row = Math.floor(Math.min(f, rows - 0.0001)), k = f - row; const dir = row % 2 ? -1 : 1; let x = dir > 0 ? U.lerp(60, 900, k) : U.lerp(900, 60, k); let y = 70 + row * 115 + Math.sin(k * Math.PI) * 25; if (row === 2 && Math.abs(x - 480) < 120) y = 300 + (y - 300) * 0; pts.push([x, y]); }
+    const ys = [60, 160, 500, 590];
+    for (let t = 0; t <= 1; t += 0.001) { const f = t * 4, row = Math.floor(Math.min(f, 3.9999)), k = f - row; const x = row % 2 ? U.lerp(910, 50, k) : U.lerp(50, 910, k); pts.push([x, ys[row] + Math.sin(k * Math.PI * 3) * 14]); }
   } else if (type === 2) { // big loop around frog then inner
     for (let t = 0; t <= 1; t += 0.0012) { const a = -Math.PI / 2 + t * Math.PI * 3.6, r = 290 - t * 150; pts.push([cx + Math.cos(a) * r * 1.45 + Math.sin(t * 20) * 10, cy + Math.sin(a) * r * 0.95]); }
-  } else { // figure eight-ish
-    for (let t = 0; t <= 1; t += 0.0012) { const a = t * Math.PI * 3.3 - Math.PI / 2; pts.push([cx + Math.sin(a) * 400, cy + Math.sin(a * 2) * 200 * (1 - t * 0.25) + (t - 0.5) * 120]); }
+  } else { // rounded-square spiral
+    for (let t = 0; t <= 1; t += 0.001) { const a = Math.PI + t * Math.PI * 3.7, r = 1 - t * 0.55; const ca = Math.cos(a), sa = Math.sin(a); const sx = Math.sign(ca) * Math.pow(Math.abs(ca), 0.5), sy = Math.sign(sa) * Math.pow(Math.abs(sa), 0.5); pts.push([cx + sx * 430 * r, cy + sy * 270 * r]); }
   }
   // resample uniformly every 2px
   const out = [pts[0]];
@@ -109,8 +109,7 @@ function buildLevel(g) {
   const lv = ZM_LEVELS[S.level];
   S.path = makePath(lv.path); S.L = (S.path.length - 1) * 2;
   S.fx = 480; S.fy = 340;
-  if (lv.path === 1) { S.fy = 300; }
-  if (lv.path === 3) { S.fy = 470; }
+  if (lv.path === 1) { S.fy = 330; }
   S.chain = []; S.shots = []; S.spawnLeft = lv.balls; S.colors = lv.colors; S.speed = lv.speed;
   S.intro = 1; S.t = 0; S.phase = 'play'; S.slow = 0; S.rev = 0; S.aimT = 0; S.combo = 0; S.bestCombo = S.bestCombo || 0; S.danger = 0; S.recoil = 0;
   S.aim = -Math.PI / 2; S.msg = lv.name; S.msgT = 2; S.lastC = -1; S.run = 0;

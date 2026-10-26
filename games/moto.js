@@ -101,7 +101,7 @@ function loadLevel(g) {
     if (f === 'hill') { const hh = 60 + R() * 90 * d, len = 500 + R() * 300; for (let k = 1; k <= 16; k++) { const t = k / 16; pts.push([x + len * t, y - Math.sin(t * Math.PI) * hh]); } x += len; }
     if (f === 'bumps') { const nb = 4 + S.lv, bh = 16 + 4 * d; for (let k = 1; k <= nb * 8; k++) pts.push([x + k * 16, y - (0.5 - 0.5 * Math.cos((k / 8) * Math.PI * 2)) * (bh + R() * 4)]); x += nb * 128; pts[pts.length - 1][1] = y; add(100, 0); }
     if (f === 'ramp') { S.signs.push({ x: x - 60, e: '⚠️' }); add(220, -90); add(40, 0); add(240, 90); add(150, 0); }
-    if (f === 'steep') { const hh = 150 + 50 * d; add(120, 0); add(200, -hh * 0.5); add(140, -hh * 0.5); add(120, 0); add(260, hh); add(100, 0); }
+    if (f === 'steep') { const hh = 150 + 50 * d; add(120, 0); add(260, -hh * 0.5); add(200, -hh * 0.5); add(120, 0); add(300, hh); add(100, 0); }
     if (f === 'jump' || f === 'bigjump') {
       const big = f === 'bigjump', hh = (big ? 120 : 80) * Math.min(1.5, d), gap = (big ? 300 : 180) + R() * 60 * d;
       S.signs.push({ x: x - 50, e: '🔥' });

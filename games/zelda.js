@@ -189,7 +189,7 @@ function getRoom(area, x, y) {
       R.t.push([...row].map((ch, tx) => {
         if (ch === 'T') return 1; if (ch === '~') return 2; if (ch === '*') return 3; if (ch === 'R') return 4; if (ch === 'D') return 6;
         if (ch === 'O') { R.npcs.push({ k: 'old', x: (tx + 0.5) * TS, y: (ty + 0.5) * TS }); R.npcs.push({ k: 'sword', x: (tx + 0.5) * TS, y: (ty + 1.6) * TS }); R.npcs.push({ k: 'fire', x: (tx - 2.5) * TS, y: (ty + 0.5) * TS }); R.npcs.push({ k: 'fire', x: (tx + 3.5) * TS, y: (ty + 0.5) * TS }); }
-        if (ch === 'M') { R.npcs.push({ k: 'shop', x: (tx + 1.5) * TS, y: (ty + 0.5) * TS }); [['bomb', 20], ['arrow', 15], ['heart', 10]].forEach((it, i) => R.npcs.push({ k: 'ware', w: it[0], price: it[1], x: (tx - 0.5 + i * 2) * TS, y: (ty + 1.7) * TS })); }
+        if (ch === 'M') { R.npcs.push({ k: 'shop', x: (tx + 1.5) * TS, y: (ty - 0.5) * TS }); [['bomb', 20], ['arrow', 15], ['heart', 10]].forEach((it, i) => R.npcs.push({ k: 'ware', w: it[0], price: it[1], x: (tx - 0.5 + i * 2) * TS, y: (ty + 0.6) * TS })); }
         if (ch === 'F') R.npcs.push({ k: 'fairy', x: (tx + 1) * TS, y: (ty + 0.5) * TS });
         if (ch === 'C') R.chest = { x: (tx + 0.5) * TS, y: (ty + 0.5) * TS, c: 'hc', open: false };
         return 0;
@@ -198,7 +198,7 @@ function getRoom(area, x, y) {
     R.spec = { ens: OWEN[x + ',' + y] || [] };
   } else {
     const D = DUN[area], sp = D.rooms[x + ',' + y];
-    R.spec = sp; R.trap = !!sp.trap;
+    R.spec = sp; R.trap = !!sp.trap; R.eye = !!sp.eye;
     for (let ty = 0; ty < RH; ty++) { const row = []; for (let tx = 0; tx < RW; tx++) row.push(tx === 0 || ty === 0 || tx === RW - 1 || ty === RH - 1 ? 1 : 0); R.t.push(row); }
     for (const p of PAT[sp.pat]) R.t[p[1]][p[0]] = p[2] === 2 ? 2 : 7;
     const doorTiles = { u: [[7, 0], [8, 0]], d: [[7, 9], [8, 9]], l: [[0, 4], [0, 5]], r: [[15, 4], [15, 5]] };
@@ -230,8 +230,9 @@ function enterRoom(g, fromDir) {
     if (R.spec.boss) { const b = mkEnemy(R.spec.boss, 12 * TS, 4.5 * TS); if (R.spec.boss === 'eye') { b.x = 7.5 * TS; b.y = 2.2 * TS; } S.ens.push(b); say(R.spec.boss === 'dragon' ? '🐉 용 아쿠아멘투스가 나타났다!' : '👁️ 거대한 눈 고마! 눈을 뜰 때 화살을 쏴라!'); g.sfx.tone(90, 1, 'sawtooth', 0.07, 60); }
   }
   R.spawned = true;
-  R.cleared = S.ens.length === 0 ? (S.area === 'ow' || done || !R.spec.reward || R.rewardGiven ? true : R.cleared) : false;
-  if (S.area !== 'ow' && S.ens.length === 0 && !R.cleared) R.cleared = false;
+  R.cleared = S.ens.length === 0;
+  R.keep = R.keep || [];
+  S.drops = R.keep.slice();
   if (R.trap && S.ens.length && g) g.sfx.tone(140, 0.25, 'square', 0.05, 80);
 }
 function freeSpot() {
@@ -356,8 +357,9 @@ function hitEnemy(g, e, dmg, vx, vy, src) {
     }
   }
 }
-function drop(k, x, y) { S.drops.push({ k, x, y, t: ['rupee', 'rupee5', 'heart', 'bombs', 'arrows'].includes(k) ? 9 : 1e9 }); }
+function drop(k, x, y) { const temp = ['rupee', 'rupee5', 'heart', 'bombs', 'arrows'].includes(k), d = { k, x, y, t: temp ? 9 : 1e9 }; S.drops.push(d); if (!temp) S.room.keep.push(d); }
 function pick(g, d) {
+  if (S.room.keep) S.room.keep = S.room.keep.filter((o) => o !== d);
   const sx = d.x, sy = d.y + OY;
   if (d.k === 'rupee' || d.k === 'rupee5') { const n = d.k === 'rupee' ? 1 : 5; S.rupees = Math.min(255, S.rupees + n); S.earned += n * 5; g.sfx.coin(); g.float(sx, sy, '+' + n + '💎', '#4ade80', 16); }
   else if (d.k === 'heart') { S.hp = Math.min(S.max, S.hp + 2); g.sfx.tone(1000, 0.08, 'sine', 0.05, 1400); }
@@ -442,7 +444,8 @@ function interact(g, dt) {
     for (let y = 0; y < RH; y++) for (let x = 0; x < RW; x++) if (R2.t[y][x] === 6) { P.x = (x + 0.5) * TS; P.y = (y + 1.5) * TS; }
     P.dir = 'd'; S.fade = 0.5; enterRoom(g, 'd'); return;
   }
-  const v = DV[dir];
+  const v = DV[dir], nk = (S.rx + v[0]) + ',' + (S.ry + v[1]);
+  if (!(S.area === 'ow' ? OW[nk] : DUN[S.area].rooms[nk])) { P.x = U.clamp(P.x, 14, RW * TS - 14); P.y = U.clamp(P.y, 14, RH * TS - 14); return; }
   S.rx += v[0]; S.ry += v[1];
   if (dir === 'l') P.x += RW * TS; if (dir === 'r') P.x -= RW * TS; if (dir === 'u') P.y += RH * TS; if (dir === 'd') P.y -= RH * TS;
   if (dir === 'l' || dir === 'r') P.x = U.clamp(P.x, 14, RW * TS - 14); else P.y = U.clamp(P.y, 14, RH * TS - 14);

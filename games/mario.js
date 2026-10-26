@@ -102,7 +102,7 @@ function load(g) {
   }
   S.castle = !!W0.castle;
   if (S.castle) {
-    for (let k = 0; k < 8; k++) ground(x + k); x += 8;
+    for (let k = 0; k < 8; k++) ground(x + k, k < 2 ? 12 : k < 4 ? 11 : 10); x += 8;
     const bx = x; for (let k = 0; k < 16; k++) { M[10][x + k] = 'b'; M[14][x + k] = 'L'; } x += 16;
     for (let k = 0; k < 14; k++) ground(x + k, 10); for (let y = 1; y < 6; y++) M[y][bx + 15] = ' ';
     S.axe = { x: x + 1, y: 9 }; S.bridge = { x0: bx, x1: bx + 15 };
