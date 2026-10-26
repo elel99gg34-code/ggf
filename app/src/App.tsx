@@ -1,5 +1,6 @@
 import { Command, Loader2, Search as SearchIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState, type ComponentType } from "react";
+import LicenseGate from "./components/LicenseGate";
 import { SystemProvider, useSystem } from "./components/system";
 import { ToastProvider, useToast } from "./components/ui";
 import { api, errorText, initEngine } from "./lib/api";
@@ -66,10 +67,25 @@ export default function App() {
   return (
     <ToastProvider>
       <SystemProvider navigate={navigate}>
-        <Shell page={page} navigate={navigate} />
+        <Gate page={page} navigate={navigate} />
       </SystemProvider>
     </ToastProvider>
   );
+}
+
+/** 라이선스 키가 등록돼 있어야 앱이 열린다. */
+function Gate({ page, navigate }: { page: string; navigate: (k: string) => void }) {
+  const { status, reload } = useSystem();
+  if (!status) {
+    return (
+      <div className="splash">
+        <div className="logo">로컬비서</div>
+        <p className="muted"><Loader2 size={16} className="spin" /> 불러오는 중…</p>
+      </div>
+    );
+  }
+  if (status.license.status !== "licensed") return <LicenseGate license={status.license} version={status.version} onDone={reload} />;
+  return <Shell page={page} navigate={navigate} />;
 }
 
 function Shell({ page, navigate }: { page: string; navigate: (k: string) => void }) {
@@ -139,15 +155,10 @@ function Shell({ page, navigate }: { page: string; navigate: (k: string) => void
           ))}
         </nav>
         <div className="sidebar-foot">
-          {lic?.status === "licensed" && <span className="muted small">정품 · {lic.holder || lic.id}</span>}
-          {lic?.status === "trial" && (
+          {lic && (
             <button className="linklike small" onClick={() => navigate("settings")}>
-              체험판 {lic.days_left}일 남음
-            </button>
-          )}
-          {lic?.status === "expired" && (
-            <button className="linklike small danger" onClick={() => navigate("settings")}>
-              체험 기간 끝 · 키 입력
+              {lic.edition_label} · {lic.holder || lic.id}
+              {lic.expires ? ` · ${lic.expires}까지` : ""}
             </button>
           )}
           <span className="muted small">v{status?.version}</span>

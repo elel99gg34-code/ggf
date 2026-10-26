@@ -1,26 +1,31 @@
 """오프라인 라이선스 (Ed25519 서명).
 
 키 형식: LB1.<base64url(payload JSON)>.<base64url(서명)>
-발급은 tools/license_gen.py 로 하고, 앱에는 공개키(license_pubkey.pem)만 들어간다.
-체험판은 첫 실행부터 TRIAL_DAYS일 동안 모든 기능을 쓸 수 있고,
-그 뒤에는 코어 기능(회의록, 파일 마스킹, 이미지·영상)만 라이선스가 필요하다.
+발급은 라이선스 발급 서버(server/)나 tools/license_gen.py로 하고, 앱에는 공개키(license_pubkey.pem)만 들어간다.
+무료 체험은 없다. 키를 등록하기 전에는 키 등록 말고는 어떤 기능도 쓸 수 없다(app.py의 미들웨어).
+에디션: pro(정품), dev(개발자, 기한을 둘 수 있음)
 """
 from __future__ import annotations
 
 import base64
 import json
+import os
 import sys
-from datetime import date, datetime, timedelta
+from datetime import date, datetime
 from pathlib import Path
 
 from .db import Database
 from .errors import AppError, LicenseRequired
 
-TRIAL_DAYS = 14
 PREFIX = "LB1"
+EDITIONS = {"pro": "정품", "dev": "개발자"}
 
 
 def _pubkey_path() -> Path:
+    # 소스로 돌릴 때만 다른 공개키를 쓸 수 있다(시연 녹화·테스트용). 배포판(PyInstaller)은 무시한다.
+    override = os.environ.get("LOCALBISEO_LICENSE_PUBKEY")
+    if override and not getattr(sys, "frozen", False):
+        return Path(override)
     base = Path(getattr(sys, "_MEIPASS", Path(__file__).parent.parent))
     bundled = base / "localbiseo" / "core" / "license_pubkey.pem"
     return bundled if bundled.exists() else Path(__file__).parent / "license_pubkey.pem"
@@ -64,30 +69,42 @@ def verify(key: str, public_key=None) -> dict:
     return payload
 
 
+def _licensed(payload: dict) -> dict:
+    edition = payload.get("ed", "pro")
+    return {
+        "status": "licensed",
+        "holder": payload.get("name", ""),
+        "id": payload.get("id", ""),
+        "edition": edition,
+        "edition_label": EDITIONS.get(edition, edition),
+        "expires": payload.get("exp"),
+    }
+
+
 def state(db: Database) -> dict:
-    started = db.get_setting("trial_started")
-    if not started:
-        started = date.today().isoformat()
-        db.set_setting("trial_started", started)
     key = db.get_setting("license_key")
-    if key:
-        try:
-            payload = verify(key)
-            return {"status": "licensed", "holder": payload.get("name", ""), "id": payload.get("id", ""), "edition": payload.get("ed", "pro")}
-        except AppError:
-            pass
-    end = date.fromisoformat(started) + timedelta(days=TRIAL_DAYS)
-    left = (end - date.today()).days
-    return {"status": "trial" if left >= 0 else "expired", "days_left": max(left, 0), "trial_ends": end.isoformat()}
+    if not key:
+        return {"status": "unlicensed"}
+    try:
+        return _licensed(verify(key))
+    except AppError as e:
+        return {"status": "invalid", "error": e.message}
+
+
+def is_licensed(db: Database) -> bool:
+    return state(db)["status"] == "licensed"
 
 
 def activate(db: Database, key: str) -> dict:
     payload = verify(key)
     db.set_setting("license_key", "".join(key.split()))
     db.set_setting("license_activated_at", datetime.now().isoformat(timespec="seconds"))
-    return {"status": "licensed", "holder": payload.get("name", ""), "id": payload.get("id", ""), "edition": payload.get("ed", "pro")}
+    return _licensed(payload)
 
 
-def require_pro(db: Database) -> None:
-    if state(db)["status"] == "expired":
-        raise LicenseRequired("체험 기간이 끝났어요. 설정 > 라이선스에서 키를 입력해 주세요.")
+def require_license(db: Database) -> None:
+    st = state(db)
+    if st["status"] == "unlicensed":
+        raise LicenseRequired("라이선스 키를 등록해야 쓸 수 있어요.")
+    if st["status"] != "licensed":
+        raise LicenseRequired(f"{st['error']} 새 키를 등록해 주세요.")

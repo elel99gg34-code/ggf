@@ -1,10 +1,18 @@
-import { createContext, useContext, type ReactNode } from "react";
+import { createContext, useContext, useEffect, type ReactNode } from "react";
 import { api } from "../lib/api";
 import { useData } from "../lib/hooks";
 import { Notice } from "./ui";
 
 export type ComponentStatus = { key: string; label: string; available: boolean; used_by: string; extra: string };
-export type License = { status: "trial" | "licensed" | "expired"; days_left?: number; trial_ends?: string; holder?: string; id?: string };
+export type License = {
+  status: "unlicensed" | "licensed" | "invalid";
+  holder?: string;
+  id?: string;
+  edition?: string;
+  edition_label?: string;
+  expires?: string | null;
+  error?: string;
+};
 export type SystemStatus = {
   version: string;
   os: string;
@@ -28,6 +36,11 @@ const SystemCtx = createContext<Ctx>({ status: null, reload: () => {}, navigate:
 
 export function SystemProvider({ children, navigate }: { children: ReactNode; navigate: (p: string) => void }) {
   const { data, reload } = useData(() => api.get<SystemStatus>("/system/status"));
+  // 쓰는 도중에 키가 막히면(예: 개발자 키 기한 끝) 상태를 다시 읽어 키 입력 화면으로 돌아간다.
+  useEffect(() => {
+    window.addEventListener("lb-license-required", reload);
+    return () => window.removeEventListener("lb-license-required", reload);
+  }, [reload]);
   const has = (key: string) => (key === "ffmpeg" ? !!data?.ffmpeg : !!data?.components.find((c) => c.key === key)?.available);
   return <SystemCtx.Provider value={{ status: data, reload, navigate, has }}>{children}</SystemCtx.Provider>;
 }

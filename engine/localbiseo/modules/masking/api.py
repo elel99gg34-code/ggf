@@ -3,7 +3,6 @@ from __future__ import annotations
 from fastapi import APIRouter
 from pydantic import BaseModel, Field
 
-from ...core import license
 from ...core.context import Ctx, job_ref
 from ...core.errors import AppError
 from .detect import DEFAULT_KINDS, KIND_LABELS, MODES, mask_text
@@ -66,6 +65,5 @@ def run_files(job, paths, kinds, mode, out_dir, faces):
 @router.post("/files")
 def mask_files_api(body: FilesIn, ctx: Ctx):
     _check(body.kinds, body.mode)
-    license.require_pro(ctx.db)
     job = ctx.jobs.submit("mask", f"파일 {len(body.paths)}개 마스킹", run_files, body.paths, body.kinds, body.mode, body.out_dir, body.faces)
     return job_ref(job)

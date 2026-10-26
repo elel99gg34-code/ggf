@@ -70,9 +70,12 @@ jobs:
         if: runner.os == 'macOS'
         run: python tools/build_engine.py
 
-      # 뜨는지만 보면 묶을 때 빠진 라이브러리를 못 잡는다. 번역·받아쓰기·이미지 가리기를 실제로 돌린다.
+      # 뜨는지만 보면 묶을 때 빠진 라이브러리를 못 잡는다. 구성요소를 실제로 불러 보고, 키 없이 잠기는지 본다.
+      # 저장소 Secrets에 LOCALBISEO_SMOKE_KEY(개발자 키)를 넣어 두면 번역·받아쓰기·이미지 가리기까지 실제로 돌린다.
       - name: 묶은 엔진으로 기능 점검
         shell: bash
+        env:
+          LOCALBISEO_SMOKE_KEY: ${{ secrets.LOCALBISEO_SMOKE_KEY }}
         run: |
           exe=app/src-tauri/resources/engine/localbiseo-engine
           [ -f "$exe.exe" ] && exe="$exe.exe"

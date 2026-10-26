@@ -8,7 +8,7 @@ from fastapi import APIRouter
 from PIL import Image, ImageColor, ImageDraw, ImageOps
 from pydantic import BaseModel, Field
 
-from ..core import ffmpeg, fonts, license, optional
+from ..core import ffmpeg, fonts, optional
 from ..core.config import output_path
 from ..core.context import Ctx, job_ref
 from ..core.errors import AppError
@@ -281,7 +281,6 @@ def presets():
 
 @router.post("/images")
 def images(body: ImageOpts, ctx: Ctx):
-    license.require_pro(ctx.db)
     if body.preset and body.preset not in PRESETS:
         raise AppError("알 수 없는 규격이에요.")
     if body.format not in ("jpg", "png", "webp", "same"):
@@ -301,14 +300,12 @@ def silence_detect(body: SilenceIn):
 
 @router.post("/silence/cut")
 def silence_cut(body: SilenceIn, ctx: Ctx):
-    license.require_pro(ctx.db)
     ffmpeg.require_ffmpeg()
     return job_ref(ctx.jobs.submit("cut", f"무음 컷: {Path(body.path).name}", cut_silence, body.path, body.noise_db, body.min_silence, body.pad, body.out_dir))
 
 
 @router.post("/subtitles")
 def subtitles(body: SubtitleIn, ctx: Ctx):
-    license.require_pro(ctx.db)
     optional.require("stt")
     if body.format not in ("srt", "vtt"):
         raise AppError("자막 형식은 srt 또는 vtt예요.")

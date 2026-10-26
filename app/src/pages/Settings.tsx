@@ -16,7 +16,7 @@ export default function Settings() {
   const settings = useData(() => api.get<Record<string, unknown>>("/system/settings"));
   const [form, setForm] = useState({ user_name: "", company: "", focus_minutes: 25, break_minutes: 5 });
   const [key, setKey] = useState("");
-  const [agree, setAgree] = useState(false);
+  const [changing, setChanging] = useState(false);
   const act = useAction();
   const [saved, setSaved] = useState(false);
   useEffect(() => {
@@ -28,6 +28,7 @@ export default function Settings() {
     const r = await act.run(() => api.post("/license", { key }));
     if (r) {
       setKey("");
+      setChanging(false);
       reload();
     }
   };
@@ -36,19 +37,22 @@ export default function Settings() {
       <div className="grid-2">
         <div className="stack">
           <Card title={<><KeyRound size={16} /> 라이선스</>}>
-            {lic?.status === "licensed" && <Notice tone="ok">정품 인증됨 · {lic.holder} ({lic.id})</Notice>}
-            {lic?.status === "trial" && <Notice>체험판이에요. {lic.days_left}일 남았어요 ({lic.trial_ends}까지). 체험 기간에는 모든 기능을 쓸 수 있어요.</Notice>}
-            {lic?.status === "expired" && <Notice tone="warn">체험 기간이 끝났어요. 회의록·파일 마스킹·이미지/영상은 라이선스가 필요해요. 나머지 비서 기능은 계속 쓸 수 있어요.</Notice>}
-            {lic?.status !== "licensed" && (
+            {lic?.status === "licensed" && (
+              <Notice tone="ok">
+                {lic.edition_label} 인증됨 · {lic.holder} ({lic.id}){lic.expires ? ` · ${lic.expires}까지` : ""}
+              </Notice>
+            )}
+            {!changing ? (
+              <Button small variant="ghost" onClick={() => setChanging(true)}>다른 키로 바꾸기</Button>
+            ) : (
               <>
-                <Field label="라이선스 키" hint="인터넷 없이 입력만으로 인증돼요.">
+                <Field label="새 라이선스 키" hint="인터넷 없이 입력만으로 인증돼요.">
                   <textarea rows={3} value={key} onChange={(e) => setKey(e.target.value)} placeholder="LB1.xxxxx.xxxxx" />
                 </Field>
-                <label className="check-label small">
-                  <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} />
-                  키를 등록하면 디지털 콘텐츠 제공이 시작되어 청약철회가 제한된다는 점을 확인했어요 (전자상거래법 제17조 제2항 제5호).
-                </label>
-                <Button variant="primary" busy={act.busy} disabled={!key.trim() || !agree} onClick={activate}>인증하기</Button>
+                <div className="row">
+                  <Button variant="primary" busy={act.busy} disabled={!key.trim()} onClick={activate}>바꾸기</Button>
+                  <Button variant="ghost" onClick={() => (setChanging(false), setKey(""))}>취소</Button>
+                </div>
                 <ErrorBox error={act.error} />
               </>
             )}

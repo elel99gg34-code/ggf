@@ -182,33 +182,62 @@ def test_srt_timestamps():
 
 
 # --- 라이선스 ---
-def test_license_trial_and_activation(client, monkeypatch, tmp_path):
-    from cryptography.hazmat.primitives import serialization
+def test_license_activation(client, app, issue):
     from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
     from localbiseo.core import license
 
-    key = Ed25519PrivateKey.generate()
-    pub = tmp_path / "pub.pem"
-    pub.write_bytes(key.public_key().public_bytes(serialization.Encoding.PEM, serialization.PublicFormat.SubjectPublicKeyInfo))
-    monkeypatch.setattr(license, "_pubkey_path", lambda: pub)
-    st = client.get("/license").json()
-    assert st["status"] == "trial" and st["days_left"] == license.TRIAL_DAYS
+    app.state.ctx.db.set_setting("license_key", None)
+    assert client.get("/license").json() == {"status": "unlicensed"}
     assert client.post("/license", json={"key": "LB1.abc.def"}).status_code == 400
-    good = license.sign({"id": "WADIZ-0001", "name": "홍길동", "ed": "pro"}, key)
+    good = issue(id="WADIZ-0001", name="홍길동")
     r = client.post("/license", json={"key": good[:20] + "\n" + good[20:]})
-    assert r.json()["status"] == "licensed" and r.json()["holder"] == "홍길동"
-    other = Ed25519PrivateKey.generate()
-    forged = license.sign({"id": "X", "name": "해커"}, other)
+    assert r.json()["status"] == "licensed" and r.json()["holder"] == "홍길동" and r.json()["edition_label"] == "정품"
+    forged = license.sign({"id": "X", "name": "해커"}, Ed25519PrivateKey.generate())
     assert client.post("/license", json={"key": forged}).status_code == 400
+    assert client.get("/license").json()["holder"] == "홍길동"  # 잘못된 키는 기존 키를 덮어쓰지 않는다
 
 
-def test_trial_expiry_blocks_core_features(client, app):
-    app.state.ctx.db.set_setting("trial_started", (date.today() - timedelta(days=30)).isoformat())
-    r = client.post("/mask/files", json={"paths": ["/x.txt"]})
-    assert r.status_code == 402
-    # 비서 기능은 계속 된다
-    assert client.post("/mask/text", json={"text": "010-1234-5678"}).status_code == 200
+def test_developer_license_with_expiry(client, issue):
+    until = (date.today() + timedelta(days=30)).isoformat()
+    r = client.post("/license", json={"key": issue(id="DEV-0001", name="개발", ed="dev", exp=until)}).json()
+    assert r["edition"] == "dev" and r["edition_label"] == "개발자" and r["expires"] == until
+    past = issue(id="DEV-0002", name="개발", ed="dev", exp=(date.today() - timedelta(days=1)).isoformat())
+    assert "기간이 끝난" in client.post("/license", json={"key": past}).json()["error"]
+
+
+def test_no_license_blocks_every_feature(client, app):
+    app.state.ctx.db.set_setting("license_key", None)
+    for method, path, body in [
+        ("post", "/mask/text", {"text": "010-1234-5678"}),
+        ("post", "/mask/files", {"paths": ["/x.txt"]}),
+        ("get", "/todos", None),
+        ("get", "/dashboard", None),
+        ("post", "/translate", {"text": "안녕"}),
+        ("get", "/transcripts", None),
+    ]:
+        r = client.request(method, path, json=body)
+        assert r.status_code == 402, path
+        assert "라이선스 키" in r.json()["error"]
+    # 키 등록과 상태·점검 화면만 열려 있다
+    for path in ["/health", "/license", "/system/status", "/system/selftest"]:
+        assert client.get(path).status_code == 200, path
+
+
+def test_expired_key_stops_working(client, app, issue):
+    from localbiseo.core import license
+
+    # 등록할 때는 유효했지만 기한이 지난 개발자 키
+    app.state.ctx.db.set_setting("license_key", issue(ed="dev", exp=(date.today() - timedelta(days=1)).isoformat()))
+    assert license.state(app.state.ctx.db)["status"] == "invalid"
+    r = client.get("/todos")
+    assert r.status_code == 402 and "기간이 끝난" in r.json()["error"]
+
+
+def test_selftest_reports_components(client):
+    r = client.get("/system/selftest").json()
+    assert set(r["checks"]) >= {"stt", "translate", "face", "ocr", "ffmpeg", "korean_font"}
+    assert all(v == "ok" or v in ("없음", "한국어 데이터 없음", "얼굴 검출기 없음") or v.startswith("오류") for v in r["checks"].values())
 
 
 def test_token_required_when_set(isolated_home):
@@ -219,12 +248,13 @@ def test_token_required_when_set(isolated_home):
     with TestClient(create_app(token="secret", data_dir=isolated_home)) as c:
         assert c.get("/health").status_code == 200
         assert c.get("/dashboard").status_code == 401
-        assert c.get("/dashboard", headers={"X-Biseo-Token": "secret"}).status_code == 200
+        # 토큰이 맞으면 그다음은 라이선스 확인이다 (이 앱엔 키가 없다)
+        assert c.get("/dashboard", headers={"X-Biseo-Token": "secret"}).status_code == 402
 
 
 def test_dashboard_and_status(client):
     d = client.get("/dashboard").json()
-    assert d["todos_open"] == 0 and d["license"]["status"] == "trial"
+    assert d["todos_open"] == 0 and d["license"]["status"] == "licensed"
     s = client.get("/system/status").json()
     assert {c["key"] for c in s["components"]} >= {"stt", "ocr", "rembg", "translate"}
 

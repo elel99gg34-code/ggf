@@ -49,6 +49,7 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
   const text = await res.text();
   const data = text ? JSON.parse(text) : null;
   if (!res.ok) {
+    if (res.status === 402) window.dispatchEvent(new Event("lb-license-required"));
     throw new ApiError((data && data.error) || `오류 (${res.status})`, res.status, data || {});
   }
   return data as T;

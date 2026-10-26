@@ -13,19 +13,45 @@ FONT_CANDIDATES = [
 ]
 
 
+@pytest.fixture(scope="session")
+def signing_key(tmp_path_factory):
+    """테스트 전용 서명 키. 소스 실행에서는 LOCALBISEO_LICENSE_PUBKEY로 공개키를 바꿀 수 있다."""
+    from cryptography.hazmat.primitives import serialization
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+
+    key = Ed25519PrivateKey.generate()
+    pub = tmp_path_factory.mktemp("license") / "pub.pem"
+    pub.write_bytes(key.public_key().public_bytes(serialization.Encoding.PEM, serialization.PublicFormat.SubjectPublicKeyInfo))
+    return key, pub
+
+
 @pytest.fixture(autouse=True)
-def isolated_home(tmp_path, monkeypatch):
+def isolated_home(tmp_path, monkeypatch, signing_key):
     home = tmp_path / "home"
     home.mkdir()
     monkeypatch.setenv("LOCALBISEO_HOME", str(home))
+    monkeypatch.setenv("LOCALBISEO_LICENSE_PUBKEY", str(signing_key[1]))
     return home
 
 
 @pytest.fixture
-def app(isolated_home):
-    from localbiseo.app import create_app
+def issue(signing_key):
+    from localbiseo.core import license
 
-    return create_app(data_dir=isolated_home)
+    def _issue(**payload) -> str:
+        return license.sign({"id": "TEST-0001", "name": "테스트", "ed": "pro", **payload}, signing_key[0])
+
+    return _issue
+
+
+@pytest.fixture
+def app(isolated_home, issue):
+    from localbiseo.app import create_app
+    from localbiseo.core import license
+
+    app = create_app(data_dir=isolated_home)
+    license.activate(app.state.ctx.db, issue())  # 기능 테스트는 정품 키가 있는 상태에서 돈다
+    return app
 
 
 @pytest.fixture

@@ -7,7 +7,7 @@ from pathlib import Path
 from fastapi import APIRouter
 from pydantic import BaseModel
 
-from ...core import license, optional, search
+from ...core import optional, search
 from ...core.config import sub_dir
 from ...core.context import Ctx, job_ref
 from ...core.db import Database, now_iso
@@ -131,7 +131,6 @@ def download(body: DownloadIn, ctx: Ctx):
 
 @router.post("/transcribe")
 def transcribe(body: TranscribeIn, ctx: Ctx):
-    license.require_pro(ctx.db)
     optional.require("stt")
     if body.diarize:
         optional.require("diarize")

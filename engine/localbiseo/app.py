@@ -13,7 +13,8 @@ from . import __version__
 from .core.config import data_dir as default_data_dir
 from .core.context import AppContext
 from .core.db import Database
-from .core.errors import AppError
+from .core import license
+from .core.errors import AppError, LicenseRequired
 from .core.jobs import JobManager
 from .modules import (
     actions, clipboard, dedupe, focus, media, notes, papers, pdf_tools, rename, schedule, screen_ocr, search_api, system,
@@ -30,6 +31,8 @@ ALLOWED_ORIGINS = [
     "http://127.0.0.1:1420",
 ]
 OPEN_PATHS = {"/health"}
+# 라이선스 키 없이 부를 수 있는 곳: 상태 확인, 설치 점검, 키 등록뿐이다.
+LICENSE_FREE_PATHS = {"/health", "/license", "/system/status", "/system/selftest", "/docs", "/openapi.json"}
 
 ROUTERS = [
     system.router, masking.router, transcribe.router, media.router, actions.router, schedule.router, notes.router,
@@ -52,6 +55,16 @@ def create_app(token: str | None = None, data_dir: Path | None = None, extra_ori
     app = FastAPI(title="로컬비서 엔진", version=__version__, docs_url="/docs" if token is None else None, redoc_url=None, lifespan=lifespan)
     app.state.ctx = ctx
     app.state.token = token
+
+    # 미들웨어는 나중에 붙인 것이 바깥에서 먼저 돈다. 토큰 확인(auth) 다음에 라이선스를 본다.
+    @app.middleware("http")
+    async def require_license(request: Request, call_next):
+        if request.method != "OPTIONS" and request.url.path not in LICENSE_FREE_PATHS:
+            try:
+                license.require_license(ctx.db)
+            except LicenseRequired as e:
+                return JSONResponse(e.to_dict(), status_code=e.status)
+        return await call_next(request)
 
     @app.middleware("http")
     async def auth(request: Request, call_next):

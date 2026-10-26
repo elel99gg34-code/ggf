@@ -1,7 +1,8 @@
-"""설치 파일에 넣을 엔진(PyInstaller로 묶은 실행 파일)이 기능을 실제로 돌리는지 확인한다.
+"""설치 파일에 넣을 엔진(PyInstaller로 묶은 실행 파일)을 점검한다. (CI용, 표준 라이브러리만 씀)
 
-/health만 보면 묶을 때 빠진 라이브러리를 못 잡는다. 번역·받아쓰기·이미지 가리기를
-한 번씩 돌려 본다. 언어팩과 음성 모델을 내려받으므로 인터넷이 필요하다. (CI용, 표준 라이브러리만 씀)
+1) 키 없이: 설치 점검(/system/selftest)으로 구성요소를 실제로 불러 보고, 기능이 잠겨 있는지 본다.
+2) 라이선스 키를 주면(LOCALBISEO_SMOKE_KEY): 등록하고 번역·받아쓰기·이미지 가리기를 한 번씩 돌린다.
+   언어팩과 음성 모델을 내려받으므로 인터넷이 필요하다.
 
     python tools/smoke_engine.py http://127.0.0.1:8799 [--need-ocr]
 """
@@ -10,6 +11,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
 import struct
 import sys
 import tempfile
@@ -78,11 +80,21 @@ def main() -> int:
             failures.append(label)
 
     _, st = call(base, "GET", "/system/status")
-    comps = {c["key"]: c["available"] for c in st["components"]}
-    print("구성요소:", comps, "| ffmpeg:", st["ffmpeg"], "| OCR:", st["ocr_backend"], "| 글꼴:", st["korean_font"], flush=True)
-    for key in REQUIRED + (["ocr"] if args.need_ocr else []):
-        check(comps.get(key, False), f"구성요소 {key}")
-    check(st["ffmpeg"], "ffmpeg")
+    print("구성요소:", {c["key"]: c["available"] for c in st["components"]}, "| OCR:", st["ocr_backend"], "| 글꼴:", st["korean_font"], flush=True)
+    _, test = call(base, "GET", "/system/selftest")
+    print("설치 점검:", test["checks"], flush=True)
+    for key in REQUIRED + ["ffmpeg"] + (["ocr"] if args.need_ocr else []):
+        check(test["checks"].get(key) == "ok", f"설치 점검 {key}", test["checks"].get(key))
+    code, res = call(base, "GET", "/todos")
+    check(code == 402, "키 없으면 잠김", f"{code} {res.get('error', '')}")
+
+    smoke_key = os.environ.get("LOCALBISEO_SMOKE_KEY", "").strip()
+    if not smoke_key:
+        print("\nLOCALBISEO_SMOKE_KEY가 없어 기능 실행 점검은 건너뜀", flush=True)
+        print(f"실패 {len(failures)}개: {', '.join(failures)}" if failures else "모두 통과", flush=True)
+        return 1 if failures else 0
+    code, res = call(base, "POST", "/license", {"key": smoke_key})
+    check(code == 200, "점검용 키 등록", res.get("error", ""))
 
     work = Path(tempfile.mkdtemp(prefix="lb-smoke-"))
 
