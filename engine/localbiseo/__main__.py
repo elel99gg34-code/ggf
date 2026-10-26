@@ -42,6 +42,12 @@ def main() -> None:
         sys.stdout.reconfigure(encoding="utf-8")
     if args.data_dir:
         os.environ["LOCALBISEO_HOME"] = args.data_dir
+    if getattr(sys, "frozen", False):
+        # 배경 제거(rembg → pymatting)는 numba 함수를 cache=True로 컴파일한다.
+        # 묶은 앱에는 소스 파일이 없어서 캐시 위치를 따로 정해 줘야 불러올 수 있다.
+        from .core.config import sub_dir
+
+        os.environ.setdefault("NUMBA_CACHE_DIR", str(sub_dir("numba-cache", sub_dir("models"))))
 
     import uvicorn
 

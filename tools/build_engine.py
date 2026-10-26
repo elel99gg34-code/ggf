@@ -34,7 +34,8 @@ HIDDEN = [
     "uvicorn.logging", "uvicorn.loops.auto", "uvicorn.protocols.http.auto", "uvicorn.protocols.websockets.auto",
     "uvicorn.lifespan.on", "pypdfium2", "pypdfium2_raw", "olefile", "openpyxl", "docx",
 ]
-COLLECT = ["faster_whisper", "ctranslate2", "sentencepiece", "rembg", "pytesseract", "cv2", "pypdfium2", "pypdfium2_raw", "docx", "imageio_ffmpeg"]
+# pymatting은 불러올 때 자기 패키지 정보(metadata)를 읽어서 같이 넣어야 한다.
+COLLECT = ["faster_whisper", "ctranslate2", "sentencepiece", "rembg", "pymatting", "pytesseract", "cv2", "pypdfium2", "pypdfium2_raw", "docx", "imageio_ffmpeg"]
 
 
 def target_triple() -> str:
