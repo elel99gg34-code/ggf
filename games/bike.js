@@ -2,9 +2,9 @@
 let S;
 const VW = 960, VH = 560, GR = 1100, TIME = 75;
 const PARKS = [
-  { n: '동네 흙길 공원', target: 6000, sky: ['#7dd3fc', '#fef9c3'], dirt: '#a16207', top: '#ca8a04', f: ['kicker', 'flat', 'funbox', 'kicker', 'rail', 'kicker', 'drop'] },
-  { n: '도심 스케이트파크', target: 14000, sky: ['#fb923c', '#fde68a'], dirt: '#6b7280', top: '#d1d5db', f: ['kicker', 'rail', 'funbox', 'bigkicker', 'rail', 'drop', 'kicker', 'bigkicker'] },
-  { n: 'X게임 메가램프', target: 26000, sky: ['#312e81', '#db2777'], dirt: '#1f2937', top: '#f472b6', f: ['bigkicker', 'rail', 'mega', 'kicker', 'funbox', 'rail', 'mega', 'bigkicker'] },
+  { n: '동네 흙길 공원', target: 8000, sky: ['#7dd3fc', '#fef9c3'], dirt: '#a16207', top: '#ca8a04', f: ['kicker', 'flat', 'funbox', 'kicker', 'rail', 'kicker', 'drop'] },
+  { n: '도심 스케이트파크', target: 18000, sky: ['#fb923c', '#fde68a'], dirt: '#6b7280', top: '#d1d5db', f: ['kicker', 'rail', 'funbox', 'bigkicker', 'rail', 'drop', 'kicker', 'bigkicker'] },
+  { n: 'X게임 메가램프', target: 30000, sky: ['#312e81', '#db2777'], dirt: '#1f2937', top: '#f472b6', f: ['bigkicker', 'rail', 'mega', 'kicker', 'funbox', 'rail', 'mega', 'bigkicker'] },
 ];
 const TRICKS = {
   none: { n: '테일휩', t: 0.45, p: 300, key: 'b' },

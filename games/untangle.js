@@ -219,7 +219,7 @@ function bestSpot(vi) {
   const base = crossOfVertex(vi);
   let bx = ox, by = oy, best = base;
   const cand = [];
-  for (let gx = 0; gx < 17; gx++) for (let gy = 0; gy < 16; gy++) cand.push([UT_AX + 30 + gx * ((UT_AW - 60) / 16), UT_AY + 30 + gy * ((UT_AH - 60) / 15)]);
+  for (let gx = 0; gx < 13; gx++) for (let gy = 0; gy < 12; gy++) cand.push([UT_AX + 30 + gx * ((UT_AW - 60) / 12), UT_AY + 30 + gy * ((UT_AH - 60) / 11)]);
   // 이웃 점들의 무게중심 근처도 후보
   const nb = S.adj[vi].map((ei) => { const [a, b] = S.e[ei]; return a === vi ? b : a; });
   const mx = nb.reduce((s, i) => s + S.v[i].x, 0) / nb.length, my = nb.reduce((s, i) => s + S.v[i].y, 0) / nb.length;
@@ -236,7 +236,7 @@ function bestSpot(vi) {
 function hint(g) {
   if (S.cross === 0) return;
   // 엉킨 점들을 교차 많은 순으로 살펴, 격자 후보 위치 중 교차가 가장 많이 줄어드는 곳으로 옮긴다
-  const order = S.v.map((_, i) => i).filter((i) => S.vcross[i] > 0).sort((a, b) => S.vcross[b] - S.vcross[a]).slice(0, 8);
+  const order = S.v.map((_, i) => i).filter((i) => S.vcross[i] > 0).sort((a, b) => S.vcross[b] - S.vcross[a]).slice(0, 6);
   let pick = null;
   for (const vi of order) { const r = bestSpot(vi); if (r.gain > 0 && (!pick || r.gain > pick.gain)) pick = { vi, ...r }; }
   pushUndo();

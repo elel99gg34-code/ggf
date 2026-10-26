@@ -112,7 +112,7 @@ function P(x, y, z) {
 function drawTile(g, x, y, t) {
   let [sx, sy] = P(x, y, 0);
   const w = BX_T, h = BX_T * 0.8;
-  const top = { 1: '#cbd5e1', 2: '#fb923c', 3: '#0f172a', 4: '#cbd5e1', 5: '#cbd5e1', 6: '#a16207' }[t];
+  const top = { 1: '#cbd5e1', 2: '#fb923c', 3: '#94a3b8', 4: '#cbd5e1', 5: '#cbd5e1', 6: '#a16207' }[t];
   const side = { 1: '#64748b', 2: '#c2410c', 3: '#334155', 4: '#64748b', 5: '#64748b', 6: '#713f12' }[t];
   g.poly([[sx + 8, sy + h], [sx + w + 8, sy + h], [sx + w + 8, sy + h + 12], [sx + 8, sy + h + 12]], side);
   g.poly([[sx + w, sy], [sx + w + 8, sy + h], [sx + w + 8, sy + h + 12], [sx + w, sy + 12]], side);

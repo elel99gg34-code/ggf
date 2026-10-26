@@ -230,6 +230,7 @@ GAME({
   },
   update(g, dt) {
     S.msgT = Math.max(0, S.msgT - dt);
+    if (S.hearts <= 0) return;
     S.wrongT = Math.max(0, S.wrongT - dt);
     if (S.nextT > 0) { S.nextT -= dt; if (S.nextT <= 0) { S.stage++; newPuzzle(g); } return; }
     S.time += dt;
@@ -262,7 +263,7 @@ GAME({
   },
   draw(g, c) {
     g.text(`📰 가로세로 낱말 — 퍼즐 ${S.stage}`, CW_GX, 36, 26, '#3f2d1c', 'left');
-    g.text('❤️'.repeat(S.hearts) + '🤍'.repeat(Math.max(0, 5 - S.hearts)), CW_GX + 560, 36, 22, '#000', 'right');
+    g.text('❤️'.repeat(Math.max(0, S.hearts)) + '🤍'.repeat(Math.max(0, 5 - S.hearts)), CW_GX + 560, 36, 22, '#000', 'right');
     const cw = S.words[S.cur], curSet = new Set(cw ? cellsOf(cw).map(([a, b]) => a + ',' + b) : []);
     for (let y = 0; y < CW_N; y++) for (let x = 0; x < CW_N; x++) {
       const px = S.ox + x * CW_CS, py = S.oy + y * CW_CS;

@@ -156,7 +156,7 @@ function bestPass(p, dir) {
 function shoot(g, p, pw, aim) {
   const m = S.m, gx = p.team ? GL0 : GL1, slap = pw > 0.35;
   const acc = p.team ? p.str : 1.05;
-  const ty = CY + U.clamp(aim || 0, -1, 1) * MOUTH * 0.8 + U.rand(-1, 1) * (MOUTH * (1.25 - acc * 0.5)) * (slap ? 1 + pw * 0.4 : 0.8);
+  const ty = CY + U.clamp(aim || 0, -1, 1) * MOUTH * 0.8 + U.rand(-1, 1) * (MOUTH * (1.1 - acc * 0.6)) * (slap ? 1 + pw * 0.4 : 0.8);
   const sp = slap ? 620 + pw * 480 : 560;
   release(g, p, Math.atan2(ty - p.y, gx - p.x), sp);
   m.puck.sh = true; m.puck.sid = (m.puck.sid || 0) + 1; m.sog[p.team]++;

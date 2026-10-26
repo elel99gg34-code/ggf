@@ -236,7 +236,7 @@ GAME({
     if (g.keyp('KeyQ') || g.clickIn(780, 160, 190, 50)) useHalf(g);
     if (g.keyp('KeyW') || g.clickIn(780, 220, 190, 50)) useSwap(g);
     if (g.keyp('KeyE') || g.clickIn(780, 280, 190, 50)) useAud(g);
-    g.info = `${S.i + 1}/10 문제 · ❤️${S.lives}${S.combo > 1 ? ` · 🔥${S.combo}연속` : ''}`;
+    g.info = `${Math.min(S.i, 9) + 1}/10 문제 · ❤️${S.lives}${S.combo > 1 ? ` · 🔥${S.combo}연속` : ''}`;
   },
   draw(g, c) {
     const q = S.cur;
@@ -253,7 +253,7 @@ GAME({
     // 카테고리
     g.rrect(30, 130, 720, 40, 10, '#1e3a8a');
     g.text(`${QS_CAT_E[q.cat] || '❔'} ${q.cat} · 난이도 ${'★'.repeat(q.d)}${'☆'.repeat(3 - q.d)}`, 46, 150, 17, '#bfdbfe', 'left');
-    g.text(`문제 ${S.i + 1}`, 734, 150, 17, '#fde047', 'right');
+    g.text(`문제 ${Math.min(S.i, 9) + 1}`, 734, 150, 17, '#fde047', 'right');
     // 문제
     g.rrect(30, 180, 720, 150, 16, '#111a4d', '#60a5fa', 3);
     const lines = wrap(g, q.q, 670, 26);
