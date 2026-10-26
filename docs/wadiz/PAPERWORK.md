@@ -99,7 +99,7 @@
 | 프로젝트 제목·요약·스토리·태그 | ✅ 준비됨 | `docs/wadiz/STORY.md` |
 | 대표·스토리 이미지 14장 | ✅ 준비됨 | `docs/wadiz/images/` |
 | 시연 영상 3개 | ✅ 자동 녹화 | `docs/wadiz/videos/` |
-| 체험판 다운로드 링크 | ✅ 공개됨 | https://github.com/elel99gg34-code/ggf/releases/tag/v0.1.0-trial (Windows exe, macOS dmg). 저장소를 비공개로 바꾸면 이 링크도 막히니 체험판은 따로 올릴 곳이 필요 |
+| 체험판 다운로드 링크 | ✖ 내림 | 공개 다운로드는 하지 않기로 함. 설치 파일은 구매자에게만 전달 |
 | 상품정보제공고시·환불 정책 | ✅ 준비됨 | `docs/WADIZ.md` 5·6번 |
 | 오픈소스 고지 | ✅ 설치 파일에 포함 | 설정 > 정보 > 오픈소스 라이선스 고지 |
 | 프로그램 저작권 등록 자료 | ✅ 준비됨 | `docs/copyright/` (선택) |

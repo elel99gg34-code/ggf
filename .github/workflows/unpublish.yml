@@ -1,0 +1,33 @@
+name: 공개 다운로드 내리기
+
+# 커밋 메시지에 [unpublish]가 들어간 커밋을 claude/** 브랜치에 올리면 실행된다.
+# 공개 릴리스(다운로드 페이지)와 태그, 지난 빌드 아티팩트를 모두 지운다.
+on:
+  push:
+    branches: ["claude/**"]
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  unpublish:
+    if: contains(github.event.head_commit.message, '[unpublish]')
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: 릴리스와 태그 지우기
+        run: |
+          gh release list --limit 100 --json tagName -q '.[].tagName' | while read -r tag; do
+            echo "릴리스 삭제: $tag"
+            gh release delete "$tag" --cleanup-tag --yes
+          done
+          echo "남은 릴리스: $(gh release list --limit 100 --json tagName -q 'length')개"
+      - name: 지난 빌드 아티팩트 지우기
+        run: |
+          gh api --paginate "repos/$GH_REPO/actions/artifacts?per_page=100" -q '.artifacts[] | "\(.id) \(.name)"' | while read -r id name; do
+            echo "아티팩트 삭제: $name ($id)"
+            gh api -X DELETE "repos/$GH_REPO/actions/artifacts/$id"
+          done

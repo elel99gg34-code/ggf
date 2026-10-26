@@ -413,7 +413,7 @@ Q. 사양이 낮은 PC에서도 되나요?
 A. 메모리 8GB 이상이면 대부분의 기능이 돌아가요. 긴 녹음을 회의록으로 바꿀 때는 16GB를 권장하고, 저사양 PC에서는 '빠름' 단계를 쓰시면 돼요.
 
 Q. 체험판이 있나요?
-A. 네. 설치 후 14일 동안 모든 기능을 무료로 쓸 수 있어요. 체험판 다운로드: https://github.com/elel99gg34-code/ggf/releases/tag/v0.1.0-trial
+A. 네. 설치 후 14일 동안 모든 기능을 무료로 쓸 수 있어요.
 
 Q. 맥(Mac)에서도 되나요?
 A. Apple Silicon(M1 이후) 맥용 체험판이 있어요. 아직 Apple 공증 전이라 처음 열 때 앱을 우클릭 → '열기'로 실행해 주세요. 화면 글자 인식(OCR)은 맥에서 Tesseract를 따로 설치해야 해요(brew install tesseract tesseract-lang).
