@@ -56,6 +56,7 @@ GAME({
       if (f.k === 'bomber') { if (d > 1400) { f.head = Math.atan2(P.y - f.y, P.x - f.x) + U.rand(-0.5, 0.5); } if (f.cd <= 0 && d < 500) { f.cd = 0.25; const a = Math.atan2(P.y - f.y, P.x - f.x) + U.rand(-0.15, 0.15); S.bul.push({ x: f.x, y: f.y, vx: Math.cos(a) * 520, vy: Math.sin(a) * 520, life: 1.2 }); } continue; }
       if (Math.abs(da) < 0.2 && d < 520 && f.cd <= 0) { f.cd = f.ace ? 0.09 : 0.14; f.burst = (f.burst || 0) + 1; if (f.burst > 8) { f.cd = 1.2; f.burst = 0; } const sp = U.rand(-0.06, 0.06); S.bul.push({ x: f.x, y: f.y, vx: Math.cos(f.a + sp) * (f.v + 620), vy: Math.sin(f.a + sp) * (f.v + 620), life: 0.9 }); }
       if (f.mis && f.mcd <= 0 && Math.abs(da) < 0.5 && d < 800 && d > 200) { f.mcd = U.rand(5, 8) - S.wave * 0.2; S.mis.push({ x: f.x, y: f.y, a: f.a, v: f.v + 80, tgt: P, life: 7 }); S.warn = 3; g.sfx.tone(1200, 0.5, 'square', 0.04, 600); }
+      if (f.flCd <= 0 && S.wave >= 2 && S.mis.some((m) => m.mine && m.tgt === f && U.dist(m.x, m.y, f.x, f.y) < 300)) { f.flCd = f.ace ? 3 : 6; if (Math.random() < (f.ace ? 0.9 : 0.25 + S.wave * 0.04)) { flare(g, f, false); f.evade = 1; f.evDir = Math.random() < 0.5 ? -1 : 1; } }
       if (d < 30 && P.inv <= 0) { hurtP(g, 30); hitF(g, f, 99); }
     }
     // 탄

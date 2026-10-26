@@ -139,7 +139,7 @@ function takeoff(g, sl, pop) {
 function air(g, dt) {
   const P = S.p;
   P.air += dt;
-  P.vy += GR * dt;
+  P.vy += GR * 0.8 * dt;
   const oy = P.y;
   P.x += P.vx * dt; P.y += P.vy * dt;
   const rs = ((g.right ? 1 : 0) - (g.left ? 1 : 0)) * 6.5;
@@ -157,8 +157,9 @@ function air(g, dt) {
     P.y = gy;
     const sl = slopeAt(P.x);
     let d = P.rot - sl; d = ((d % (Math.PI * 2)) + Math.PI * 3) % (Math.PI * 2) - Math.PI;
-    if (P.trick) return doCrash(g, '트릭 도중 착지!');
-    if (Math.abs(d) > 0.6) return doCrash(g, '착지 실패!');
+    if (P.trick && P.air > 0.12) { if (P.trick.t < P.trick.max * 0.3) { const T = TRICKS[P.trick.k]; addCombo(g, T.n + '(아슬)', Math.round(T.p * 0.6)); P.trick = null; } else return doCrash(g, '트릭 도중 착지!'); }
+    P.trick = null;
+    if (Math.abs(d) > 0.75 && P.air > 0.15) return doCrash(g, '착지 실패!');
     P.state = 'ground'; P.rot = sl;
     P.sp = Math.max(80, P.vx * Math.cos(sl) + P.vy * Math.sin(sl));
     finishAir(g, Math.abs(d) < 0.15);

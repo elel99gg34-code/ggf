@@ -315,11 +315,9 @@ function korea(c, x, y, w, h) {
   c.fillStyle = '#0047a0'; c.beginPath(); c.arc(r / 2, 0, r / 2, 0, Math.PI * 2); c.fill();
   c.restore();
   // 4괘 (건곤감리)
-  const bars = [[[1], [1], [1]], [[0], [1], [0]], [[1], [0], [1]], [[0], [0], [0]]];
   const pos = [[-1, -1], [1, -1], [-1, 1], [1, 1]];
   const dirs = [Math.atan2(2, 3), -Math.atan2(2, 3), -Math.atan2(2, 3), Math.atan2(2, 3)];
-  const trig = [[1, 1, 1], [1, 0, 1], [0, 1, 0], [0, 0, 0]];
-  void bars;
+  const trig = [[1, 1, 1], [0, 1, 0], [1, 0, 1], [0, 0, 0]];
   pos.forEach(([sx, sy], i) => {
     const px = cx + sx * w * 0.3, py = cy + sy * h * 0.3;
     c.save(); c.translate(px, py); c.rotate(dirs[i] + Math.PI / 2);

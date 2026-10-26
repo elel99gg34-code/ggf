@@ -214,32 +214,43 @@ function undo(g) {
   S.moves++; g.sfx.tone(300, 0.05, 'sine', 0.05);
 }
 function say(t) { S.msg = t; S.msgT = 2.4; }
-function hint(g) {
-  if (S.cross === 0) return;
-  // 교차가 가장 많은 점을 골라, 격자 후보 위치 중 교차가 가장 적어지는 곳으로
-  let worst = 0;
-  S.vcross.forEach((c, i) => { if (c > S.vcross[worst]) worst = i; });
-  const v = S.v[worst], ox = v.x, oy = v.y;
-  const base = crossOfVertex(worst);
+function bestSpot(vi) {
+  const v = S.v[vi], ox = v.x, oy = v.y;
+  const base = crossOfVertex(vi);
   let bx = ox, by = oy, best = base;
   const cand = [];
   for (let gx = 0; gx < 17; gx++) for (let gy = 0; gy < 16; gy++) cand.push([UT_AX + 30 + gx * ((UT_AW - 60) / 16), UT_AY + 30 + gy * ((UT_AH - 60) / 15)]);
   // 이웃 점들의 무게중심 근처도 후보
-  const nb = S.adj[worst].map((ei) => { const [a, b] = S.e[ei]; return a === worst ? b : a; });
+  const nb = S.adj[vi].map((ei) => { const [a, b] = S.e[ei]; return a === vi ? b : a; });
   const mx = nb.reduce((s, i) => s + S.v[i].x, 0) / nb.length, my = nb.reduce((s, i) => s + S.v[i].y, 0) / nb.length;
   for (let r = 0; r < 30; r++) cand.push([mx + U.rand(-40, 40), my + U.rand(-40, 40)]);
   for (const [x, y] of cand) {
-    if (S.v.some((o, i) => i !== worst && Math.hypot(o.x - x, o.y - y) < 18)) continue;
+    if (S.v.some((o, i) => i !== vi && Math.hypot(o.x - x, o.y - y) < 18)) continue;
     v.x = x; v.y = y;
-    const c = crossOfVertex(worst);
+    const c = crossOfVertex(vi);
     if (c < best) { best = c; bx = x; by = y; }
   }
   v.x = ox; v.y = oy;
+  return { gain: base - best, x: bx, y: by };
+}
+function hint(g) {
+  if (S.cross === 0) return;
+  // 엉킨 점들을 교차 많은 순으로 살펴, 격자 후보 위치 중 교차가 가장 많이 줄어드는 곳으로 옮긴다
+  const order = S.v.map((_, i) => i).filter((i) => S.vcross[i] > 0).sort((a, b) => S.vcross[b] - S.vcross[a]).slice(0, 8);
+  let pick = null;
+  for (const vi of order) { const r = bestSpot(vi); if (r.gain > 0 && (!pick || r.gain > pick.gain)) pick = { vi, ...r }; }
   pushUndo();
   S.hintsUsed++; S.moves++;
-  if (best < base) { v.tx = bx; v.ty = by; say(`💡 점 하나를 옮겨 교차 ${base - best}개 줄였어요`); }
-  else { v.tx = S.sol[worst][0]; v.ty = S.sol[worst][1]; say('💡 이 점을 정답 위치로 옮겼어요'); }
-  S.hintV = worst; S.hintT = 1.5;
+  let vi;
+  if (pick) { vi = pick.vi; S.v[vi].tx = pick.x; S.v[vi].ty = pick.y; say(`💡 점 하나를 옮겨 교차 ${pick.gain}개 줄였어요`); }
+  else {
+    // 막다른 상태: 아직 정답 자리가 아닌 점 하나를 정답 위치로
+    vi = order[0];
+    const off = S.v.map((v, i) => i).filter((i) => Math.hypot(S.v[i].x - S.sol[i][0], S.v[i].y - S.sol[i][1]) > 3);
+    if (off.length) vi = off.sort((a, b) => S.vcross[b] - S.vcross[a])[0];
+    S.v[vi].tx = S.sol[vi][0]; S.v[vi].ty = S.sol[vi][1]; say('💡 이 점을 정답 위치로 옮겼어요');
+  }
+  S.hintV = vi; S.hintT = 1.5;
   g.sfx.power();
 }
 function checkWin(g) {

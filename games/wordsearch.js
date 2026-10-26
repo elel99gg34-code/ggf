@@ -86,9 +86,9 @@ GAME({
     if (S.reverse) g.text('⚠ 거꾸로 숨은 단어도 있어요', LX + 145, 570, 13, '#dc2626');
     else if (S.diag) g.text('대각선도 확인하세요', LX + 145, 570, 13, '#c2410c');
     g.button(650, 610, 140, 50, '💡 힌트 (-10초)', '#ea580c', 16);
-    g.button(810, 610, 130, 50, '🔀 보기 전환', '#9a3412', 16);
-    g.text(`남은 시간 ${Math.ceil(S.time)}초`, WS_GX, 690 - 12, 18, tr < 0.2 ? '#dc2626' : '#9a3412', 'left');
-    if (S.combo > 1 && g.time - S.lastFind < 4) g.text(`연속 찾기 ×${S.combo}`, WS_GX + WS_GS, 678, 18, '#db2777', 'right');
+    g.button(810, 610, 130, 50, '🔀 목록 섞기', '#9a3412', 16);
+    g.text(`⏱ 남은 시간 ${Math.ceil(S.time)}초`, 795, 545, 20, tr < 0.2 ? '#dc2626' : '#9a3412');
+    if (S.combo > 1 && g.time - S.lastFind < 4) g.text(`연속 찾기 ×${S.combo}`, 795, 515, 18, '#db2777');
     if (S.msgT > 0) { c.globalAlpha = Math.min(1, S.msgT); g.rrect(WS_GX + 90, 330, WS_GS - 180, 80, 18, 'rgba(154,52,18,.92)'); g.text(S.msg, WS_GX + WS_GS / 2, 370, 28, '#fff'); c.globalAlpha = 1; }
   },
 });

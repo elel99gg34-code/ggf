@@ -159,7 +159,7 @@ function shoot(g, p, pw, aim) {
   const ty = CY + U.clamp(aim || 0, -1, 1) * MOUTH * 0.8 + U.rand(-1, 1) * (MOUTH * (1.25 - acc * 0.5)) * (slap ? 1 + pw * 0.4 : 0.8);
   const sp = slap ? 620 + pw * 480 : 560;
   release(g, p, Math.atan2(ty - p.y, gx - p.x), sp);
-  m.puck.sh = true; m.sog[p.team]++;
+  m.puck.sh = true; m.puck.sid = (m.puck.sid || 0) + 1; m.sog[p.team]++;
   if (slap) { g.sfx.tone(120, 0.15, 'square', 0.1, 40); g.sfx.noise(0.1, 0.2); g.shake(5, 0.15); g.burst(p.x, p.y, '#e0f2fe', 14, 260); if (p.team === 0) g.float(p.x, p.y - 30, '슬랩샷!', '#67e8f9', 18); }
 }
 function ai(g, p, dt, chaser) {
@@ -266,7 +266,7 @@ function puckPhys(g, dt) {
         }
         continue;
       }
-      if (!p.gk && fast > 700 && Math.random() < 0.5) continue;
+      if (k.sh && !p.gk) { if (p.team === k.last) continue; if (p.blk === k.sid) continue; p.blk = k.sid; if (Math.random() < 0.7) continue; g.float(p.x, p.y - 26, '블록!', '#e2e8f0', 14); }
       take(p); break;
     }
   }
