@@ -146,12 +146,11 @@ function genTarget(D) {
   }
   return null;
 }
-const TNAMES = ['날개 펼친 새', '달리는 고양이', '춤추는 사람', '작은 배', '비밀의 성', '토끼 그림자', '수상한 로봇', '여우 한 마리', '산 위의 집', '날으는 용', '앉아 있는 개', '기묘한 탑'];
 function newPuzzle(g) {
   const D = TDF[S.diff]; let T = null; while (!T) T = genTarget(D);
   const target = T.placed.map((pl) => ({ i: pl.i, v: pl.v.v.map(([x, y]) => [x + pl.dx, y + pl.dy]), rot: pl.v.k * 2, flip: pl.v.flip }));
   const [x0, y0, x1, y1] = T.bb;
-  Object.assign(S, { target, occ: T.occ, bb: T.bb, tx: Math.round(TCX - ((x0 + x1) / 2) * TU), ty: Math.round(TCY - ((y0 + y1) / 2) * TU), time: 0, hints: 0, revealed: [], done: false, drag: null, sel: -1, cover: 0, shapeName: `「${U.choice(TNAMES)}」 실루엣` });
+  Object.assign(S, { target, occ: T.occ, bb: T.bb, tx: Math.round(TCX - ((x0 + x1) / 2) * TU), ty: Math.round(TCY - ((y0 + y1) / 2) * TU), time: 0, hints: 0, revealed: [], done: false, drag: null, sel: -1, cover: 0, shapeName: `수수께끼 실루엣 #${S.solvedCnt + 1}` });
   resetPieces();
 }
 function resetPieces() {
