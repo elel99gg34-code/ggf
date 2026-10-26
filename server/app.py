@@ -353,8 +353,31 @@ def create_app(pin: str, private_key_pem: str, db_url: str | None = None) -> Fas
     return app
 
 
+def setup_needed_app(missing: list[str]) -> FastAPI:
+    """설정이 덜 됐을 때 뜨는 안내 화면. 키를 발급하는 기능은 없다."""
+    app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
+    items = "".join(f"<li><code>{m}</code></li>" for m in missing)
+    page = (
+        '<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">'
+        "<title>설정 필요</title><body style=\"font-family:sans-serif;max-width:560px;margin:40px auto;padding:0 16px;line-height:1.6\">"
+        f"<h1>라이선스 서버 설정이 필요해요</h1><p>Render 대시보드의 Environment에서 아래 값을 넣으면 자동으로 다시 시작돼요.</p><ul>{items}</ul></body>"
+    )
+
+    @app.get("/healthz")
+    def healthz():
+        return {"ok": False, "missing": missing}
+
+    @app.get("/{path:path}")
+    def notice(path: str):
+        return Response(page, media_type="text/html; charset=utf-8", status_code=503)
+
+    return app
+
+
 def create_app_from_env() -> FastAPI:
     pem = os.environ.get("LICENSE_PRIVATE_KEY", "").replace("\\n", "\n")
-    if not pem.strip():
-        raise RuntimeError("LICENSE_PRIVATE_KEY(서명 개인키 PEM)를 설정해 주세요.")
-    return create_app(os.environ.get("ADMIN_PIN", ""), pem, os.environ.get("DATABASE_URL"))
+    pin = os.environ.get("ADMIN_PIN", "")
+    missing = [name for name, value in (("ADMIN_PIN", pin), ("LICENSE_PRIVATE_KEY", pem.strip())) if not value]
+    if missing:
+        return setup_needed_app(missing)
+    return create_app(pin, pem, os.environ.get("DATABASE_URL"))

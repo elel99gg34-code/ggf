@@ -142,4 +142,10 @@ def test_pin_and_key_come_from_env(monkeypatch, tmp_path, key):
     monkeypatch.setenv("ADMIN_PIN", "123")
     with pytest.raises(RuntimeError):
         server.create_app_from_env()
+    # 서명 키가 아직 없으면 키 발급 없이 안내 화면만 뜬다
+    monkeypatch.delenv("LICENSE_PRIVATE_KEY")
+    with TestClient(server.create_app_from_env()) as c:
+        r = c.get("/")
+        assert r.status_code == 503 and "LICENSE_PRIVATE_KEY" in r.text
+        assert c.post("/api/unlock", json={"pin": PIN}).status_code in (404, 405)
     assert server.database_url("postgres://u:p@h/db") == "postgresql+psycopg://u:p@h/db"
