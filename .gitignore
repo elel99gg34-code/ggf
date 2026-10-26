@@ -33,3 +33,6 @@ tools/wadiz/.story.built.html
 # 배포용으로 묶는 엔진 폴더와 고지문
 app/src-tauri/resources/engine/
 app/src-tauri/resources/THIRD_PARTY_NOTICES.txt
+
+# 라이선스 서버 로컬 DB
+server/licenses.db

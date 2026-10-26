@@ -22,6 +22,20 @@ jobs:
         working-directory: engine
         run: python -m pytest -q
 
+  server:
+    name: 라이선스 서버 테스트
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 설치
+        run: pip install -r server/requirements.txt ./engine pytest httpx
+      - name: pytest
+        working-directory: server
+        run: python -m pytest -q
+
   app:
     name: 화면 빌드
     runs-on: ubuntu-latest

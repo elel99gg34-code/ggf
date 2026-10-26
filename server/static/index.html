@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>라이선스 발급</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div id="lock" class="lock" hidden>
+    <form id="unlock-form" class="card lock-card" autocomplete="off">
+      <div class="brand"><span class="mark">비</span> 로컬비서 라이선스 발급</div>
+      <h1>관리자 번호를 입력하세요</h1>
+      <input id="pin" type="password" inputmode="numeric" maxlength="32" placeholder="••••••" aria-label="관리자 번호" required>
+      <button class="primary" type="submit">잠금 해제</button>
+      <p id="lock-error" class="error" role="alert"></p>
+    </form>
+  </div>
+
+  <div id="admin" hidden>
+    <header class="top">
+      <div class="brand"><span class="mark">비</span> 로컬비서 라이선스 발급</div>
+      <button id="lock-btn" class="ghost">잠그기</button>
+    </header>
+    <nav class="tabs" role="tablist">
+      <button class="tab active" data-tab="issue">발급</button>
+      <button class="tab" data-tab="list">발급 기록</button>
+      <button class="tab" data-tab="bulk">일괄 발급</button>
+    </nav>
+
+    <main>
+      <section id="tab-issue" class="tab-panel">
+        <form id="issue-form" class="card stack">
+          <fieldset class="kinds">
+            <legend>종류</legend>
+            <label><input type="radio" name="edition" value="pro" checked> <b>정품 라이선스</b><span>구매자용 · 평생 · PC 2대</span></label>
+            <label><input type="radio" name="edition" value="dev"> <b>개발자 라이선스</b><span>테스트·지인용 · 모든 기능 · 기한 선택</span></label>
+          </fieldset>
+          <div class="grid">
+            <label><span>이름 <em>*</em></span><input name="name" maxlength="100" required placeholder="앱에 표시돼요"></label>
+            <label>이메일<input name="email" type="email" maxlength="200"></label>
+            <label>주문번호<input name="order_no" maxlength="100" placeholder="와디즈 후원 번호 등"></label>
+            <label>메모<input name="memo" maxlength="1000"></label>
+          </div>
+          <div id="dev-expiry" class="grid" hidden>
+            <label>사용 기한
+              <select name="period">
+                <option value="">기한 없음</option>
+                <option value="7">7일</option>
+                <option value="30" selected>30일</option>
+                <option value="90">90일</option>
+                <option value="365">1년</option>
+                <option value="date">날짜 지정</option>
+              </select>
+            </label>
+            <label id="exp-date-wrap" hidden>마지막 날<input name="exp_date" type="date"></label>
+          </div>
+          <button class="primary" type="submit">발급하기</button>
+          <p id="issue-error" class="error" role="alert"></p>
+        </form>
+        <div id="issued" class="card stack" hidden>
+          <div class="row"><b id="issued-title"></b></div>
+          <textarea id="issued-key" readonly rows="4"></textarea>
+          <div class="row">
+            <button id="copy-key" class="primary">키 복사</button>
+            <button id="copy-msg">안내 문구 복사</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="tab-list" class="tab-panel" hidden>
+        <div class="card stack">
+          <div class="row wrap">
+            <input id="search" type="search" placeholder="이름·이메일·주문번호·번호로 찾기" class="grow">
+            <select id="filter">
+              <option value="">전체</option>
+              <option value="pro">정품</option>
+              <option value="dev">개발자</option>
+            </select>
+            <a id="export" class="button" href="/api/licenses.csv">CSV 내려받기</a>
+          </div>
+          <p class="muted small">취소는 기록에만 남아요. 앱은 인터넷 없이 키를 확인하기 때문에, 이미 등록한 키를 원격으로 막을 수는 없어요.</p>
+          <p id="count" class="muted small"></p>
+          <ul id="rows" class="rows"></ul>
+        </div>
+      </section>
+
+      <section id="tab-bulk" class="tab-panel" hidden>
+        <div class="card stack">
+          <p>와디즈 서포터 명단을 붙여 넣거나 CSV 파일을 고르세요. 열 순서: <b>이름, 이메일, 주문번호</b> (첫 줄에 머리글이 있어도 돼요)</p>
+          <input id="bulk-file" type="file" accept=".csv,text/csv,text/plain">
+          <textarea id="bulk-text" rows="8" placeholder="홍길동,hong@example.com,W-10001&#10;김민수,kim@example.com,W-10002"></textarea>
+          <div class="row wrap">
+            <select id="bulk-edition">
+              <option value="pro">정품 라이선스</option>
+              <option value="dev">개발자 라이선스 (기한 없음)</option>
+            </select>
+            <button id="bulk-go" class="primary">발급하기</button>
+          </div>
+          <p id="bulk-error" class="error" role="alert"></p>
+          <div id="bulk-done" hidden class="stack">
+            <b id="bulk-title"></b>
+            <button id="bulk-download">결과 CSV 내려받기</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <div id="toast" class="toast" hidden></div>
+  <script src="/static/app.js"></script>
+</body>
+</html>
