@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>로컬비서 사용 설명서</title>
+<style>
+@font-face { font-family: P; font-weight: 400; src: url("../wadiz/node_modules/pretendard/dist/web/static/woff2/Pretendard-Regular.woff2"); }
+@font-face { font-family: P; font-weight: 600; src: url("../wadiz/node_modules/pretendard/dist/web/static/woff2/Pretendard-SemiBold.woff2"); }
+@font-face { font-family: P; font-weight: 700; src: url("../wadiz/node_modules/pretendard/dist/web/static/woff2/Pretendard-Bold.woff2"); }
+@font-face { font-family: P; font-weight: 800; src: url("../wadiz/node_modules/pretendard/dist/web/static/woff2/Pretendard-ExtraBold.woff2"); }
+@page { size: A4; margin: 18mm 17mm 20mm; }
+@page cover { margin: 0; }
+:root { --navy: #0b1630; --blue: #2563eb; --ink: #1b1f27; --muted: #5b6474; --line: #e3e6eb; --soft: #f3f5f9; --yellow: #ffd84d; }
+* { box-sizing: border-box; }
+html { font-family: P, "NanumGothic", sans-serif; color: var(--ink); font-size: 10.5pt; line-height: 1.7; word-break: keep-all; }
+body { margin: 0; }
+h1, h2, h3 { line-height: 1.35; margin: 0; }
+h1 { font-size: 22pt; font-weight: 800; letter-spacing: -0.02em; }
+h2 { font-size: 15pt; font-weight: 800; margin: 18pt 0 6pt; }
+h3 { font-size: 12pt; font-weight: 700; margin: 12pt 0 4pt; }
+p { margin: 0 0 7pt; }
+ul, ol { margin: 0 0 8pt; padding-left: 16pt; }
+li { margin: 0 0 3pt; }
+b { font-weight: 700; }
+.muted { color: var(--muted); }
+.small { font-size: 9pt; }
+.chapter { break-before: page; }
+.chapter > .kicker { color: var(--blue); font-weight: 800; font-size: 10pt; letter-spacing: 0.08em; }
+.chapter > h1 { margin: 2pt 0 10pt; padding-bottom: 8pt; border-bottom: 2pt solid var(--navy); }
+.feature { break-inside: avoid; margin: 0 0 14pt; }
+.feature + .feature { break-before: auto; }
+figure { margin: 6pt 0 10pt; break-inside: avoid; }
+figure img { width: 100%; border: 0.6pt solid var(--line); border-radius: 6pt; display: block; }
+figcaption { font-size: 8.5pt; color: var(--muted); margin-top: 3pt; }
+.box { background: var(--soft); border-radius: 8pt; padding: 9pt 12pt; margin: 6pt 0 10pt; break-inside: avoid; }
+.box.warn { background: #fff7e6; }
+.box > b:first-child { display: block; margin-bottom: 2pt; }
+kbd { font-family: inherit; font-size: 9pt; font-weight: 700; padding: 0 4pt; border: 0.6pt solid #c9ced8; border-bottom-width: 1.5pt; border-radius: 4pt; background: #fff; }
+table { width: 100%; border-collapse: collapse; margin: 4pt 0 10pt; font-size: 9.5pt; break-inside: avoid; }
+th, td { text-align: left; padding: 5pt 7pt; border-bottom: 0.6pt solid var(--line); vertical-align: top; }
+th { background: var(--soft); font-weight: 700; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 10pt; }
+.qa { break-inside: avoid; margin: 0 0 9pt; }
+.qa b { display: block; }
+
+/* 표지 */
+.cover { page: cover; height: 297mm; background: var(--navy); color: #fff; padding: 34mm 22mm; display: flex; flex-direction: column; break-after: page; }
+.cover .mark { width: 22mm; height: 22mm; border-radius: 6mm; background: var(--blue); display: grid; place-items: center; font-size: 30pt; font-weight: 800; }
+.cover h1 { font-size: 40pt; margin: 14mm 0 4mm; color: #fff; }
+.cover .lead { font-size: 15pt; color: #c3cfee; font-weight: 600; }
+.cover .tags { margin-top: 10mm; display: flex; flex-wrap: wrap; gap: 3mm; }
+.cover .tags span { border: 0.8pt solid #3b4a72; border-radius: 99pt; padding: 2mm 5mm; font-size: 10.5pt; color: #dfe6f7; }
+.cover .foot { margin-top: auto; color: #8f9cc0; font-size: 10pt; }
+.cover .foot b { color: var(--yellow); }
+
+/* 차례 */
+.toc { break-after: page; }
+.toc ol { list-style: none; padding: 0; margin: 8pt 0 0; }
+.toc > ol > li { font-weight: 700; font-size: 11.5pt; margin: 9pt 0 2pt; }
+.toc ol ol { padding-left: 12pt; margin: 2pt 0 0; }
+.toc ol ol li { font-weight: 400; font-size: 10pt; margin: 1pt 0; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<section class="cover">
+  <div class="mark">비</div>
+  <h1>로컬비서<br>사용 설명서</h1>
+  <div class="lead">인터넷 없이 내 PC에서 돌아가는 업무 비서</div>
+  <div class="tags"><span>회의록</span><span>개인정보 가리기</span><span>이미지·영상</span><span>비서 기능 13가지</span></div>
+  <div class="foot">버전 0.1 · Windows 10/11 · macOS 12 이상<br>모든 처리는 <b>PC 안에서만</b> 이뤄지고, 파일은 서버로 보내지 않아요.</div>
+</section>
+
+<section class="toc">
+  <h1>차례</h1>
+  <ol>
+    <li>1. 시작하기
+      <ol><li>설치 사양 · Windows 설치 · macOS 설치</li><li>라이선스 키 등록 · 화면 둘러보기 · 처음 한 번 내려받는 것</li></ol></li>
+    <li>2. 핵심 기능
+      <ol><li>회의록 · 개인정보 가리기 · 이미지·영상</li></ol></li>
+    <li>3. 비서 기능 13가지
+      <ol><li>할 일 뽑기 · 일정 뽑기 · 메모·할 일 · 클립보드 · 화면 글자 인식 · 영수증·명함</li>
+          <li>번역 · 글다듬기 · 이름 일괄 변경 · 중복 정리 · PDF 도구 · 집중 타이머 · 통합 검색</li></ol></li>
+    <li>4. 설정과 단축키</li>
+    <li>5. 자주 묻는 질문과 문제 해결</li>
+    <li>6. 데이터 보관 · 라이선스 · 문의</li>
+  </ol>
+</section>
+
+<!-- 1. 시작하기 -->
+<section class="chapter">
+  <div class="kicker">CHAPTER 1</div>
+  <h1>시작하기</h1>
+
+  <h2>설치 사양</h2>
+  <table>
+    <tr><th>운영체제</th><td>Windows 10·11 (64비트), macOS 12 이상 (Apple Silicon: M1 이후)</td></tr>
+    <tr><th>메모리</th><td>8GB 이상. 긴 녹음을 회의록으로 만들 때는 16GB 권장</td></tr>
+    <tr><th>저장 공간</th><td>설치 약 1GB + 음성 인식 모델 0.5~1.5GB (고른 정확도에 따라)</td></tr>
+    <tr><th>인터넷</th><td>설치할 때와 AI 모델을 처음 내려받을 때만 필요해요</td></tr>
+  </table>
+
+  <h2>Windows에 설치하기</h2>
+  <ol>
+    <li>안내 메일의 <b>Windows 설치 파일 받기</b>를 눌러 <b>LocalBiseo_…_x64-setup.exe</b>를 받아요.</li>
+    <li>받은 파일을 두 번 눌러 실행해요.</li>
+    <li><b>'Windows의 PC 보호'</b> 파란 창이 뜨면 <b>추가 정보</b>를 누르고 <b>실행</b>을 눌러요. 아직 코드 서명을 받지 않은 새 프로그램이라 나오는 안내예요.</li>
+    <li>설치가 끝나면 바탕화면이나 시작 메뉴의 <b>로컬비서</b>를 실행해요.</li>
+  </ol>
+  <div class="box warn"><b>백신이 막는다면</b>백신 프로그램이 새 프로그램이라는 이유로 실행을 막을 때가 있어요. 백신의 '예외(허용) 목록'에 로컬비서 설치 폴더를 넣어 주세요.</div>
+
+  <h2>macOS에 설치하기</h2>
+  <ol>
+    <li><b>macOS 설치 파일 받기</b>로 <b>.dmg</b> 파일을 받아 열어요.</li>
+    <li>로컬비서 아이콘을 <b>응용 프로그램</b> 폴더로 끌어다 놓아요.</li>
+    <li>처음 열 때는 응용 프로그램 폴더에서 로컬비서를 <b>우클릭(또는 Control+클릭) → 열기</b>를 누르고, 다시 나오는 창에서 <b>열기</b>를 눌러요. 다음부터는 그냥 열려요.</li>
+  </ol>
+  <div class="box"><b>맥에서 화면 글자 인식(OCR)을 쓰려면</b>터미널에서 <kbd>brew install tesseract tesseract-lang</kbd>를 한 번 실행해 주세요. Homebrew가 없다면 brew.sh의 안내대로 먼저 설치해요. Windows에는 처음부터 들어 있어요.</div>
+
+  <h2>라이선스 키 등록</h2>
+  <figure><img src="shots/00_gate.jpg"><figcaption>처음 실행하면 나오는 라이선스 키 입력 화면</figcaption></figure>
+  <ol>
+    <li>안내 메일의 <b>라이선스 키 확인하기</b>를 누르고, 안내를 읽은 뒤 키를 열어요.</li>
+    <li><b>키 복사</b>를 눌러 키 전체(LB1.으로 시작)를 복사해요.</li>
+    <li>로컬비서 화면의 입력 칸에 붙여 넣고, 안내에 동의한 뒤 <b>등록하고 시작하기</b>를 눌러요.</li>
+  </ol>
+  <p>인터넷 없이 입력만으로 인증돼요. 키 하나로 내 PC 2대까지 쓸 수 있어요. PC를 바꿀 때도 같은 키를 다시 넣으면 돼요.</p>
+
+  <h2>화면 둘러보기</h2>
+  <figure><img src="shots/01_home.jpg"><figcaption>홈: 남은 할 일, 오늘 집중한 시간, 최근 회의록과 모든 기능</figcaption></figure>
+  <ul>
+    <li><b>왼쪽 메뉴</b>: 핵심 기능 3가지와 비서 기능 13가지가 있어요.</li>
+    <li><b>찾기·이동</b>(<kbd>Ctrl</kbd> <kbd>K</kbd>): 기능 이름이나 메모·회의록 속 글자를 바로 찾아 이동해요.</li>
+    <li>창을 닫아도 <b>트레이(알림 영역)</b>에 남아 클립보드 기록과 단축키가 계속 동작해요. 완전히 끄려면 트레이 아이콘에서 <b>끝내기</b>를 눌러요.</li>
+  </ul>
+  <figure><img src="shots/19_palette.jpg"><figcaption>Ctrl+K로 여는 찾기·이동 창</figcaption></figure>
+
+  <h2>처음 한 번 내려받는 것</h2>
+  <table>
+    <tr><th>무엇</th><th>언제</th><th>크기</th></tr>
+    <tr><td>음성 인식 모델</td><td>회의록을 처음 만들 때 (정확도마다 따로)</td><td>150MB~3GB</td></tr>
+    <tr><td>배경 지우기 모델</td><td>이미지에서 '배경 지우기'를 처음 켤 때</td><td>약 170MB</td></tr>
+    <tr><td>번역 언어팩</td><td>번역할 언어 조합을 처음 쓸 때</td><td>언어팩마다 약 100MB</td></tr>
+  </table>
+  <p>한 번 받으면 그다음부터는 인터넷 없이 돌아가요.</p>
+</section>
+
+<!-- 2. 핵심 기능 -->
+<section class="chapter">
+  <div class="kicker">CHAPTER 2</div>
+  <h1>핵심 기능</h1>
+
+  <div class="feature">
+    <h2>🎙 회의록</h2>
+    <p>녹음이나 영상 파일을 넣으면 한국어로 받아쓰고, 핵심 문장을 골라 요약해요. 대화 속 할 일은 담당자·기한과 함께, 일정은 날짜·시간과 함께 정리해요.</p>
+    <figure><img src="shots/02_transcribe_new.jpg"><figcaption>새로 만들기: 녹음 파일을 넣고 정확도를 고른 뒤 '회의록 만들기'</figcaption></figure>
+    <ol>
+      <li><b>회의록 → 새로 만들기</b>에서 녹음 파일을 끌어다 놓거나 눌러서 골라요. (mp3·m4a·wav·aac·flac·ogg·mp4·mov·mkv·webm 등)</li>
+      <li>오른쪽 <b>정확도</b>를 골라요. 처음에는 <b>균형(권장)</b>이 좋아요. 사양이 낮으면 <b>빠름</b>을 쓰세요.</li>
+      <li><b>회의록 만들기</b>를 누르면 진행 막대가 나와요. 처음 한 번은 모델을 내려받느라 시간이 더 걸려요.</li>
+      <li>녹음이 없으면 <b>글 붙여넣기</b>에 회의 메모를 넣어도 요약과 할 일을 뽑아 줘요.</li>
+    </ol>
+    <figure><img src="shots/02b_transcribe_detail.jpg"><figcaption>완성된 회의록: 요약, 전체 내용, 할 일, 일정, 내보내기</figcaption></figure>
+    <ul>
+      <li><b>틀린 글자</b>는 전체 내용에서 눌러 바로 고칠 수 있어요.</li>
+      <li><b>할 일 자동 등록</b>을 켜 두면 찾은 할 일이 메모·할 일 목록에 바로 들어가요. 같은 할 일은 두 번 넣지 않아요.</li>
+      <li><b>내보내기</b>: 워드(docx), 텍스트, 마크다운, 자막(SRT·VTT). <b>개인정보 가린 사본으로</b>를 켜면 전화번호·주민번호가 가려진 파일이 나와요.</li>
+      <li><b>캘린더 파일</b>을 누르면 찾은 일정을 .ics로 저장해 구글·아웃룩·애플 캘린더에 넣을 수 있어요.</li>
+    </ul>
+    <div class="box"><b>더 정확하게 받아쓰려면</b>마이크를 말하는 사람 가까이 두고, 잡음이 적은 곳에서 녹음하세요. 정확도를 <b>정확함</b>으로 올리면 느려지는 대신 더 정확해요.</div>
+  </div>
+
+  <div class="feature">
+    <h2>🛡 개인정보 가리기</h2>
+    <p>문서와 사진 속 주민등록번호·전화번호·계좌번호·이메일·이름·주소 같은 개인정보를 찾아 가린 <b>'_마스킹' 사본</b>을 만들어요. 원본은 그대로 둬요.</p>
+    <figure><img src="shots/03_mask_files.jpg"><figcaption>한글(HWPX)·워드·PDF·사진을 한 번에 가린 결과</figcaption></figure>
+    <ol>
+      <li><b>파일</b> 탭에서 가릴 파일을 넣어요. 여러 개를 한 번에 넣어도 돼요.</li>
+      <li>오른쪽에서 <b>찾을 항목</b>과 <b>가리는 방식</b>을 골라요.
+        <ul><li>일부만: 010-****-5678, 900101-1******, 홍*동</li><li>전부: ***-****-****</li><li>항목 이름: [전화번호]</li></ul></li>
+      <li><b>가리기</b>를 누르면 파일마다 찾은 항목과 개수, 결과 파일 위치가 나와요.</li>
+    </ol>
+    <table>
+      <tr><th>파일</th><th>가리는 방법</th></tr>
+      <tr><td>한글(HWPX)·워드(DOCX)</td><td>글자 모양·표·머리글·바닥글을 그대로 두고 가려요. 문서 속 작성자 정보도 지워요.</td></tr>
+      <tr><td>PDF</td><td>개인정보가 있는 쪽은 검게 칠하고 글자 자체를 지워서, 복사·검색해도 원문이 나오지 않아요. 그 쪽은 그림으로 바뀌어 글자 선택이 안 돼요.</td></tr>
+      <tr><td>사진(PNG·JPG 등)</td><td>사진 속 글자를 읽어 그 자리를 칠하고, 얼굴은 모자이크해요.</td></tr>
+      <tr><td>구형 한글(HWP)</td><td>본문 글자만 가린 텍스트 파일로 저장해요. 서식이 필요하면 한글에서 'HWPX로 저장'한 뒤 넣어 주세요.</td></tr>
+    </table>
+    <figure><img src="shots/03b_mask_text.jpg"><figcaption>글 바로 가리기: 붙여 넣은 글을 그 자리에서 가려요</figcaption></figure>
+    <div class="box warn"><b>꼭 확인해 주세요</b>자동 탐지는 사람의 최종 확인을 대신하지 않아요. 밖으로 보내기 전에 결과 파일을 한 번 열어 보세요.</div>
+  </div>
+
+  <div class="feature">
+    <h2>🖼 이미지·영상</h2>
+    <p>상품 사진을 마켓 규격에 맞추고 워터마크를 넣어요. 영상은 말 없는 구간을 잘라 내거나 자막을 만들어요.</p>
+    <figure><img src="shots/04_media.jpg"><figcaption>폴더째 넣고 규격·워터마크를 고르면 한 번에 처리</figcaption></figure>
+    <ul>
+      <li><b>규격</b>: 스마트스토어·쿠팡 대표(1000×1000), 상세페이지(가로 860), 인스타 정사각·세로, 썸네일, 직접 입력</li>
+      <li><b>맞추기</b>: 여백 넣기 / 잘라 채우기 / 안에 맞추기</li>
+      <li><b>워터마크</b>: 글자, 위치 6가지(바둑판 포함), 진하기, 색</li>
+      <li><b>배경 지우기</b>: AI가 상품만 남겨요 (처음 한 번 모델을 내려받아요)</li>
+      <li><b>형식</b>: JPG·PNG·WEBP, 화질 조절. 결과는 원본 옆(또는 고른 폴더)에 '_편집' 이름으로 저장돼요.</li>
+      <li><b>영상 무음 컷·자막</b> 탭: 말이 없는 부분을 잘라 영상 길이를 줄이고(자르기 전에 몇 분 줄어드는지 미리 보여 줘요), 영상 속 말을 받아써 SRT 자막을 만들어요.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- 3. 비서 기능 -->
+<section class="chapter">
+  <div class="kicker">CHAPTER 3</div>
+  <h1>비서 기능 13가지</h1>
+
+  <div class="feature">
+    <h2>✅ 할 일 뽑기</h2>
+    <p>회의 메모·메일·메신저 대화를 붙여 넣으면 해야 할 일을 찾아 담당자·기한과 함께 정리해요. 고칠 건 고치고 <b>할 일 목록에 넣기</b>를 누르세요.</p>
+    <figure><img src="shots/05_actions.jpg"></figure>
+  </div>
+  <div class="feature">
+    <h2>📅 일정 뽑기</h2>
+    <p>"내일 오후 3시", "다음 주 화요일 10시 반", "11월 3일 2시~4시" 같은 표현을 찾아요. <b>.ics로 저장</b>하면 구글·아웃룩·애플 캘린더에 바로 들어가요.</p>
+    <figure><img src="shots/06_schedule.jpg"></figure>
+  </div>
+  <div class="feature">
+    <h2>📝 메모·할 일</h2>
+    <p>할 일은 기한이 다가오면 '오늘', '내일', '2일 지남'으로 보여요. 메모는 태그를 달고 중요한 건 위에 고정할 수 있어요.</p>
+    <div class="two">
+      <figure><img src="shots/07_notes_todo.jpg"><figcaption>할 일</figcaption></figure>
+      <figure><img src="shots/07b_notes_memo.jpg"><figcaption>메모</figcaption></figure>
+    </div>
+  </div>
+  <div class="feature">
+    <h2>📋 클립보드 기록</h2>
+    <p>복사한 글을 최근 500개까지 기억해요. 주민번호·카드번호 같은 민감정보는 <b>가려서 저장</b>하거나 <b>아예 저장하지 않도록</b> 고를 수 있어요. 기록을 끄는 것도 여기서 해요.</p>
+    <figure><img src="shots/08_clipboard.jpg"></figure>
+  </div>
+  <div class="feature">
+    <h2>🔍 화면 글자 인식</h2>
+    <p>어디서든 <kbd>Ctrl</kbd> <kbd>Shift</kbd> <kbd>O</kbd>를 누르면 화면을 캡처해요. 읽을 부분을 끌어서 고르면 글자로 바꿔 줘요. 이미지 파일을 넣어도 돼요. 읽은 글은 <b>번역하기</b>나 <b>영수증·명함으로</b> 바로 보낼 수 있어요.</p>
+    <figure><img src="shots/09_ocr.jpg"></figure>
+  </div>
+  <div class="feature">
+    <h2>🧾 영수증·명함</h2>
+    <p>영수증 사진에서 가맹점·날짜·금액·사업자번호를 읽어 경비 장부에 넣고, 월별 엑셀로 내보내요. 명함 사진은 이름·회사·직함·전화·이메일을 읽어 휴대폰 연락처 파일(vCard)로 만들어요. 읽은 값은 저장 전에 고칠 수 있어요.</p>
+    <div class="two">
+      <figure><img src="shots/10_papers_receipt.jpg"><figcaption>영수증 → 경비</figcaption></figure>
+      <figure><img src="shots/10b_papers_card.jpg"><figcaption>명함 → 연락처</figcaption></figure>
+    </div>
+  </div>
+  <div class="feature">
+    <h2>🌐 번역</h2>
+    <p>한국어·영어·일본어·중국어를 인터넷 없이 번역해요. 언어 조합마다 처음 한 번 <b>언어팩 받기</b>가 필요해요. 한국어↔일본어·중국어는 영어를 거쳐 번역해요.</p>
+    <figure><img src="shots/11_translate.jpg"></figure>
+    <p class="muted small">PC 안에서 돌아가는 작은 번역 모델이라 문장이 덜 매끄러울 수 있어요. 외국어 자료의 뜻을 파악하는 용도로 쓰고, 밖으로 보낼 글은 한 번 더 확인해 주세요.</p>
+  </div>
+  <div class="feature">
+    <h2>✍️ 글다듬기</h2>
+    <p>'몇일→며칠', '할께요→할게요', '안되요→안 돼요' 같은 맞춤법을 고치고, 해요체 ↔ 합니다체 ↔ 공문체(~함, ~임)로 바꿔요. 받는 사람과 할 말만 쓰면 업무 메일 틀도 만들어 줘요.</p>
+    <figure><img src="shots/12_writing.jpg"></figure>
+  </div>
+  <div class="feature">
+    <h2>🏷 이름 일괄 변경</h2>
+    <p>'상품_001.jpg'처럼 번호·날짜·사진 찍은 날짜를 넣어 여러 파일 이름을 한 번에 바꿔요. 바뀔 이름을 먼저 보여 주고, 잘못 바꿨으면 <b>되돌리기</b>로 원래대로 돌려요.</p>
+    <figure><img src="shots/13_rename.jpg"></figure>
+  </div>
+  <div class="feature">
+    <h2>🗂 중복 정리</h2>
+    <p>내용이 똑같은 파일과 거의 같은 사진을 찾아 묶어 보여 줘요. 바로 지우지 않고 <b>보관함</b>으로 옮겨서, 보관함 기록에서 언제든 되돌릴 수 있어요.</p>
+    <figure><img src="shots/14_dedupe.jpg"></figure>
+  </div>
+  <div class="feature">
+    <h2>📄 PDF 도구</h2>
+    <p>합치기, 나누기(쪽 범위·몇 쪽씩), 용량 줄이기, 돌리기, 이미지 → PDF, PDF → 이미지. 파일을 인터넷 사이트에 올릴 필요가 없어요.</p>
+    <figure><img src="shots/15_pdf.jpg"></figure>
+  </div>
+  <div class="feature">
+    <h2>⏱ 집중 타이머</h2>
+    <p>25분 집중, 5분 휴식의 뽀모도로 타이머예요. 다른 화면으로 가도 계속 돌고, 끝나면 알림이 와요. 요일별 집중 시간과 끝낸 할 일을 주간 리포트로 보여 줘요. 시간은 설정에서 바꿀 수 있어요.</p>
+    <figure><img src="shots/16_focus.jpg"></figure>
+  </div>
+  <div class="feature">
+    <h2>🔎 통합 검색</h2>
+    <p>회의록·메모·할 일·클립보드·연락처, 그리고 등록한 폴더 속 한글(HWP·HWPX)·워드·PDF 문서 안의 글자까지 한 번에 찾아요. 어디서든 <kbd>Ctrl</kbd> <kbd>Shift</kbd> <kbd>Space</kbd>로 바로 열 수 있어요.</p>
+    <figure><img src="shots/17_search.jpg"></figure>
+  </div>
+</section>
+
+<!-- 4. 설정과 단축키 -->
+<section class="chapter">
+  <div class="kicker">CHAPTER 4</div>
+  <h1>설정과 단축키</h1>
+  <figure><img src="shots/18_settings.jpg"><figcaption>설정: 라이선스, 내 정보, 단축키, 구성요소 상태</figcaption></figure>
+  <ul>
+    <li><b>라이선스</b>: 등록된 키와 이름을 보여 줘요. <b>다른 키로 바꾸기</b>로 키를 바꿀 수 있어요.</li>
+    <li><b>내 정보와 기본값</b>: 메일 서명에 쓸 이름·회사, 집중·휴식 시간</li>
+    <li><b>구성요소</b>: 음성 인식·문자 인식·배경 지우기·번역 같은 AI 기능이 준비됐는지 보여 줘요.</li>
+    <li><b>오픈소스 라이선스 고지</b>: 로컬비서에 쓰인 오픈소스 목록</li>
+  </ul>
+  <h2>단축키</h2>
+  <table>
+    <tr><th>단축키</th><th>하는 일</th></tr>
+    <tr><td><kbd>Ctrl</kbd> <kbd>Shift</kbd> <kbd>Space</kbd></td><td>어디서든 로컬비서를 열고 찾기</td></tr>
+    <tr><td><kbd>Ctrl</kbd> <kbd>Shift</kbd> <kbd>O</kbd></td><td>화면을 캡처해서 글자 읽기</td></tr>
+    <tr><td><kbd>Ctrl</kbd> <kbd>K</kbd></td><td>앱 안에서 기능·내용 찾기</td></tr>
+    <tr><td><kbd>Esc</kbd></td><td>찾기 창 닫기</td></tr>
+  </table>
+  <p class="muted small">맥에서도 어디서나 쓰는 단축키는 Control 키를 써요. 앱 안의 찾기는 ⌘ K도 돼요.</p>
+</section>
+
+<!-- 5. FAQ -->
+<section class="chapter">
+  <div class="kicker">CHAPTER 5</div>
+  <h1>자주 묻는 질문과 문제 해결</h1>
+  <div class="qa"><b>Q. 인터넷이 꼭 필요한가요?</b>설치할 때와 AI 모델(음성 인식·배경 지우기·번역 언어팩)을 처음 내려받을 때만 필요해요. 그다음부터는 비행기 모드에서도 돌아가요. 라이선스 인증도 인터넷 없이 돼요.</div>
+  <div class="qa"><b>Q. 제 파일이 어딘가로 전송되나요?</b>아니요. 녹음·문서·사진·메모 모두 PC 안에서만 처리하고 저장해요.</div>
+  <div class="qa"><b>Q. 'Windows의 PC 보호' 창이 떠서 설치가 안 돼요.</b>창 안의 '추가 정보'를 누르면 나오는 '실행' 버튼을 누르세요. 새 프로그램이라 Windows가 한 번 확인하는 거예요.</div>
+  <div class="qa"><b>Q. 맥에서 '확인되지 않은 개발자' 때문에 열리지 않아요.</b>응용 프로그램 폴더에서 로컬비서를 우클릭 → 열기 → 열기를 누르세요. 그래도 안 되면 시스템 설정 → 개인정보 보호 및 보안 아래쪽의 '그래도 열기'를 누르세요.</div>
+  <div class="qa"><b>Q. 회의록 만들기가 너무 느려요.</b>정확도를 <b>빠름</b>으로 바꾸고, 다른 무거운 프로그램을 닫아 보세요. 처음 한 번은 모델을 내려받느라 더 오래 걸려요. 걸리는 시간은 PC 사양과 고른 정확도에 따라 많이 달라요.</div>
+  <div class="qa"><b>Q. 받아쓰기가 틀려요.</b>녹음 품질의 영향이 커요. 정확도를 <b>정확함</b>으로 올리거나, 틀린 곳은 전체 내용에서 눌러 바로 고치세요.</div>
+  <div class="qa"><b>Q. '구성요소가 아직 없어요'라고 나와요.</b>설정 → 구성요소에서 무엇이 빠졌는지 확인하세요. 맥의 문자 인식은 Tesseract를 따로 설치해야 해요(1장 참고). 그 밖의 경우는 문의해 주세요.</div>
+  <div class="qa"><b>Q. 번역이 안 돼요.</b>처음 쓰는 언어 조합은 <b>언어팩 받기</b>를 눌러 내려받아야 해요(인터넷 필요).</div>
+  <div class="qa"><b>Q. 개인정보 가리기가 놓친 게 있어요.</b>자동 탐지는 모든 경우를 잡지 못해요. 결과 파일을 확인하고, 놓친 부분은 직접 고쳐 주세요. 어떤 형식을 놓쳤는지 알려 주시면 업데이트에 반영할게요.</div>
+  <div class="qa"><b>Q. 창을 닫았는데 계속 돌아가요.</b>트레이(알림 영역)에 남아 클립보드 기록과 단축키를 유지해요. 완전히 끄려면 트레이 아이콘 → 끝내기를 누르세요.</div>
+  <div class="qa"><b>Q. 새 PC로 옮기고 싶어요.</b>새 PC에 설치하고 같은 키를 넣으면 돼요. 메모·회의록 같은 기록도 옮기려면 6장의 데이터 폴더를 통째로 복사하세요.</div>
+</section>
+
+<!-- 6. 데이터·라이선스·문의 -->
+<section class="chapter">
+  <div class="kicker">CHAPTER 6</div>
+  <h1>데이터 보관 · 라이선스 · 문의</h1>
+  <h2>데이터는 어디에 있나요</h2>
+  <table>
+    <tr><th>Windows</th><td><b>%APPDATA%\LocalBiseo</b> (파일 탐색기 주소창에 그대로 입력)</td></tr>
+    <tr><th>macOS</th><td><b>~/Library/Application Support/LocalBiseo</b> (Finder → 이동 → 폴더로 이동)</td></tr>
+  </table>
+  <p>메모·할 일·회의록·클립보드 기록과 내려받은 AI 모델이 이 폴더에 있어요. <b>백업</b>하려면 로컬비서를 끈 뒤 이 폴더를 통째로 복사해 두세요. 가린 파일과 편집한 이미지는 원본 옆(또는 고른 폴더)에 저장돼요.</p>
+
+  <h2>라이선스</h2>
+  <ul>
+    <li>라이선스 키 하나로 <b>구매하신 분의 PC 2대</b>까지 쓸 수 있어요.</li>
+    <li>한 번 결제로 계속 쓰고, 구매 후 <b>1년 동안 업데이트</b>를 무료로 받아요.</li>
+    <li>키를 다른 사람과 나눠 쓰거나 공개하면 안 돼요.</li>
+    <li>개발자 라이선스는 안내받은 기한까지 쓸 수 있어요.</li>
+  </ul>
+  <h2>청약철회(환불) 안내</h2>
+  <p>라이선스 키를 확인(열람)하면 디지털 콘텐츠 제공이 시작된 것으로 보아 청약철회가 제한돼요(전자상거래법 제17조 제2항 제5호). 키를 확인하기 전이라면 구매하신 곳의 환불 정책에 따라 환불받을 수 있어요. 프로그램이 소개와 다르거나 결함으로 핵심 기능을 쓸 수 없는 경우는 키 확인과 상관없이 환불 정책에 따라 처리해요.</p>
+  <h2>문의</h2>
+  <p>안내 메일에 답장하시거나 <b>kkulpeul@gmail.com</b>으로 보내 주세요. 문제가 있다면 운영체제, 어떤 기능에서 어떤 메시지가 나왔는지 화면 캡처와 함께 알려 주시면 빨리 도와드릴 수 있어요.</p>
+  <div class="box"><b>오픈소스</b>로컬비서는 여러 오픈소스 소프트웨어를 사용해요. 전체 목록과 라이선스는 설정 → 정보 → 오픈소스 라이선스 고지에서 볼 수 있어요.</div>
+</section>
+
+</body>
+</html>

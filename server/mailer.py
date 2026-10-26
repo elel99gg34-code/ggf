@@ -39,9 +39,33 @@ function doPost(e) {
     const options = { htmlBody: req.html, name: req.from_name, attachments: attachments };
     if (req.reply_to) options.replyTo = req.reply_to;
     MailApp.sendEmail(req.to, req.subject, req.text, options);
+    if (req.more && req.server_url) keepWaking(req.server_url);
     return out({ ok: true, remaining: MailApp.getRemainingDailyQuota() });
   } catch (err) {
     return out({ ok: false, error: String(err) });
+  }
+}
+
+// 무료 서버는 접속이 없으면 잠든다. 보낼 메일이 남아 있는 동안만 한 시간마다 깨운다.
+function keepWaking(serverUrl) {
+  PropertiesService.getScriptProperties().setProperty("SERVER_URL", serverUrl);
+  const exists = ScriptApp.getProjectTriggers().some(function (t) { return t.getHandlerFunction() === "wakeServer"; });
+  if (!exists) ScriptApp.newTrigger("wakeServer").timeBased().everyHours(1).create();
+}
+
+function wakeServer() {
+  const url = PropertiesService.getScriptProperties().getProperty("SERVER_URL");
+  let queued = 1;
+  try {
+    const res = UrlFetchApp.fetch(url + "/mail/wake", { muteHttpExceptions: true });
+    queued = JSON.parse(res.getContentText()).queued;
+  } catch (err) {
+    return; // 서버가 깨어나는 중이면 다음 시간에 다시 본다
+  }
+  if (!url || queued === 0) {
+    ScriptApp.getProjectTriggers().forEach(function (t) {
+      if (t.getHandlerFunction() === "wakeServer") ScriptApp.deleteTrigger(t);
+    });
   }
 }
 
@@ -93,9 +117,10 @@ class AppsScriptRelay:
     def ping(self) -> dict:
         return self.call({"action": "ping"}, timeout=30)
 
-    def send(self, to: str, subject: str, html_body: str, text: str, from_name: str, reply_to: str, attachments: list[dict]) -> dict:
-        return self.call({"action": "send", "to": to, "subject": subject, "html": html_body, "text": text,
-                          "from_name": from_name, "reply_to": reply_to, "attachments": attachments})
+    def send(self, to: str, subject: str, html_body: str, text: str, from_name: str, reply_to: str, attachments: list[dict],
+             server_url: str = "", more: bool = False) -> dict:
+        return self.call({"action": "send", "to": to, "subject": subject, "html": html_body, "text": text, "from_name": from_name,
+                          "reply_to": reply_to, "attachments": attachments, "server_url": server_url, "more": more})
 
 
 # --- 메일 내용 ---------------------------------------------------------------

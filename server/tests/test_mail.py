@@ -28,10 +28,10 @@ class FakeTransport:
         self.sent: list[dict] = []
         self.fail: Exception | None = None
 
-    def send(self, cfg, row, attachments):
+    def send(self, cfg, row, attachments, more=False):
         if self.fail:
             raise self.fail
-        self.sent.append({"cfg": cfg, "row": row, "attachments": attachments})
+        self.sent.append({"cfg": cfg, "row": row, "attachments": attachments, "more": more})
 
     def ping(self, cfg):
         return {"ok": True, "remaining": 99, "account": "shop@example.com"}
@@ -177,6 +177,16 @@ def test_quota_error_postpones_everything(env):
     fake.fail = None
     assert app.state.mailer.process_once() == 0  # 3시간 뒤로 미뤄 둠
     assert app.state.mailer.process_once(now=datetime.now(timezone.utc) + timedelta(hours=4)) == 2
+
+
+def test_server_asks_to_be_woken_while_mail_remains(env):
+    c, fake, app = env
+    for i in range(3):
+        c.post("/api/licenses", json={"name": f"사람{i}", "email": f"p{i}@example.com", "send_email": True})
+    app.state.mailer.process_once()
+    assert [m["more"] for m in fake.sent] == [True, True, False]
+    assert fake.sent[0]["cfg"]["public_url"] == "https://license.example.com"
+    assert c.get("/mail/wake").json() == {"queued": 0}  # 잠금 없이 열리지만 남은 개수만 알려 준다
 
 
 def test_notice_to_holders(env):

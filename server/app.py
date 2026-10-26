@@ -50,7 +50,7 @@ DEFAULT_DB = HERE / "licenses.db"
 GUIDE_PATH = HERE / "assets" / "guide.pdf"
 SETTING_DEFAULTS = {
     "relay_url": "", "sender_name": "로컬비서", "reply_to": "", "support_email": "", "download_windows": "", "download_mac": "",
-    "seller_footer": "", "include_key": "0", "attach_guide": "1", "daily_limit": "90",
+    "seller_footer": "", "include_key": "0", "attach_guide": "1", "daily_limit": "90", "public_url": "",
 }
 
 metadata = MetaData()
@@ -310,6 +310,10 @@ class MailStore:
     def daily_limit(self) -> int:
         return self.settings()["daily_limit"]
 
+    def queued_count(self) -> int:
+        with self.engine.connect() as conn:
+            return conn.execute(select(func.count()).select_from(emails).where(emails.c.status == "queued")).scalar_one()
+
     def ready(self) -> bool:
         return self.settings()["relay_url"].startswith("https://script.google.com/")
 
@@ -346,9 +350,10 @@ class RelayTransport:
     def __init__(self, secret: str):
         self.secret = secret
 
-    def send(self, cfg: dict, row: dict, attachments: list[dict]) -> None:
+    def send(self, cfg: dict, row: dict, attachments: list[dict], more: bool = False) -> None:
         AppsScriptRelay(cfg["relay_url"], self.secret).send(
-            row["to_addr"], row["subject"], row["html"], row["text"], cfg["sender_name"], cfg["reply_to"] or cfg["support_email"], attachments
+            row["to_addr"], row["subject"], row["html"], row["text"], cfg["sender_name"], cfg["reply_to"] or cfg["support_email"], attachments,
+            server_url=cfg["public_url"], more=more,
         )
 
     def ping(self, cfg: dict) -> dict:
@@ -388,7 +393,8 @@ def create_app(pin: str, private_key_pem: str, db_url: str | None = None, mail_t
 
     def deliver(row: dict) -> None:
         cfg = store.settings()
-        transport.send(cfg, row, guide_attachment(GUIDE_PATH) if row["attach_guide"] else [])
+        # 이 메일 말고도 남아 있으면 Apps Script가 잠든 서버를 한 시간마다 깨우게 한다.
+        transport.send(cfg, row, guide_attachment(GUIDE_PATH) if row["attach_guide"] else [], more=store.queued_count() > 1)
 
     mailer = Mailer(store, deliver)
 
@@ -464,6 +470,10 @@ def create_app(pin: str, private_key_pem: str, db_url: str | None = None, mail_t
             license_id=license_id, kind=kind, to_addr=to.strip(), subject=subject, html=html_body, text=text, attach_guide=attach,
             status="queued", attempts=0, last_error="", created_at=now, next_try_at=now,
         )).inserted_primary_key[0]
+
+    def remember_base(base: str) -> None:
+        if store.settings()["public_url"] != base:
+            store.save_settings({"public_url": base})
 
     def enqueue_license_mail(conn, lic: dict, base: str) -> int:
         if lic["revoked_at"]:
@@ -543,6 +553,8 @@ def create_app(pin: str, private_key_pem: str, db_url: str | None = None, mail_t
     def create_license(body: IssueIn, request: Request, _: str = Depends(admin)):
         if body.send_email and not valid_email(body.email):
             raise HTTPException(400, "메일로 보내려면 올바른 이메일 주소를 넣어 주세요.")
+        if body.send_email:
+            remember_base(public_base(request))
         with engine.begin() as conn:
             lic = issue(conn, body)
             if body.send_email:
@@ -566,6 +578,8 @@ def create_app(pin: str, private_key_pem: str, db_url: str | None = None, mail_t
             if bad:
                 raise HTTPException(400, f"이메일 주소가 없거나 올바르지 않은 사람이 있어요: {', '.join(bad[:10])}")
         base = public_base(request)
+        if body.send_email:
+            remember_base(base)
         with engine.begin() as conn:
             issued = [issue(conn, IssueIn(edition=body.edition, expires=body.expires, **p)) for p in people]
             if body.send_email:
@@ -696,6 +710,7 @@ def create_app(pin: str, private_key_pem: str, db_url: str | None = None, mail_t
 
     @app.post("/api/licenses/{license_id}/send")
     def send_license(license_id: str, request: Request, _: str = Depends(admin)):
+        remember_base(public_base(request))
         with engine.begin() as conn:
             lic = get_license(conn, license_id)
             if not lic:
@@ -706,13 +721,14 @@ def create_app(pin: str, private_key_pem: str, db_url: str | None = None, mail_t
         return out
 
     @app.post("/api/notices")
-    def send_notice(body: NoticeIn, _: str = Depends(admin)):
+    def send_notice(body: NoticeIn, request: Request, _: str = Depends(admin)):
         """라이선스가 있는 사람 모두에게 공지 (취소된 라이선스는 뺀다, 같은 주소는 한 번만)."""
         cfg = store.settings()
         stmt = select(licenses.c.email).where(licenses.c.revoked_at.is_(None))
         if body.target in EDITIONS:
             stmt = stmt.where(licenses.c.edition == body.target)
         subject, html_body, text = notice_mail(body.subject, body.body, cfg)
+        remember_base(public_base(request))
         with engine.begin() as conn:
             seen: set[str] = set()
             for (addr,) in conn.execute(stmt.order_by(licenses.c.id)):
@@ -722,6 +738,12 @@ def create_app(pin: str, private_key_pem: str, db_url: str | None = None, mail_t
                     enqueue(conn, "notice", addr, subject, html_body, text)
         mailer.wake()
         return {"queued": len(seen)}
+
+    @app.get("/mail/wake")
+    def mail_wake():
+        """Apps Script가 한 시간마다 불러 잠든 서버를 깨운다. 남은 메일 수만 알려 준다."""
+        mailer.wake()
+        return {"queued": store.queued_count()}
 
     # --- 고객이 메일 링크로 여는 곳 -------------------------------------------------
     def check_link(conn, license_id: str, token: str) -> dict:
