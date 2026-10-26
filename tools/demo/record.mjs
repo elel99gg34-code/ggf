@@ -1,7 +1,7 @@
 // 와디즈 시연 영상 녹화 (실제 앱 화면을 그대로 녹화한다. 결과는 모두 엔진이 실제로 만든 것).
 //   node tools/demo/record.mjs <예시 파일 폴더> <출력 폴더> [mask,media,transcribe]
 // 미리 띄워 둘 것: 엔진(127.0.0.1:8765, 토큰 없이)과 화면(vite preview, :1420)
-import { mkdirSync, renameSync, readdirSync } from "node:fs";
+import { mkdirSync, renameSync, readdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { createRequire } from "node:module";
 
@@ -44,9 +44,13 @@ async function session(name, fn) {
   const browser = await chromium.launch();
   const ctx = await browser.newContext({ viewport: SIZE, recordVideo: { dir: outDir, size: SIZE }, locale: "ko-KR" });
   const page = await ctx.newPage();
+  const t0 = Date.now();
+  const cuts = []; // 영상에서 잘라 낼 구간(초). MP4로 바꿀 때 뺀다.
   let mouse = { x: 700, y: 450 };
   const h = {
     page,
+    now: () => (Date.now() - t0) / 1000,
+    cut: (from, to) => to - from > 1 && cuts.push([from, to]),
     wait: (ms) => page.waitForTimeout(ms),
     caption: async (html) => {
       await page.evaluate((t) => { const el = document.getElementById("demo-cap"); if (el) el.innerHTML = t; }, html);
@@ -87,6 +91,7 @@ async function session(name, fn) {
     await ctx.close();
     await browser.close();
     if (video) renameSync(await video.path(), join(outDir, `${name}.webm`));
+    writeFileSync(join(outDir, `${name}.cuts.json`), JSON.stringify(cuts));
   }
   console.log(`녹화 완료: ${name}.webm`);
 }
@@ -155,7 +160,8 @@ await session("transcribe", async (h) => {
   await h.choose(".dropzone", [join(samples, "회의녹음.mp3")]);
   await h.type("input[placeholder='예: 10월 마케팅 회의']", "와디즈 펀딩 준비 회의", 60);
   await h.click("button:has-text('회의록 만들기')");
-  await h.caption("AI가 받아쓰는 중… <b>파일은 PC 밖으로 나가지 않아요</b>");
+  await h.caption("AI가 받아쓰는 중… <b>파일은 PC 밖으로 나가지 않아요</b><br><span style='font-size:17px;font-weight:500;opacity:.8'>기다리는 시간은 줄여서 보여 드려요</span>");
+  const waitFrom = h.now() + 3;
   // 받아쓰기가 끝날 때까지 진행 상황을 로그로 남긴다 (실패하면 화면의 오류 문구를 보여 준다).
   for (let i = 0; ; i++) {
     if (await h.page.locator("text=전체 내용").count()) break;
@@ -165,6 +171,7 @@ await session("transcribe", async (h) => {
     if (i > 600) throw new Error("10분 안에 끝나지 않음");
     await h.wait(1000);
   }
+  h.cut(waitFrom, h.now() - 1.5); // 진행 막대가 도는 동안은 3초만 남기고 끝나기 직전으로 넘어간다
   await h.wait(800);
   await h.caption("받아쓰기 · 요약 · <b>할 일과 일정</b>까지 자동 정리");
   await h.wait(3500);

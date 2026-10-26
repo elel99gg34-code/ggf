@@ -60,7 +60,12 @@ jobs:
       - name: MP4로 변환
         run: |
           mkdir -p docs/wadiz/videos
-          conv() { ffmpeg -v error -y -i "$RUNNER_TEMP/videos/$1.webm" -c:v libx264 -preset slow -crf 21 -pix_fmt yuv420p -movflags +faststart "docs/wadiz/videos/$2.mp4"; }
+          # 녹화 스크립트가 남긴 구간(기다리는 시간)을 잘라 낸다.
+          conv() {
+            skip=$(python -c "import json,sys; print('+'.join(f'between(t,{a:.2f},{b:.2f})' for a, b in json.load(open(sys.argv[1]))) or '0')" "$RUNNER_TEMP/videos/$1.cuts.json")
+            ffmpeg -v error -y -i "$RUNNER_TEMP/videos/$1.webm" -vf "fps=25,select='not($skip)',setpts=N/25/TB" \
+              -c:v libx264 -preset slow -crf 21 -pix_fmt yuv420p -movflags +faststart "docs/wadiz/videos/$2.mp4"
+          }
           conv transcribe 시연1_회의록
           conv mask 시연2_개인정보가리기
           conv media 시연3_이미지일괄처리
