@@ -193,6 +193,7 @@ function hits(g) {
 function applyHit(g, o, src, dmg, base, grow, ang, dir) {
   if (o.shielding) { o.shield -= dmg * 1.5; o.vx = dir * 120; g.sfx.tone(900, 0.06, 'square', 0.04); S.fx.push({ x: o.x, y: o.y - 30, t: 0.15, spark: '#93c5fd' }); return; }
   o.dmg += dmg; o.last = src;
+  if (src && src.slot === 0) g.score += Math.round(dmg * 10);
   const kb = (base + o.dmg * grow) / o.F.wt;
   o.vx = Math.cos(ang) * kb * dir; o.vy = Math.sin(ang) * kb;
   if (Math.abs(ang) > 1.3) o.vx = dir * kb * 0.15;

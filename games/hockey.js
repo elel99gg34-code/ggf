@@ -263,7 +263,7 @@ function puckPhys(g, dt) {
         if (Math.random() < save) {
           if (Math.random() < 0.5) { take(p); p.dec = 0; } else { k.vx = -k.vx * 0.4; k.vy = U.rand(-300, 300); }
           g.sfx.tone(400, 0.06, 'square', 0.07); g.float(p.x, p.y - 28, '세이브!', p.team ? '#fca5a5' : '#93c5fd', 18);
-        }
+        } else p.cd = 0.5;
         continue;
       }
       if (k.sh && !p.gk) { if (p.team === k.last) continue; if (p.blk === k.sid) continue; p.blk = k.sid; if (Math.random() < 0.7) continue; g.float(p.x, p.y - 26, '블록!', '#e2e8f0', 14); }
