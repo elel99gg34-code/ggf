@@ -86,3 +86,11 @@ main { max-width: 980px; margin: 0 auto; padding: 16px; display: flex; flex-dire
   .rows li { grid-template-columns: 1fr; }
   .rows .actions { grid-row: auto; grid-column: 1; justify-content: flex-start; }
 }
+
+.check { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 8px; font-weight: 600; font-size: 14px; }
+.check input { width: auto; }
+.steps { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; line-height: 1.6; }
+.steps a { color: var(--accent); }
+.chip.ok { color: var(--ok); }
+.chip.wait { color: var(--muted); }
+.chip.bad { color: var(--danger); }

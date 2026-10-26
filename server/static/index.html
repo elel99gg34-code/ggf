@@ -27,6 +27,7 @@
       <button class="tab active" data-tab="issue">발급</button>
       <button class="tab" data-tab="list">발급 기록</button>
       <button class="tab" data-tab="bulk">일괄 발급</button>
+      <button class="tab" data-tab="mail">메일</button>
     </nav>
 
     <main>
@@ -57,11 +58,13 @@
             </label>
             <label id="exp-date-wrap" hidden>마지막 날<input name="exp_date" type="date"></label>
           </div>
+          <label class="check"><input type="checkbox" name="send_email" checked> 발급하고 이메일로 보내기 <span class="muted small">(키 확인 링크·설치 방법·사용 설명서)</span></label>
           <button class="primary" type="submit">발급하기</button>
           <p id="issue-error" class="error" role="alert"></p>
         </form>
         <div id="issued" class="card stack" hidden>
           <div class="row"><b id="issued-title"></b></div>
+          <p id="issued-mail" class="muted small"></p>
           <textarea id="issued-key" readonly rows="4"></textarea>
           <div class="row">
             <button id="copy-key" class="primary">키 복사</button>
@@ -97,13 +100,101 @@
               <option value="pro">정품 라이선스</option>
               <option value="dev">개발자 라이선스 (기한 없음)</option>
             </select>
+            <label class="check"><input type="checkbox" id="bulk-send" checked> 모두 이메일로 보내기</label>
             <button id="bulk-go" class="primary">발급하기</button>
           </div>
+          <p class="muted small">무료 Gmail은 하루 100통까지 보낼 수 있어요. 넘으면 다음 날 자동으로 이어서 보내요.</p>
           <p id="bulk-error" class="error" role="alert"></p>
           <div id="bulk-done" hidden class="stack">
             <b id="bulk-title"></b>
             <button id="bulk-download">결과 CSV 내려받기</button>
           </div>
+        </div>
+      </section>
+
+      <section id="tab-mail" class="tab-panel" hidden>
+        <div class="card stack">
+          <div class="row wrap"><b>발송 상태</b><span id="mail-state" class="chip"></span></div>
+          <p id="mail-summary" class="muted small"></p>
+        </div>
+
+        <form id="mail-form" class="card stack">
+          <b>메일 설정</b>
+          <div class="grid">
+            <label>보내는 이름<input name="sender_name" maxlength="60" placeholder="로컬비서"></label>
+            <label>답장 받을 이메일<input name="reply_to" type="email" maxlength="200" placeholder="고객 문의를 받을 주소"></label>
+            <label>문의 안내 이메일<input name="support_email" type="email" maxlength="200" placeholder="메일 아래에 보여요"></label>
+            <label>하루 최대 발송 수<input name="daily_limit" type="number" min="1" max="2000"></label>
+          </div>
+          <div class="grid">
+            <label>Windows 설치 파일 링크<input name="download_windows" maxlength="1000" placeholder="https://drive.google.com/…"></label>
+            <label>macOS 설치 파일 링크<input name="download_mac" maxlength="1000" placeholder="https://drive.google.com/…"></label>
+          </div>
+          <p class="muted small">설치 파일은 구글 드라이브 등에 올리고 '링크가 있는 모든 사용자' 공유 링크를 넣으세요. 고객에게는 이 링크 대신 서버 주소가 가서, 나중에 파일을 바꿔도 메일을 다시 보낼 필요가 없어요. 키가 없으면 설치해도 쓸 수 없어요.</p>
+          <label>메일 아래 판매자 정보<textarea name="seller_footer" rows="3" maxlength="1000" placeholder="상호 · 대표자 · 사업자등록번호 · 통신판매업 신고번호"></textarea></label>
+          <label class="check"><input type="checkbox" name="attach_guide"> 사용 설명서 PDF 첨부 <span id="guide-state" class="muted small"></span></label>
+          <label class="check"><input type="checkbox" name="include_key"> 키를 메일에 바로 넣기 <span class="muted small">(끄면 '키 확인하기' 링크로 보내고, 고객이 키를 연 시각이 남아요. 환불 판단에 필요해서 꺼 두는 걸 권해요)</span></label>
+          <button class="primary" type="submit">설정 저장</button>
+          <p id="mail-error" class="error" role="alert"></p>
+        </form>
+
+        <div class="card stack">
+          <b>Gmail 연결 (처음 한 번)</b>
+          <ol class="steps">
+            <li><b>판매용 Gmail 계정</b>으로 로그인한 상태에서 <a href="https://script.google.com/home/projects/create" target="_blank" rel="noopener">script.google.com 새 프로젝트</a>를 여세요. 개인 계정으로 하면 고객에게 그 주소가 보여요.</li>
+            <li>아래 코드를 복사해서 원래 있던 내용을 지우고 붙여 넣은 뒤 저장하세요.</li>
+            <li>오른쪽 위 <b>배포 → 새 배포</b> → 톱니바퀴에서 <b>웹 앱</b> → 실행 사용자 <b>나</b>, 액세스 권한 <b>모든 사용자</b> → <b>배포</b> → 권한 허용(‘고급 → 안전하지 않음으로 이동’이 나오면 눌러도 돼요. 내가 만든 코드예요).</li>
+            <li>나온 <b>웹 앱 URL</b>을 아래에 붙여 넣고 <b>연결 확인</b>을 누르세요.</li>
+          </ol>
+          <textarea id="script-code" rows="8" readonly></textarea>
+          <div class="row wrap">
+            <button id="copy-script">코드 복사</button>
+          </div>
+          <div class="row wrap">
+            <input id="relay-url" class="grow" placeholder="https://script.google.com/macros/s/…/exec">
+            <button id="relay-save" class="primary">연결 확인</button>
+          </div>
+          <p id="relay-result" class="muted small" role="status"></p>
+        </div>
+
+        <div class="card stack">
+          <b>테스트 메일</b>
+          <div class="row wrap">
+            <input id="test-to" type="email" class="grow" placeholder="받을 주소 (내 메일)">
+            <button id="test-send">예시 안내 메일 보내기</button>
+            <a class="button" href="/api/mail/preview" target="_blank" rel="noopener">미리보기</a>
+          </div>
+          <p id="test-result" class="muted small" role="status"></p>
+        </div>
+
+        <form id="notice-form" class="card stack">
+          <b>공지 보내기</b>
+          <p class="muted small">업데이트 안내 같은 알림을 라이선스가 있는 사람 모두에게 보내요. 취소된 라이선스는 빼고, 같은 주소는 한 번만 보내요.</p>
+          <div class="grid">
+            <label>받는 사람
+              <select name="target">
+                <option value="all">모두</option>
+                <option value="pro">정품만</option>
+                <option value="dev">개발자만</option>
+              </select>
+            </label>
+            <label>제목<input name="subject" maxlength="200" required placeholder="예: 로컬비서 0.2 업데이트 안내"></label>
+          </div>
+          <label>내용<textarea name="body" rows="7" maxlength="20000" required placeholder="빈 줄로 문단을 나눠요."></textarea></label>
+          <button class="primary" type="submit">공지 보내기</button>
+          <p id="notice-result" class="muted small" role="status"></p>
+        </form>
+
+        <div class="card stack">
+          <div class="row wrap"><b class="grow">보낸 메일</b>
+            <select id="outbox-filter">
+              <option value="">전체</option>
+              <option value="queued">대기</option>
+              <option value="sent">보냄</option>
+              <option value="failed">실패</option>
+            </select>
+          </div>
+          <ul id="outbox" class="rows"></ul>
         </div>
       </section>
     </main>
