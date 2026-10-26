@@ -139,13 +139,36 @@ def test_pin_and_key_come_from_env(monkeypatch, tmp_path, key):
     monkeypatch.setenv("DATABASE_URL", f"sqlite:///{tmp_path / 'env.sqlite'}")
     with TestClient(server.create_app_from_env()) as c:
         assert c.post("/api/unlock", json={"pin": PIN}).status_code == 200
-    monkeypatch.setenv("ADMIN_PIN", "123")
-    with pytest.raises(RuntimeError):
-        server.create_app_from_env()
+    monkeypatch.setenv("ADMIN_PIN", "123")  # 너무 짧으면 발급 화면 대신 안내만
+    with TestClient(server.create_app_from_env()) as c:
+        assert c.get("/").status_code == 503 and "6자리" in c.get("/").text
     # 서명 키가 아직 없으면 키 발급 없이 안내 화면만 뜬다
+    monkeypatch.setenv("ADMIN_PIN", PIN)
     monkeypatch.delenv("LICENSE_PRIVATE_KEY")
     with TestClient(server.create_app_from_env()) as c:
         r = c.get("/")
         assert r.status_code == 503 and "LICENSE_PRIVATE_KEY" in r.text
         assert c.post("/api/unlock", json={"pin": PIN}).status_code in (404, 405)
+    # 잘못된 값이면 서버가 죽지 않고 안내한다
+    monkeypatch.setenv("LICENSE_PRIVATE_KEY", "abc")
+    with TestClient(server.create_app_from_env()) as c:
+        assert c.get("/").status_code == 503 and "올바르지 않아요" in c.get("/").text
+
+
+@pytest.mark.parametrize("mangle", [
+    lambda pem: pem.replace("\n", " "),  # 한 줄 칸에 붙여 넣어 줄바꿈이 공백이 됨
+    lambda pem: pem.replace("\n", ""),
+    lambda pem: pem.replace("\n", "\\n"),
+    lambda pem: "".join(pem.splitlines()[1:-1]),  # 머리글 없이 가운데만
+    lambda pem: f'"{pem.strip()}"',
+])
+def test_pasted_key_forms_are_accepted(monkeypatch, tmp_path, key, mangle):
+    pem = key.private_bytes(serialization.Encoding.PEM, serialization.PrivateFormat.PKCS8, serialization.NoEncryption()).decode()
+    monkeypatch.setenv("ADMIN_PIN", PIN)
+    monkeypatch.setenv("LICENSE_PRIVATE_KEY", mangle(pem))
+    monkeypatch.setenv("DATABASE_URL", f"sqlite:///{tmp_path / 'p.sqlite'}")
+    with TestClient(server.create_app_from_env()) as c:
+        assert c.post("/api/unlock", json={"pin": PIN}).status_code == 200
+        lic = c.post("/api/licenses", json={"name": "홍길동"}).json()
+    assert verify_in_app(lic["key"], key)["name"] == "홍길동"
     assert server.database_url("postgres://u:p@h/db") == "postgresql+psycopg://u:p@h/db"

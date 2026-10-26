@@ -16,6 +16,7 @@ import base64
 import csv
 import hashlib
 import hmac
+import html
 import io
 import json
 import os
@@ -353,21 +354,32 @@ def create_app(pin: str, private_key_pem: str, db_url: str | None = None) -> Fas
     return app
 
 
-def setup_needed_app(missing: list[str]) -> FastAPI:
-    """설정이 덜 됐을 때 뜨는 안내 화면. 키를 발급하는 기능은 없다."""
+def normalize_pem(value: str) -> str:
+    """Render 입력 칸에 붙여 넣다 줄바꿈이 사라지거나(\\n, 공백) 머리글이 빠져도 PEM으로 되돌린다."""
+    text = value.replace("\\n", "\n").strip().strip('"').strip("'")
+    body = text.replace("-----BEGIN PRIVATE KEY-----", "").replace("-----END PRIVATE KEY-----", "")
+    body = "".join(body.split())
+    lines = [body[i : i + 64] for i in range(0, len(body), 64)]
+    return "-----BEGIN PRIVATE KEY-----\n" + "\n".join(lines) + "\n-----END PRIVATE KEY-----\n"
+
+
+def setup_needed_app(problems: list[str]) -> FastAPI:
+    """설정이 덜 됐거나 잘못됐을 때 뜨는 안내 화면. 키를 발급하는 기능은 없다."""
     app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
-    items = "".join(f"<li><code>{m}</code></li>" for m in missing)
+    items = "".join(f"<li>{html.escape(m)}</li>" for m in problems)
     page = (
         '<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">'
         "<title>설정 필요</title><body style=\"font-family:sans-serif;max-width:560px;margin:40px auto;padding:0 16px;line-height:1.6\">"
-        f"<h1>라이선스 서버 설정이 필요해요</h1><p>Render 대시보드의 Environment에서 아래 값을 넣으면 자동으로 다시 시작돼요.</p><ul>{items}</ul></body>"
+        "<h1>라이선스 서버 설정이 필요해요</h1>"
+        "<p>Render 대시보드 → localbiseo-license → Environment에서 아래 값을 넣고 <b>Save, rebuild, and deploy</b>를 누르세요.</p>"
+        f"<ul>{items}</ul></body>"
     )
 
     @app.get("/healthz")
     def healthz():
-        return {"ok": False, "missing": missing}
+        return {"ok": False, "problems": problems}
 
-    @app.get("/{path:path}")
+    @app.api_route("/{path:path}", methods=["GET", "HEAD"])
     def notice(path: str):
         return Response(page, media_type="text/html; charset=utf-8", status_code=503)
 
@@ -375,9 +387,16 @@ def setup_needed_app(missing: list[str]) -> FastAPI:
 
 
 def create_app_from_env() -> FastAPI:
-    pem = os.environ.get("LICENSE_PRIVATE_KEY", "").replace("\\n", "\n")
-    pin = os.environ.get("ADMIN_PIN", "")
-    missing = [name for name, value in (("ADMIN_PIN", pin), ("LICENSE_PRIVATE_KEY", pem.strip())) if not value]
-    if missing:
-        return setup_needed_app(missing)
-    return create_app(pin, pem, os.environ.get("DATABASE_URL"))
+    raw_pem = os.environ.get("LICENSE_PRIVATE_KEY", "")
+    pin = os.environ.get("ADMIN_PIN", "").strip()
+    problems = []
+    if not pin:
+        problems.append("ADMIN_PIN: 관리자 번호가 없어요.")
+    if not raw_pem.strip():
+        problems.append("LICENSE_PRIVATE_KEY: 서명 개인키(private.pem 파일 내용 전체)가 없어요.")
+    if problems:
+        return setup_needed_app(problems)
+    try:
+        return create_app(pin, normalize_pem(raw_pem), os.environ.get("DATABASE_URL", "").strip() or None)
+    except (ValueError, TypeError, RuntimeError) as e:
+        return setup_needed_app([f"설정값이 올바르지 않아요: {e}"])
