@@ -6,13 +6,13 @@ const PT_PCOL = ['#38bdf8', '#fb923c'];
 const PT_LV = [
   { name: '첫 번째 포탈', tip: '왼쪽 벽(흰 벽)과 오른쪽 천장에 포탈을 하나씩! 벽으로 걸어 들어가세요.', b: (f, s) => { f(14, 0, 28, 0, '#'); f(13, 10, 13, 15, 'X'); f(0, 12, 0, 15, '#'); s(2, 15, 'P'); s(27, 15, 'E'); } },
   { name: '산성 건너기', tip: '초록 산성은 위험! 양쪽 벽을 포탈로 연결하세요.', b: (f, s) => { f(8, 15, 21, 15, '^'); f(0, 11, 0, 15, '#'); f(29, 11, 29, 15, '#'); s(3, 15, 'P'); s(25, 15, 'E'); } },
-  { name: '빠른 것은 빠르게 나온다', tip: '높은 곳에서 바닥 포탈로 떨어지면, 반대편 포탈에서 같은 속도로 튀어나와요!', b: (f, s) => { f(1, 4, 6, 15, 'X'); f(7, 16, 12, 16, '#'); f(13, 15, 19, 15, '^'); f(20, 16, 21, 16, '#'); f(22, 6, 28, 15, 'X'); s(3, 3, 'P'); s(26, 5, 'E'); } },
-  { name: '큐브와 버튼', tip: '선반 위 큐브를 가져와 버튼에! Shift/X 로 들기·내려놓기', b: (f, s) => { f(0, 4, 2, 4, 'X'); f(0, 1, 0, 3, '#'); s(1, 3, 'C'); f(0, 11, 0, 15, '#'); f(24, 1, 24, 10, 'X'); f(24, 11, 24, 15, 'D'); s(12, 15, 'B'); s(6, 15, 'P'); s(27, 15, 'E'); } },
+  { name: '빠른 것은 빠르게 나온다', tip: '절벽 끝에 서서 아래 바닥을 조준! 높은 곳에서 바닥 포탈로 떨어지면 같은 속도로 튀어나와요.', b: (f, s) => { f(1, 4, 6, 15, 'X'); f(7, 16, 12, 16, '#'); f(13, 15, 19, 15, '^'); f(20, 16, 21, 16, '#'); f(22, 6, 28, 15, 'X'); s(3, 3, 'P'); s(26, 5, 'E'); } },
+  { name: '큐브와 버튼', tip: '선반 위 큐브를 가져와 버튼에! Shift/X 로 들기·내려놓기', b: (f, s) => { f(0, 4, 2, 4, 'X'); f(0, 1, 0, 2, '#'); s(2, 3, 'C'); f(0, 11, 0, 15, '#'); f(24, 1, 24, 10, 'X'); f(24, 11, 24, 15, 'D'); s(12, 15, 'B'); s(6, 15, 'P'); s(27, 15, 'E'); } },
   { name: '분해 그릴', tip: '파란 격자(그릴)는 포탈 발사를 막고, 통과하면 포탈이 사라져요. 날아서 넘어가세요!', b: (f, s) => { f(1, 4, 4, 15, 'X'); f(5, 16, 14, 16, '#'); f(15, 8, 15, 15, 'X'); f(15, 1, 15, 7, 'G'); s(2, 3, 'P'); s(25, 15, 'E'); f(20, 13, 22, 15, 'X'); } },
   { name: '멀리 날아가기', tip: '벽 포탈에서 튀어나오는 속도로 산성을 뛰어넘으세요.', b: (f, s) => { f(22, 5, 28, 15, 'X'); f(18, 16, 21, 16, '#'); f(17, 10, 17, 15, 'X'); f(8, 15, 16, 15, 'X'); f(1, 15, 7, 15, '^'); f(0, 10, 0, 14, '#'); s(25, 4, 'P'); s(16, 14, 'E'); } },
   { name: '구덩이 속 큐브', tip: '큐브 바로 아래에 포탈을 열면 큐브가 떨어져 다른 포탈로 나와요.', b: (f, s) => { f(1, 9, 28, 15, 'X'); f(9, 9, 14, 15, '.'); f(9, 16, 14, 16, '#'); s(13, 15, 'C'); f(0, 5, 0, 8, '#'); s(5, 8, 'B'); s(3, 8, 'P'); f(22, 1, 22, 4, 'X'); f(22, 5, 22, 8, 'D'); s(26, 8, 'E'); } },
   { name: '무한 낙하', tip: '발밑 바닥과 바로 위 천장에 포탈 → 무한히 떨어지며 가속! 그다음 주황 포탈을 옮기세요.', b: (f, s) => { f(7, 15, 19, 15, '^'); f(1, 16, 6, 16, '#'); f(20, 16, 21, 16, '#'); f(22, 6, 28, 15, 'X'); f(1, 0, 12, 0, '#'); s(3, 15, 'P'); s(26, 5, 'E'); } },
-  { name: '두 개의 버튼', tip: '버튼 두 개를 동시에 눌러야 문이 열려요. 큐브도 두 개!', b: (f, s) => { f(1, 9, 28, 15, 'X'); f(9, 9, 14, 15, '.'); f(9, 16, 14, 16, '#'); s(13, 15, 'C'); f(0, 4, 2, 4, 'X'); f(0, 1, 0, 3, '#'); s(1, 3, 'C'); f(0, 5, 0, 8, '#'); s(5, 8, 'B'); s(17, 8, 'B'); f(22, 1, 22, 4, 'X'); f(22, 5, 22, 8, 'D'); s(26, 8, 'E'); s(7, 8, 'P'); } },
+  { name: '두 개의 버튼', tip: '버튼 두 개를 동시에 눌러야 문이 열려요. 큐브도 두 개!', b: (f, s) => { f(1, 9, 28, 15, 'X'); f(9, 9, 14, 15, '.'); f(9, 16, 14, 16, '#'); s(13, 15, 'C'); f(0, 4, 2, 4, 'X'); f(0, 1, 0, 2, '#'); s(2, 3, 'C'); f(0, 5, 0, 8, '#'); s(5, 8, 'B'); s(17, 8, 'B'); f(22, 1, 22, 4, 'X'); f(22, 5, 22, 8, 'D'); s(26, 8, 'E'); s(7, 8, 'P'); } },
   { name: '최종 시험', tip: '버튼으로 문을 열고, 날아서 산성을 건너라!', b: (f, s) => { f(22, 5, 28, 15, 'X'); f(18, 16, 21, 16, '#'); f(17, 10, 17, 15, 'X'); f(8, 15, 16, 15, 'X'); f(1, 15, 7, 15, '^'); f(0, 10, 0, 14, '#'); f(13, 11, 13, 14, 'D'); s(27, 4, 'C'); s(23, 4, 'B'); s(25, 4, 'P'); s(16, 14, 'E'); } },
 ];
 GAME({
@@ -42,8 +42,9 @@ GAME({
       if (!dir) P.vx *= 1 - 0.5 * dt;
     }
     P.coy = P.ground ? 0.08 : P.coy - dt;
-    if ((g.pressed('a') || g.pressed('up')) && P.coy > 0) { P.vy = -520; P.coy = 0; g.sfx.jump(); }
-    if (!(g.a || g.up) && P.vy < -260) P.vy = -260;
+    if ((g.pressed('a') || g.pressed('up')) && P.coy > 0) { P.vy = -520; P.coy = 0; P.jumping = true; g.sfx.jump(); }
+    if (P.vy >= 0) P.jumping = false;
+    if (P.jumping && !(g.a || g.up) && P.vy < -260) P.vy = -260;
     P.vy = Math.min(P.vy + 1500 * dt, 1100);
     physics(g, P, dt);
     // carry
@@ -182,8 +183,8 @@ function tryPortal(g, b, hit, nx, ny) {
     const i = portalOn(tx, ty, nx, ny);
     if (i < 0) continue;
     // tangential fit
-    if (nx !== 0) { if (b.y < ty * PT_T - 6 || b.y + b.h > ty * PT_T + PT_T + 6) continue; }
-    else { if (b.x < tx * PT_T - 8 || b.x + b.w > tx * PT_T + PT_T + 8) continue; }
+    if (nx !== 0) { const cy = b.y + b.h / 2; if (cy < ty * PT_T + 2 || cy > ty * PT_T + PT_T - 2 || b.y < ty * PT_T - 8 || b.y + b.h > ty * PT_T + PT_T + 8) continue; }
+    else { const cx = b.x + b.w / 2; if (cx < tx * PT_T - 2 || cx > tx * PT_T + PT_T + 2) continue; }
     teleport(g, b, S.portals[i], S.portals[1 - i]);
     return true;
   }
@@ -201,14 +202,16 @@ function teleport(g, b, A, B) {
   const cx = B.tx * PT_T + 16 + B.nx * (16 + b.w / 2 + 1), cy = B.ty * PT_T + 16 + B.ny * (16 + b.h / 2 + 1);
   b.x = cx - b.w / 2; b.y = B.ny === 0 ? B.ty * PT_T + PT_T - b.h - 0.5 : cy - b.h / 2;
   if (B.ny === 0 && b.h > PT_T) b.y = cy - b.h / 2;
-  b.vx = vx; b.vy = vy; b.tcd = 0.05;
+  b.vx = vx; b.vy = vy; b.tcd = 0.05; b.jumping = false;
   if (b === S.p && S.carry) { S.carry.x = b.x; S.carry.y = b.y; }
   if (g) { g.sfx.tone(300, 0.12, 'sine', 0.06, 900); g.burst(cx, cy + PT_OY, PT_PCOL, 10, 160, 0.4); }
 }
 function shoot(g, i) {
   const P = S.p;
-  const ox = P.x + P.w / 2, oy = P.y + P.h / 2;
   const dx = Math.cos(S.aim), dy = Math.sin(S.aim);
+  // the gun is held out in front of the body, so you can aim down past a ledge edge
+  let ox = P.x + P.w / 2 + (Math.abs(dx) > 0.05 ? Math.sign(dx) * 16 : 0), oy = P.y + P.h / 2;
+  if (isSolid(Math.floor(ox / PT_T), Math.floor(oy / PT_T))) ox = P.x + P.w / 2;
   let px = ox, py = oy, ptx = Math.floor(px / PT_T), pty = Math.floor(py / PT_T);
   let res = null;
   for (let d = 0; d < 1400; d += 2) {

@@ -258,7 +258,7 @@ function puckPhys(g, dt) {
     const d = U.dist(sx, sy, k.x, k.y), reach = p.gk ? 26 : 20;
     if (d < reach) {
       if (p.gk && k.sh && fast > 300) {
-        const save = U.clamp(0.95 - fast / 1500 + (p.str - 1) * 0.5 - (p.team ? 0.03 : 0), 0.22, 0.9);
+        const save = U.clamp(1.05 - fast / 1600 + (p.str - 1) * 0.5 - (p.team ? 0.03 : 0), 0.22, 0.9);
         k.sh = false;
         if (Math.random() < save) {
           if (Math.random() < 0.5) { take(p); p.dec = 0; } else { k.vx = -k.vx * 0.4; k.vy = U.rand(-300, 300); }
