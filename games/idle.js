@@ -32,16 +32,25 @@ GAME({
       shafts: [newShaft(0)],
       elev: { L: 1, mgr: false, y: 0, state: 'idle', load: 0, target: 0, wait: 0, boost: 0, cd: 0, stops: [] },
       wh: { L: 1, mgr: false, x: 0, state: 'idle', load: 0, wait: 0, boost: 0, cd: 0 },
-      nugget: null, nuggetT: 30, msg: '', msgT: 0, rateEst: 0, lastEarn: [], dragY: null,
+      nugget: null, nuggetT: 30, lastReal: 0, msg: '', msgT: 0, rateEst: 0, lastEarn: [], dragY: null,
     };
     S.elev.y = ID_SURF - 20;
     say('갱도를 클릭해서 광부에게 일을 시키세요!');
   },
   update(g, dt) {
     S.t += dt; S.msgT = Math.max(0, S.msgT - dt);
+    // 방치 보상: 탭이 꺼져 있던 시간만큼 시뮬레이션 (최대 30분)
+    const now = performance.now(), gap = S.lastReal ? (now - S.lastReal) / 1000 : 0;
+    S.lastReal = now;
+    if (gap > 3) {
+      const before = S.earned, steps = Math.min(7200, Math.floor(gap / 0.25));
+      for (let k = 0; k < steps; k++) { autoNoMgr(); tick(0.25, null); }
+      const got = S.earned - before;
+      if (got > 0) { say(`💤 방치 보상 +${fmt(got)}원 (${Math.round(steps * 0.25)}초)`); g.sfx.coin(); }
+    }
     tick(dt, g);
     // 스크롤
-    const maxS = Math.max(0, ID_SURF + S.shafts.length * ID_SH + 120 - (640 - ID_TOP));
+    const maxS = Math.max(0, ID_SURF + S.shafts.length * ID_SH + 170 - (640 - ID_TOP));
     let sc = 0;
     if (g.held('up')) sc -= 500 * dt;
     if (g.held('down')) sc += 500 * dt;
@@ -128,6 +137,7 @@ GAME({
     if (S.msgT > 0) { c.globalAlpha = Math.min(1, S.msgT); g.rrect(250, 60, 460, 38, 12, 'rgba(0,0,0,.8)'); g.text(S.msg, 480, 79, 16, '#fde68a'); c.globalAlpha = 1; }
   },
 });
+function autoNoMgr() { /* 방치 중에는 매니저가 있는 곳만 일한다 */ }
 function newShaft(i) { return { i, L: 1, mgr: false, stock: 0, boost: 0, cd: 0, active: 0, miners: [mk(0)] }; }
 function mk(k) { return { x: 0, ph: 'idle', t: 0, carry: 0, k, off: k * 0.13 }; }
 function say(m) { S.msg = m; S.msgT = 3; }

@@ -9,7 +9,7 @@ const TANKS = [
 const SP = [
   { k: 'guppy', n: '구피', e: '🐟', t: 0, cost: 20, val: 35, grow: 25, sz: 26, sp: 70 },
   { k: 'clown', n: '흰동가리', e: '🐠', t: 0, cost: 60, val: 95, grow: 35, sz: 30, sp: 60 },
-  { k: 'shrimp', n: '새우', e: '🦐', t: 0, cost: 45, val: 60, grow: 30, sz: 22, sp: 40, bottom: 1 },
+  { k: 'shrimp', n: '새우', e: '🦐', t: 0, cost: 45, val: 60, grow: 30, sz: 22, sp: 40, bottom: 1, cleaner: 1 },
   { k: 'puffer', n: '복어', e: '🐡', t: 0, cost: 130, val: 200, grow: 45, sz: 34, sp: 35 },
   { k: 'crab', n: '꽃게', e: '🦀', t: 1, cost: 90, val: 130, grow: 40, sz: 30, sp: 35, bottom: 1 },
   { k: 'squid', n: '오징어', e: '🦑', t: 1, cost: 160, val: 240, grow: 45, sz: 36, sp: 55 },
@@ -69,7 +69,7 @@ GAME({
     // 관람 수입
     S.attr = 0; for (const t of S.tanks) if (t.owned) S.attr += tankAttr(t);
     S.incT += dt;
-    if (S.incT >= 1) { S.incT -= 1; const inc = S.attr / 60; S.coins += inc; S.earned += inc; }
+    if (S.incT >= 1) { S.incT -= 1; const inc = S.attr / 30; S.coins += inc; S.earned += inc; }
     S.saveT -= dt; if (S.saveT <= 0) { S.saveT = 15; saveGame(); }
     S.goalT -= dt; if (S.goalT <= 0) { S.goalT = 0.5; checkGoal(g); }
     for (const t of S.toasts) t.t -= dt;
@@ -133,7 +133,7 @@ function toast(s, col) { S.toasts.push({ s, col: col || '#fff', t: 4 }); if (S.t
 function fishVal(f) { return Math.round(SPK[f.sp].val * (0.25 + Math.min(1, f.size) * 0.75) * VAR.find((x) => x.k === f.v).m * (0.5 + f.health / 200)); }
 function tankAttr(t) {
   let a = 0;
-  for (const f of t.fish) a += SPK[f.sp].val * Math.min(1, f.size) * VAR.find((x) => x.k === f.v).m * (f.health / 100) * 0.06;
+  for (const f of t.fish) a += SPK[f.sp].val * Math.min(1, f.size) * VAR.find((x) => x.k === f.v).m * (f.health / 100) * 0.25;
   let d = 0; for (const o of t.decos) d += DECO.find((x) => x.k === o.k).ap;
   return (a + d) * (0.5 + t.water / 200);
 }
@@ -145,9 +145,9 @@ function spend(c) {
 /* ---------- 시뮬 ---------- */
 function tankTick(g, t, dt, vis) {
   // 수질
-  let dirt = t.fish.length * 0.025 + t.poop.length * 0.04;
-  for (const p of t.food) if (p.rot > 0) dirt += 0.12;
-  let clean = t.filter * 0.18;
+  let dirt = t.fish.length * 0.015 + t.poop.length * 0.015;
+  for (const p of t.food) if (p.rot > 0) dirt += 0.06;
+  let clean = t.filter * 0.22;
   for (const o of t.decos) if (o.k === 'weed') clean += 0.03;
   t.water = U.clamp(t.water - (dirt - clean) * dt, 0, 100);
   // 자동 급식
@@ -158,7 +158,7 @@ function tankTick(g, t, dt, vis) {
     if (p.y < SAND + 8) { p.y += 34 * dt; p.x += Math.sin(g.time * 3 + p.ph) * 8 * dt; }
     else { p.rot += dt; if (p.rot > 16) { t.food.splice(i, 1); t.water = Math.max(0, t.water - 3); } }
   }
-  for (let i = t.poop.length - 1; i >= 0; i--) { const p = t.poop[i]; if (p.y < SAND + 10) p.y += 12 * dt; p.t += dt; if (p.t > 40) { t.poop.splice(i, 1); } }
+  for (let i = t.poop.length - 1; i >= 0; i--) { const p = t.poop[i]; if (p.y < SAND + 10) p.y += 12 * dt; p.t += dt; if (p.t > 25) { t.poop.splice(i, 1); } }
   // 물고기
   for (let i = t.fish.length - 1; i >= 0; i--) {
     const f = t.fish[i], s = SPK[f.sp];
@@ -212,6 +212,7 @@ function moveFish(g, t, f, s, dt) {
       if (bd < 18) { t.fish.splice(t.fish.indexOf(prey), 1); f.hunger = 0; if (S.sel === prey) S.sel = null; toast(`🦈 배고픈 상어가 ${SPK[prey.sp].n}을(를) 잡아먹었어요!`, '#f87171'); if (S.cur === t.i) { g.shake(5); g.sfx.hit(); g.burst(f.x, f.y, '#ef4444', 12, 120); } }
     }
   }
+  if (s.bottom && t.poop.length) { for (let j = t.poop.length - 1; j >= 0; j--) { const p = t.poop[j]; if (p.y > SAND && Math.abs(p.x - f.x) < 14) t.poop.splice(j, 1); } }
   if (tx === f.tx && ty === f.ty) {
     f.t -= dt;
     const dd = Math.hypot(f.tx - f.x, f.ty - f.y);
@@ -296,6 +297,7 @@ function drawFish(g, c, f, x, y, scale) {
   else c.rotate(U.clamp(f.vy / 200, -0.4, 0.4) * (f.fl ? -1 : 1));
   if (f.v === 'r') c.filter = `hue-rotate(${(g.time * 120) % 360}deg) saturate(2)`;
   else if (V.f !== 'none') c.filter = V.f;
+  if (f.v !== 'n') { c.shadowColor = f.v === 'g' ? '#facc15' : f.v === 'a' ? '#ffffff' : '#f0abfc'; c.shadowBlur = 14; }
   if (f.health < 30) c.globalAlpha = 0.6;
   g.emoji(s.e, 0, 0, size);
   c.restore();
@@ -349,7 +351,7 @@ function drawTank(g, c) {
 function drawTop(g) {
   g.rect(0, 0, 960, 52, '#0b1e2c'); g.rect(0, 51, 960, 1, '#1f3b52');
   g.text('💰 ' + Math.floor(S.coins).toLocaleString(), 14, 18, 19, '#fde047', 'left');
-  g.text(`관람 수입 ${(S.attr / 60).toFixed(1)}/초`, 14, 39, 11, '#93c5fd', 'left');
+  g.text(`관람 수입 ${(S.attr / 30).toFixed(1)}/초`, 14, 39, 11, '#93c5fd', 'left');
   g.text(`📖 도감 ${colCount()}/${SP.length * 4}`, 190, 18, 14, '#e0f2fe', 'left');
   g.text(`🥚 번식 ${S.births}회`, 190, 39, 11, '#cbd5e1', 'left');
   const G = GOALS[S.goal];
@@ -381,7 +383,7 @@ function drawPanel(g, c) {
       B(g, x, y, 224, 44, '', '#13283b', () => { if (spend(s.cost)) { const f = addFish(t, s.k, 'n', 0.4); f.y = TY + 30; S.g.sfx.coin(); S.g.burst(f.x, f.y, '#67e8f9', 10, 120); } }, { dis: full });
       g.emoji(s.e, x + 22, y + 22, 28);
       g.text(s.n, x + 44, y + 14, 13, '#fff', 'left');
-      g.text(`성체가치 ${s.val} · ${s.bottom ? '바닥형' : s.pred ? '포식자!' : s.drift ? '부유형' : '유영형'}`, x + 44, y + 31, 10, '#94a3b8', 'left');
+      g.text(`성체가치 ${s.val} · ${s.bottom ? '바닥청소부' : s.pred ? '포식자!' : s.drift ? '부유형' : '유영형'}`, x + 44, y + 31, 10, '#94a3b8', 'left');
       g.text(s.cost, x + 216, y + 22, 13, S.coins >= s.cost ? '#fde047' : '#f87171', 'right');
       y += 48;
     });

@@ -249,7 +249,7 @@ function hud(g, c) {
   g.emoji('🏁', VW - 21, 118, 18);
   // 페이스노트
   if (S.note && S.note.life > 0) {
-    S.note.life -= 1 / 60;
+    const nowT = performance.now(); S.note.life -= Math.min(0.05, (nowT - (S.note.lastT || nowT)) / 1000); S.note.lastT = nowT;
     const n = S.note, hp = n.sev === '헤어핀';
     g.rrect(VW / 2 - 130, 16, 260, 74, 14, hp ? 'rgba(220,38,38,.85)' : 'rgba(0,0,0,.65)', '#fff', 2);
     c.save(); c.translate(VW / 2 - 85, 53); c.scale(n.dir, 1);
