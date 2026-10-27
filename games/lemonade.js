@@ -213,7 +213,7 @@ function serve(g, w) {
   if (r.l + r.s < 5) q -= 0.15;
   const val = q - Math.max(0, (r.p / w.max) - 0.75) * 0.6;
   const issues = [[dl - ds > 1.6 ? 1 : 0, '너무 셔요'], [ds - dl > 1.6 ? 1 : 0, '너무 달아요'], [r.l + r.s < 5 ? 1 : 0, '밍밍해요'], [di < -1.6 ? 1 : 0, '미지근해요'], [di > 1.8 ? 1 : 0, '너무 차가워요']].filter((x) => x[0]);
-  if (val > 0.72) { d.happy++; say(w, '😋', U.choice(['최고예요!', '또 올게요!', '완벽해요!'])); S.pop = Math.min(100, S.pop + 0.35); }
+  if (val > 0.72) { d.happy++; say(w, '😋', U.choice(['최고예요!', '또 올게요!', '완벽해요!'])); S.pop = Math.min(100, S.pop + 0.25); }
   else if (val > 0.45) { d.meh++; say(w, '😐', issues.length ? issues[0][1] : '그럭저럭'); S.pop = Math.min(100, S.pop + 0.05); }
   else { d.bad++; say(w, '🤢', issues.length ? U.choice(issues)[1] : '별로예요'); S.pop = Math.max(0, S.pop - 0.45); }
 }
@@ -248,6 +248,7 @@ function nextDay(g) {
 }
 function finish(g) {
   g.save('run', null);
+  g.score = Math.max(0, Math.floor(S.money));
   const st = g.load('stats', { best: 0 }); st.best = Math.max(st.best, S.money); g.save('stats', st);
   if (S.money >= GOALM) g.win(`🍋 레모네이드 재벌! ${won(S.money)} · 총 ${S.total.toLocaleString()}잔`);
   else g.over(`30일 장사 끝 · ${won(S.money)} (목표 ${won(GOALM)}) · 총 ${S.total}잔`);
