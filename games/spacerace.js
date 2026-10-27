@@ -101,7 +101,7 @@ function ship(g, s, dt) {
   if (!s.alive) { s.vx *= 0.97; s.vy *= 0.97; s.x += s.vx * dt; s.y += s.vy * dt; return; }
   const me = s === S.me, I = s.in;
   s.boost -= dt; s.shield -= dt; s.slow -= dt; s.flick -= dt;
-  if (s.fin) { I.gas = true; I.steer = 0; }
+  if (s.fin) I.gas = true;
   const fx = Math.cos(s.a), fy = Math.sin(s.a);
   const top = (430 * s.skill + (s.boost > 0 ? 240 : 0)) * (s.slow > 0 ? 0.6 : 1), sp = Math.hypot(s.vx, s.vy);
   s.a += I.steer * (I.air ? 3.6 : 2.4) * dt;
