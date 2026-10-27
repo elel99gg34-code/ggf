@@ -22,9 +22,12 @@ GAME({
     if (S.phase === 'result') { S.t -= dt; if (S.t <= 0) { if (S.lives <= 0) return g.over(`최고 ${S.best}자리 · 레벨 ${S.level}`); S.phase = 'ready'; S.t = 0.6; } return; }
     // input
     S.inT += dt;
-    for (let d = 0; d <= 9; d++) if (g.keyp('Digit' + d) || g.keyp('Numpad' + d)) press(g, String(d));
-    if (g.keyp('Backspace')) press(g, '⌫');
-    if (g.keyp('Enter') || g.keyp('NumpadEnter')) press(g, '✔');
+    for (const code of g.typed) {
+      const m = /^(?:Digit|Numpad)(\d)$/.exec(code);
+      if (m) press(g, m[1]);
+      else if (code === 'Backspace') press(g, '⌫');
+      else if (code === 'Enter' || code === 'NumpadEnter') press(g, '✔');
+    }
     if (g.mouse.clicked) NM_KEYS.forEach((k, i) => { const r = keyRect(i); if (g.inRect(r[0], r[1], r[2], r[3])) press(g, k); });
     g.info = `레벨 ${S.level} · ${S.len}자리 · ❤️${S.lives}`;
   },

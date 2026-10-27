@@ -218,7 +218,10 @@ function aiMove(g) {
     known.sort((a, b) => follow(a) - follow(b));
     const top = known.slice(0, Math.max(1, Math.ceil(known.length / 4)));
     w = U.choice(top);
-  } else w = U.choice(known);
+  } else {
+    const safe = known.filter((x) => follow(x) > 0);
+    w = U.choice(safe.length && Math.random() > 0.05 * S.stage ? safe : known);
+  }
   addWord(g, w, 'ai');
   g.sfx.tone(520, 0.08, 'triangle', 0.06); g.sfx.tone(700, 0.08, 'triangle', 0.06, 0, 0.08);
   if (follow(w) === 0) say('😈 한방 단어! 이어갈 수 있을까?', '#b91c1c', 1.8);

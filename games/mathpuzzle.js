@@ -37,8 +37,8 @@ GAME({
     if (g.clickIn(580, 520, 160, 54) || g.keyp('KeyH')) { useHint(g); return; }
     if (g.clickIn(760, 520, 160, 54) || g.keyp('KeyN')) { fail(g, '⏭ 건너뜀'); return; }
     if (!m.clicked) return;
-    const hit = hitTest(m.x, m.y);
     const kind = S.cfg.kind;
+    const hit = hitTest(m.x, m.y, kind === 'move' ? (S.held ? 0 : 1) : kind === 'remove' ? 1 : undefined);
     if (kind === 'move') {
       if (S.held) {
         if (hit && !(S.slots[hit.i].m & hit.b)) { pushHist(); S.slots[hit.i].m |= hit.b; S.held = null; g.sfx.drop(); afterAction(g); }
@@ -84,7 +84,7 @@ GAME({
     const pl = S.layout;
     g.rrect(pl.x0 - 30, S.oy - 34, pl.wTot + 60, S.L * 2 + S.T * 3 + 68, 22, 'rgba(0,0,0,.28)', S.done && !S.failed ? '#facc15' : 'rgba(255,255,255,.08)', 3);
     const showGhost = (S.cfg.kind === 'move' && S.held) || S.cfg.kind === 'add';
-    const hov = !S.done ? hitTest(g.mouse.x, g.mouse.y) : null;
+    const hov = !S.done ? hitTest(g.mouse.x, g.mouse.y, S.cfg.kind === 'move' ? (S.held ? 0 : 1) : S.cfg.kind === 'remove' ? 1 : undefined) : null;
     for (let i = 0; i < S.slots.length; i++) {
       const sl = S.slots[i];
       for (const b of bitsOf(sl.k)) {
@@ -123,7 +123,7 @@ GAME({
     }
   },
 });
-function bitsOf(k) { return k === 'D' ? [1, 2, 4, 8, 16, 32, 64] : k === 'O' ? [1, 2] : [1, 2]; }
+function bitsOf(k) { return k === 'D' ? [1, 2, 4, 8, 16, 32, 64] : k === 'O' ? [2, 1] : [1, 2]; }
 function cfgFor(lv) {
   if (lv <= 5) return { kind: 'move', K: 1, tpls: [0], time: 70 };
   if (lv <= 8) return { kind: lv % 2 ? 'remove' : 'add', K: 1, tpls: [0, 1], time: 60 };
@@ -183,6 +183,7 @@ function genPuzzle(cfg) {
       const st = sol.map((s) => ({ k: s.k, m: s.m }));
       const pos = U.shuffle(positions(st));
       const on = pos.filter(([i, b]) => st[i].m & b), off = pos.filter(([i, b]) => !(st[i].m & b));
+      if (on.length < cfg.K || off.length < cfg.K) break;
       // 정답 → 문제 로 거꾸로 변형
       if (cfg.kind === 'move' || cfg.kind === 'add') for (let j = 0; j < cfg.K; j++) { const [i, b] = on[j]; st[i].m &= ~b; }
       if (cfg.kind === 'move' || cfg.kind === 'remove') for (let j = 0; j < cfg.K; j++) { const [i, b] = off[j]; st[i].m |= b; }
@@ -227,14 +228,16 @@ function stickRect(i, b) {
   if (k === 'O') return b === 1 ? { x: x0 + t, y: yc - t / 2, w: L, h: t } : { x: x0 + t + L / 2 - t / 2, y: yc - L / 2, w: t, h: L };
   return b === 1 ? { x: x0 + t, y: yc - t / 2 - 13, w: L, h: t } : { x: x0 + t, y: yc - t / 2 + 13, w: L, h: t };
 }
-function hitTest(x, y) {
+function hitTest(x, y, want) {
+  // want: 1 = 놓인 성냥만, 0 = 빈 자리만, undefined = 모두
   let best = null, bd = 1e9;
   for (let i = 0; i < S.slots.length; i++) {
     if (S.slots[i].k === 'E') continue;
     for (const b of bitsOf(S.slots[i].k)) {
+      if (want !== undefined && !!(S.slots[i].m & b) !== !!want) continue;
       const r = stickRect(i, b), pad = 7;
       if (x >= r.x - pad && x <= r.x + r.w + pad && y >= r.y - pad && y <= r.y + r.h + pad) {
-        const d = Math.hypot(x - (r.x + r.w / 2), y - (r.y + r.h / 2));
+        const d = r.w > r.h ? Math.abs(y - (r.y + r.h / 2)) + Math.max(0, Math.abs(x - (r.x + r.w / 2)) - r.w / 2) : Math.abs(x - (r.x + r.w / 2)) + Math.max(0, Math.abs(y - (r.y + r.h / 2)) - r.h / 2);
         if (d < bd) { bd = d; best = { i, b }; }
       }
     }

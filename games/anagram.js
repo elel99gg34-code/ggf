@@ -33,7 +33,7 @@ GAME({
     S.time -= dt;
     if (S.time <= 0) { S.time = 0; return g.over(`정답: ${S.cur.w} · ${S.solved}단어 · 레벨 ${S.level}`); }
     // 키 입력
-    for (let i = 1; i <= 9; i++) if (g.keyp('Digit' + i) || g.keyp('Numpad' + i)) pickTile(g, i - 1);
+    for (const code of g.typed) { const m = /^(?:Digit|Numpad)([1-9])$/.exec(code); if (m) pickTile(g, Number(m[1]) - 1); }
     if (g.keyp('Backspace')) unpick(g, S.pick.length - 1);
     if (g.keyp('KeyH')) hint(g);
     if (g.keyp('KeyS')) skip(g);

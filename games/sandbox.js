@@ -149,12 +149,9 @@ function discover(key) {
   gg.score = S.disc.size * 100 + (S.disc.size === DISC.length ? 1000 : 0);
   S.toast.push({ s: `✨ 발견! ${d[1]}  (+100)`, t: 3.5 });
   gg.sfx.power();
-  const after = unlockedList();
-  if (after.length > before) {
-    const nw = after.slice(before).length ? PAL.filter((p) => isUnlocked(p)).map((p) => p.t).filter((t) => t !== ERASE) : [];
+  if (unlockedList().length > before) {
     const newly = PAL.filter((p) => isUnlocked(p) && (p.need === S.disc.size || p.disc === key)).map((p) => MATS[p.t][0]);
     if (newly.length) S.toast.push({ s: `🔓 새 재료: ${newly.join(', ')}`, t: 4 });
-    void nw;
   }
   if (S.disc.size === DISC.length) S.toast.push({ s: '🏆 모든 반응을 발견했어요! (+1000)', t: 5 });
   gg.burst(PX / 2, 70, ['#fde047', '#f472b6', '#60a5fa'], 30, 260, 0.9, 4);

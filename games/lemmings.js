@@ -1,31 +1,31 @@
 'use strict';
 let S;
-const LG_CS = 4, LG_GW = 240, LG_GH = 115, LG_WH = 460, LG_TICK = 0.075, LG_SPLAT = 30;
+const LG_CS = 4, LG_GW = 240, LG_GH = 115, LG_WH = 460, LG_TICK = 0.075, LG_SPLAT = 40;
 const LG_SK = [
   { id: 'climb', n: '등반', e: '🧗' }, { id: 'float', n: '낙하산', e: '☂️' }, { id: 'bomb', n: '폭파', e: '💣' }, { id: 'block', n: '막기', e: '✋' },
   { id: 'build', n: '계단', e: '🧱' }, { id: 'bash', n: '수평굴', e: '👊' }, { id: 'mine', n: '사선굴', e: '⛏️' }, { id: 'dig', n: '수직굴', e: '⬇️' },
 ];
 // skills order: climb float bomb block build bash mine dig
 const LG_LV = [
-  { name: '그냥 파 보세요', n: 10, need: 5, time: 180, rr: 50, sk: [0, 0, 0, 0, 0, 0, 0, 10], hatch: [160, 120], exit: [800, 432],
+  { name: '그냥 파 보세요', n: 10, need: 5, time: 180, rr: 50, sk: [0, 0, 0, 0, 0, 0, 0, 10], hatch: [160, 120], exit: [800, 360],
     b: (T) => { T.rect(80, 250, 800, 50); T.rect(80, 150, 20, 100); T.rect(860, 150, 20, 100); T.rect(40, 360, 900, 100); T.rect(40, 300, 20, 60); T.rect(920, 300, 20, 60); } },
-  { name: '다리를 놓아라', n: 15, need: 10, time: 200, rr: 50, sk: [0, 0, 0, 0, 12, 0, 0, 0], hatch: [120, 140], exit: [850, 312],
-    b: (T) => { T.rect(40, 330, 360, 130); T.rect(20, 200, 20, 260); T.rect(560, 340, 400, 120); T.water(400, 420, 160, 40); } },
-  { name: '절벽 주의', n: 20, need: 15, time: 180, rr: 60, sk: [0, 0, 2, 4, 0, 0, 0, 6], hatch: [480, 100], exit: [480, 432],
+  { name: '다리를 놓아라', n: 15, need: 10, time: 200, rr: 50, sk: [0, 0, 0, 0, 12, 0, 0, 0], hatch: [120, 140], exit: [850, 340],
+    b: (T) => { T.rect(40, 330, 360, 130); T.rect(20, 200, 20, 260); T.rect(520, 340, 440, 120); T.water(400, 420, 120, 40); } },
+  { name: '절벽 주의', n: 20, need: 15, time: 180, rr: 60, sk: [0, 0, 2, 4, 0, 0, 0, 6], hatch: [480, 100], exit: [480, 360],
     b: (T) => { T.rect(260, 260, 440, 40); T.rect(100, 360, 760, 100); T.water(0, 440, 100, 20); T.water(860, 440, 100, 20); T.rect(0, 440, 100, 20, 0); } },
-  { name: '벽을 넘어서', n: 20, need: 14, time: 200, rr: 50, sk: [20, 20, 0, 0, 0, 0, 0, 0], hatch: [120, 200], exit: [840, 432],
+  { name: '벽을 넘어서', n: 20, need: 14, time: 200, rr: 50, sk: [20, 20, 0, 0, 0, 0, 0, 0], hatch: [120, 200], exit: [840, 360],
     b: (T) => { T.rect(20, 360, 920, 100); T.rect(0, 200, 20, 260); T.rect(420, 120, 50, 240); T.rect(940, 200, 20, 260); } },
-  { name: '뚫고 지나가기', n: 20, need: 16, time: 220, rr: 50, sk: [0, 0, 0, 0, 0, 10, 0, 0], hatch: [100, 220], exit: [880, 352],
+  { name: '뚫고 지나가기', n: 20, need: 16, time: 220, rr: 50, sk: [0, 0, 0, 0, 0, 10, 0, 0], hatch: [100, 220], exit: [880, 380],
     b: (T) => { T.rect(20, 380, 920, 80); T.rect(0, 200, 20, 260); T.rect(260, 260, 60, 120); T.rect(480, 230, 80, 150); T.rect(700, 280, 50, 100); T.rect(940, 200, 20, 260); } },
-  { name: '깊은 동굴', n: 20, need: 15, time: 240, rr: 55, sk: [0, 5, 0, 2, 0, 0, 10, 4], hatch: [140, 60], exit: [800, 432],
+  { name: '깊은 동굴', n: 20, need: 15, time: 240, rr: 55, sk: [0, 5, 0, 2, 0, 0, 10, 4], hatch: [140, 60], exit: [800, 380],
     b: (T) => { T.rect(40, 160, 600, 220); T.rect(20, 40, 20, 340); T.steel(640, 160, 20, 140); T.rect(40, 440, 900, 20); T.rect(660, 380, 280, 60); T.rect(940, 200, 20, 260); T.erase(300, 260, 120, 60); } },
-  { name: '강철 미로', n: 25, need: 18, time: 240, rr: 50, sk: [0, 4, 4, 4, 8, 6, 0, 6], hatch: [100, 60], exit: [860, 432],
+  { name: '강철 미로', n: 25, need: 18, time: 240, rr: 50, sk: [0, 4, 4, 4, 8, 6, 0, 6], hatch: [100, 60], exit: [860, 300],
     b: (T) => { T.rect(40, 160, 420, 30); T.steel(460, 160, 40, 30); T.rect(20, 40, 20, 160); T.rect(300, 300, 640, 40); T.steel(300, 300, 100, 40); T.rect(40, 440, 900, 20); T.rect(560, 340, 40, 100); T.steel(940, 200, 20, 260); } },
-  { name: '산 넘고 물 건너', n: 30, need: 22, time: 260, rr: 55, sk: [6, 10, 2, 3, 12, 4, 4, 4], hatch: [90, 120], exit: [880, 280],
+  { name: '산 넘고 물 건너', n: 30, need: 22, time: 260, rr: 55, sk: [6, 10, 2, 3, 12, 4, 4, 4], hatch: [90, 120], exit: [880, 300],
     b: (T) => { T.rect(20, 300, 260, 160); T.ellipse(380, 360, 140, 120); T.water(280, 430, 380, 30); T.rect(660, 300, 300, 160); T.rect(500, 200, 30, 140); T.rect(0, 100, 20, 360); } },
-  { name: '탑 아래로', n: 30, need: 20, time: 260, rr: 60, sk: [0, 8, 5, 4, 6, 4, 6, 8], hatch: [480, 40], exit: [120, 432],
+  { name: '탑 아래로', n: 30, need: 20, time: 260, rr: 60, sk: [0, 8, 5, 4, 6, 4, 6, 8], hatch: [480, 40], exit: [120, 440],
     b: (T) => { T.rect(380, 100, 200, 30); T.rect(400, 200, 160, 30); T.rect(380, 300, 200, 30); T.steel(370, 60, 10, 280); T.steel(580, 60, 10, 280); T.rect(20, 440, 920, 20); T.water(600, 420, 360, 40); T.rect(200, 380, 40, 60); } },
-  { name: '최후의 시험', n: 40, need: 30, time: 300, rr: 50, sk: [6, 6, 4, 4, 10, 5, 5, 5], hatch: [80, 60], exit: [890, 152],
+  { name: '최후의 시험', n: 40, need: 30, time: 300, rr: 50, sk: [6, 6, 4, 4, 10, 5, 5, 5], hatch: [80, 60], exit: [890, 170],
     b: (T) => { T.rect(20, 140, 300, 40); T.rect(0, 20, 20, 160); T.steel(320, 140, 30, 40); T.rect(20, 300, 500, 40); T.rect(20, 440, 920, 20); T.water(520, 400, 200, 60); T.rect(720, 360, 240, 100); T.rect(700, 170, 260, 30); T.rect(620, 200, 40, 160); T.steel(940, 0, 20, 170); } },
 ];
 GAME({
@@ -130,7 +130,7 @@ function tick(g) {
     if (S.spawnT <= 0) {
       S.spawnT = 0.35 + (100 - S.rr) / 40;
       const [hx, hy] = S.L.hatch;
-      S.lems.push({ x: Math.round(hx / LG_CS), y: Math.round(hy / LG_CS), dir: 1, st: 'fall', fd: 0, climb: false, float: false, bomb: -1, n: 0, k: 0, anim: 0 });
+      S.lems.push({ x: Math.round(hx / LG_CS), y: Math.round(hy / LG_CS), dir: 1, st: 'fall', fd: -200, climb: false, float: false, bomb: -1, n: 0, k: 0, anim: 0 });
       S.spawned++;
       if (g) g.sfx.tone(700, 0.04, 'square', 0.03);
     }
@@ -170,9 +170,9 @@ function updLem(g, L) {
     case 'build': {
       L.k++;
       if (L.k % 4) return;
-      if (solid(L.x + L.dir, L.y - 1) || solid(L.x + L.dir * 2, L.y - 1) || solid(L.x + L.dir, L.y - 3)) { L.dir = -L.dir; L.st = 'walk'; return; }
+      if (solid(L.x + L.dir, L.y - 1) || solid(L.x + L.dir * 2, L.y - 1) || solid(L.x + L.dir * 3, L.y - 1) || solid(L.x + L.dir, L.y - 3)) { L.dir = -L.dir; L.st = 'walk'; return; }
       for (let k = 0; k < 4; k++) addC(L.x + L.dir * k, L.y);
-      L.x += L.dir * 2; L.y -= 1; L.n++;
+      L.x += L.dir * 3; L.y -= 1; L.n++;
       if (g) g.sfx.tone(L.n >= 10 ? 900 : 500, 0.03, 'square', 0.03);
       if (L.n >= 12) { L.st = 'walk'; L.shrug = 10; }
       return;

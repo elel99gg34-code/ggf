@@ -78,14 +78,14 @@ function loadRound(g, hp) {
   if (S.rd >= 2) S.obs.push({ x: AX + AW * 0.25, y: AY + AH / 2, r: 26 }, { x: AX + AW * 0.75, y: AY + AH / 2, r: 26 });
   S.mud = [];
   for (let k = 0; k < 3 + S.rd; k++) S.mud.push({ x: U.rand(AX + 100, AX + AW - 100), y: U.rand(AY + 80, AY + AH - 80), r: U.rand(35, 60), oil: k % 3 === 2 });
-  Object.assign(S, { count: 3.5, cb: 4, t: 0, end: 0, won: false, pws: [], pwT: 4, skid: [], hitT: 0 });
+  Object.assign(S, { count: 3.5, cb: 4, t: 0, end: 0, won: false, pws: [], pwT: 4, skid: [], hitT: 0, pcd: {} });
 }
 function ai(c, dt) {
   c.tgtT -= dt;
   if (!c.tgt || !c.tgt.alive || c.tgtT <= 0) {
     c.tgtT = U.rand(3, 6);
     const others = S.cars.filter((o) => o !== c && o.alive);
-    others.sort((a, b) => (U.dist(c.x, c.y, a.x, a.y) - (a === S.me ? 120 : 0) + a.hp) - (U.dist(c.x, c.y, b.x, b.y) - (b === S.me ? 120 : 0) + b.hp));
+    others.sort((a, b) => (U.dist(c.x, c.y, a.x, a.y) - (a === S.me ? 10 : 0) + a.hp) - (U.dist(c.x, c.y, b.x, b.y) - (b === S.me ? 10 : 0) + b.hp));
     c.tgt = others[0] || null;
     const pw = S.pws.find((p) => U.dist(c.x, c.y, p.x, p.y) < 200);
     if (pw && Math.random() < 0.5) c.tgt = { x: pw.x, y: pw.y, vx: 0, vy: 0, alive: true, pw: 1 };
@@ -140,15 +140,16 @@ function updCars(g, dt) {
     if (vn >= 0) continue;
     const jimp = -(1.4) * vn / (1 / A.mass + 1 / B.mass);
     A.vx -= jimp * nx / A.mass; A.vy -= jimp * ny / A.mass; B.vx += jimp * nx / B.mass; B.vy += jimp * ny / B.mass;
-    const imp = -vn;
-    if (imp < 50) continue;
+    const imp = Math.min(420, -vn), key = i * 16 + j;
+    if (imp < 50 || (S.pcd[key] || 0) > S.t) continue;
+    S.pcd[key] = S.t + 0.3;
     // 부위별 데미지
     const zone = (V, sx, sy) => { let a = Math.atan2(sy, sx) - V.a; a = ((a + Math.PI * 3) % (Math.PI * 2)) - Math.PI; a = Math.abs(a); return a < 0.8 ? 'front' : a > 2.35 ? 'rear' : 'side'; };
     const zA = zone(A, nx, ny), zB = zone(B, -nx, -ny);
     const mult = { front: 0.5, side: 1.5, rear: 1.2 };
-    const base = imp * 0.09;
-    const dB = base * mult[zB] * (zA === 'front' ? 1.2 : 0.6) * (A.spike > 0 ? 2 : 1) * (A.nosOn > 0 ? 1.4 : 1) * A.mass;
-    const dA = base * mult[zA] * (zB === 'front' ? 1.2 : 0.6) * (B.spike > 0 ? 2 : 1) * (B.nosOn > 0 ? 1.4 : 1) * B.mass;
+    const base = imp * 0.03;
+    const dB = base * mult[zB] * (zA === 'front' ? 1.2 : 0.6) * (A.spike > 0 ? 2 : 1) * (A.nosOn > 0 ? 1.25 : 1) * A.mass;
+    const dA = base * mult[zA] * (zB === 'front' ? 1.2 : 0.6) * (B.spike > 0 ? 2 : 1) * (B.nosOn > 0 ? 1.25 : 1) * B.mass;
     damage(g, B, dB, A, zB); damage(g, A, dA, B, zA);
     const px = (A.x + B.x) / 2, py = (A.y + B.y) / 2;
     g.burst(px, py, ['#fde047', '#f97316', '#e5e7eb', '#94a3b8'], Math.min(24, 6 + imp / 20), 200 + imp, 0.45, 3);
@@ -159,6 +160,7 @@ function updCars(g, dt) {
 }
 function damage(g, c, dmg, by, zone) {
   if (!c.alive || c.shield > 0) return;
+  if (c === S.me) dmg *= 0.75;
   c.hp -= dmg; c.lastHit = by;
   if (by === S.me && dmg > 3) { g.add(Math.round(dmg * 10)); if (dmg > 15) g.float(c.x, c.y - 30, zone === 'side' ? `💥 T-본! ${Math.round(dmg)}` : zone === 'rear' ? `후방 ${Math.round(dmg)}` : `${Math.round(dmg)}`, zone === 'side' ? '#f472b6' : '#fde047', zone === 'side' ? 22 : 16); }
   if (c.hp <= 0) {
