@@ -49,7 +49,7 @@ GAME({
     g.info = `레벨 ${S.lv} · 정답 ${S.solved}/40 · 콤보 ${S.combo}`;
     if (S.fb > 0) {
       S.fb -= dt;
-      if (S.fb <= 0 || (S.fb < 2 && (g.mouse.clicked || g.pressed('a')))) {
+      if (S.fb <= 0 || (S.fb < 2.6 && (g.mouse.clicked || g.pressed('a')))) {
         S.fb = 0;
         if (S.lives <= 0) { g.over(`레벨 ${S.lv} · ${S.solved}문제 정답 · 최고 콤보 ${S.best}`); return; }
         if (S.solved >= 40) { g.win(`40문제 정복! 최고 콤보 ${S.best}`); return; }

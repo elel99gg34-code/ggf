@@ -111,8 +111,10 @@ function input(g) {
   if (m.clicked) {
     S.drag = { x: hx, y: hy };
     const b = at(hx, hy);
-    if (S.tool === 'sel' || (b && b.t === 'asm' && S.tool !== 'del' && S.tool !== 'belt')) { S.sel = b && b.t === 'asm' ? { x: hx, y: hy } : null; if (b) g.sfx.click(); if (S.tool === 'sel' || b) return; }
-    if (S.tool === 'del') demolish(g, hx, hy); else place(g, hx, hy, S.dir);
+    if (S.tool === 'del') { demolish(g, hx, hy); return; }
+    if (b && !(S.tool === 'belt' && b.t === 'belt')) { S.sel = b.t === 'asm' ? { x: hx, y: hy } : null; g.sfx.click(); if (S.tool !== 'belt') S.drag = null; return; }
+    if (S.tool === 'sel') { S.sel = null; S.drag = null; return; }
+    place(g, hx, hy, S.dir);
   } else if (m.down && S.drag) {
     if (hx !== S.drag.x || hy !== S.drag.y) {
       const dx = Math.sign(hx - S.drag.x), dy = Math.sign(hy - S.drag.y);
@@ -335,7 +337,7 @@ function drawGrid(g, c) {
 function tooltip(g, b, px, py) {
   const lines = [BD[b.t].e + ' ' + BD[b.t].n];
   if (b.t === 'belt' && b.it) lines.push('운반 중: ' + IT[b.it.k].n);
-  if (b.t === 'miner') lines.push('채굴: ' + IT[['', 'io', 'co', 'coal'][S.ore[py / T | 0] ? 0 : 0] || 'io'].n.replace(/.*/, IT[['', 'io', 'co', 'coal'][S.ore[S.hy][S.hx]]].n));
+  if (b.t === 'miner') lines.push('채굴: ' + (IT[['', 'io', 'co', 'coal'][S.ore[S.hy][S.hx]]] || IT.io).n);
   if (b.t === 'furnace') lines.push('광석 → 판 (철/구리)');
   if (b.t === 'asm') { if (b.rec) { const r = REC[b.rec]; lines.push(Object.keys(r.in).map((k) => `${IT[k].n} ${b.inb[k] || 0}/${r.in[k]}`).join(', ') + ' → ' + IT[r.out].n + (r.n > 1 ? '×' + r.n : '')); } else lines.push('클릭해서 레시피 선택!'); }
   if (b.t === 'seller') lines.push('들어온 물건을 판매');
