@@ -1,8 +1,8 @@
 // 사용 설명서용 앱 화면 캡처. 실제 앱(엔진 + 화면)을 띄워 예시 데이터를 넣고 화면마다 찍는다.
 //   node tools/ebook/capture.mjs <예시 파일 폴더> <출력 폴더> <라이선스 키 파일>
 // 미리 띄워 둘 것: 엔진(127.0.0.1:8765, 토큰 없이, 키 등록 전)과 화면(:1420)
-import { mkdirSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { copyFileSync, mkdirSync, readFileSync, rmSync } from "node:fs";
+import { dirname, join } from "node:path";
 import { createRequire } from "node:module";
 
 const require = createRequire(import.meta.url);
@@ -101,7 +101,12 @@ await shot("03_mask_files", async () => {
 await shot("03b_mask_text", async () => {
   await go("mask");
   await tab("글 바로 가리기");
-  await page.fill("textarea", "홍길동 고객님(900101-1234567) 연락처 010-1234-5678, 이메일 hong@example.com 으로 견적서를 보내 주세요. 계좌 국민 123456-01-234567");
+  // 내가 정하는 말: 거래처 이름은 가리고, 회사 대표번호는 남긴다
+  await page.fill("textarea[placeholder*='로컬상회']", "로컬상회");
+  await page.fill("textarea[placeholder*='02-345']", "02-345-6789");
+  await page.locator("main textarea").first().fill(
+    "로컬상회 홍길동 고객님(900101-1234567) 연락처 010-1234-5678, 이메일 hong@example.com 으로 견적서를 보내 주세요. 계좌 국민 123456-01-234567 / 문의는 대표번호 02-345-6789",
+  );
   await primary();
   await page.waitForTimeout(800);
 });
@@ -198,6 +203,53 @@ await shot("19_palette", async () => {
   await page.keyboard.type("회의", { delay: 60 });
   await page.waitForTimeout(800);
 });
+
+// 자동 처리: 규칙 두 개를 만들고 파일을 넣어 처리 기록까지
+const AUTO = join(dirname(samples), "자동처리");
+rmSync(AUTO, { recursive: true, force: true });
+const inbox = join(AUTO, "받은 서류");
+const photos = join(AUTO, "상품 사진");
+mkdirSync(inbox, { recursive: true });
+mkdirSync(photos, { recursive: true });
+mkdirSync(join(AUTO, "영수증"), { recursive: true });
+await call("POST", "/automations", { name: "고객 서류 가리기", folder: inbox, action: "mask" });
+await call("POST", "/automations", {
+  name: "상품 사진 규격", folder: photos, action: "image", after: "move",
+  options: { preset: "smartstore_main", watermark: "@로컬샵", enhance: true },
+});
+for (const f of ["고객상담기록.docx", "장학금신청서.hwpx"]) copyFileSync(join(samples, f), join(inbox, f));
+for (const f of ["머그컵_그린.jpg", "머그컵_블루.jpg"]) copyFileSync(join(samples, "상품사진", f), join(photos, f));
+for (let i = 0; i < 60; i++) {
+  const log = await call("GET", "/automations/log");
+  if (log.length >= 4 && !log.some((l) => l.status === "running")) break;
+  await page.waitForTimeout(1000);
+}
+await shot("20_auto", () => go("auto"));
+await shot("20b_auto_new", async () => {
+  await go("auto");
+  await page.click("button:has-text('새 규칙')");
+  await page.click(".action-tile:has-text('영수증')");
+  await choose(".card .dropzone", [join(AUTO, "영수증")]);
+  await page.fill("input[placeholder='영수증 → 경비 장부']", "영수증 모으기");
+}, { x: 232, y: 0, width: 1128, height: 860 });
+
+// 작은 도구
+const toolClip = { x: 232, y: 0, width: 1128, height: 620 };
+await shot("21_tools", async () => {
+  await go("tools");
+  await page.click(".tool-tile:has-text('금액 한글')");
+  await page.fill("input[placeholder^='금액']", "1,234,000");
+  await page.click("main [role=tab]:text-is('공급가 + 부가세')");
+  await page.waitForTimeout(500);
+}, toolClip);
+await shot("21b_tools_date", async () => {
+  await go("tools");
+  await page.click(".tool-tile:has-text('날짜 계산')");
+  await tab("두 날짜 사이");
+  await page.fill("main input[type=date] >> nth=0", "2026-09-21");
+  await page.fill("main input[type=date] >> nth=1", "2026-10-09");
+  await page.waitForTimeout(600);
+}, toolClip);
 
 await browser.close();
 console.log(failures.length ? `실패:\n${failures.join("\n")}` : "모두 찍음");
