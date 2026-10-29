@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Any
 
 from fastapi import Depends, Request
 
@@ -15,6 +15,7 @@ class AppContext:
     db: Database
     jobs: JobManager
     data_dir: Path
+    watcher: Any = None  # 자동 처리 폴더 감시 (modules.automation.Watcher)
 
 
 def get_ctx(request: Request) -> AppContext:

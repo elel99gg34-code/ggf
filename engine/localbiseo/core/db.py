@@ -85,6 +85,36 @@ CREATE TABLE IF NOT EXISTS contacts (
   website TEXT NOT NULL DEFAULT '',
   created_at TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS automations (
+  id INTEGER PRIMARY KEY,
+  name TEXT NOT NULL DEFAULT '',
+  folder TEXT NOT NULL,
+  action TEXT NOT NULL,
+  options TEXT NOT NULL DEFAULT '{}',
+  out_dir TEXT,
+  after TEXT NOT NULL DEFAULT 'keep',
+  enabled INTEGER NOT NULL DEFAULT 1,
+  error TEXT NOT NULL DEFAULT '',
+  created_at TEXT NOT NULL,
+  last_run_at TEXT
+);
+CREATE TABLE IF NOT EXISTS automation_seen (
+  automation_id INTEGER NOT NULL,
+  path TEXT NOT NULL,
+  size INTEGER NOT NULL,
+  mtime REAL NOT NULL,
+  PRIMARY KEY (automation_id, path)
+);
+CREATE TABLE IF NOT EXISTS automation_log (
+  id INTEGER PRIMARY KEY,
+  automation_id INTEGER NOT NULL,
+  src TEXT NOT NULL,
+  dst TEXT,
+  status TEXT NOT NULL,
+  message TEXT NOT NULL DEFAULT '',
+  created_at TEXT NOT NULL,
+  finished_at TEXT
+);
 CREATE TABLE IF NOT EXISTS file_ops (
   id INTEGER PRIMARY KEY,
   kind TEXT NOT NULL,

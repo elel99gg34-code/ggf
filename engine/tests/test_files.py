@@ -261,3 +261,18 @@ def test_load_audio_reports_broken_file(tmp_path):
     bad.write_bytes(b"not audio")
     with pytest.raises(AppError):
         load_audio(str(bad))
+
+
+def test_image_enhance_and_new_presets(client, tmp_path, wait_job):
+    src = tmp_path / "어두운사진.jpg"
+    Image.new("RGB", (1600, 1000), (60, 55, 50)).save(src)
+    ImageDraw.Draw(img := Image.open(src)).rectangle((400, 300, 1200, 700), fill=(90, 80, 75))
+    img.save(src)
+    job = wait_job(client.post("/media/images", json={"paths": [str(src)], "preset": "youtube_thumb", "enhance": True}).json())
+    assert job["status"] == "done", job
+    out = Image.open(job["result"]["results"][0]["dst"]).convert("L")
+    assert out.size == (1280, 720)
+    lo, hi = out.getextrema()
+    assert hi - lo > 150  # 흐릿한 대비가 넓게 펴졌다
+    keys = {p["key"] for p in client.get("/media/presets").json()["presets"]}
+    assert {"youtube_thumb", "blog_966", "delivery_menu", "kakao_profile"} <= keys

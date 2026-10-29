@@ -1,4 +1,4 @@
-"""파일 형식별 마스킹: 텍스트, DOCX, HWPX, HWP(텍스트 추출), PDF, 이미지."""
+"""파일 형식별 마스킹: 텍스트, DOCX, HWPX, HWP(텍스트 추출), XLSX, PDF, 이미지."""
 from __future__ import annotations
 
 import html
@@ -13,16 +13,24 @@ from ...core import ocr, optional
 from ...core.config import output_path
 from ...core.errors import AppError
 from ...core.extract import HWPX_TOKEN_RE, TEXT_EXTS, hwp_text, hwpx_sections, pdf_page_chars, read_text_file
-from .detect import Finding, detect, mask_text, remap_runs, summarize_findings
+from .detect import Finding, custom_words, detect, mask_text, remap_runs, summarize_findings
 
 IMAGE_EXTS = {".png", ".jpg", ".jpeg", ".bmp", ".webp", ".tif", ".tiff"}
-SUPPORTED_EXTS = TEXT_EXTS | IMAGE_EXTS | {".docx", ".hwpx", ".hwp", ".pdf"}
+SUPPORTED_EXTS = TEXT_EXTS | IMAGE_EXTS | {".docx", ".hwpx", ".hwp", ".xlsx", ".pdf"}
 
 
-def mask_file(path: str | Path, kinds: list[str] | None, mode: str, out_dir: str | None = None, faces: bool = True) -> dict:
+def mask_file(
+    path: str | Path, kinds: list[str] | None, mode: str, out_dir: str | None = None, faces: bool = True,
+    always: list[str] | None = None, never: list[str] | None = None,
+) -> dict:
     src = Path(path)
     if not src.exists():
         raise AppError(f"파일을 찾을 수 없어요: {src}")
+    with custom_words(always, never):
+        return _dispatch(src, kinds, mode, out_dir, faces)
+
+
+def _dispatch(src: Path, kinds, mode, out_dir, faces) -> dict:
     ext = src.suffix.lower()
     if ext in TEXT_EXTS:
         return _mask_textfile(src, kinds, mode, out_dir)
@@ -32,6 +40,8 @@ def mask_file(path: str | Path, kinds: list[str] | None, mode: str, out_dir: str
         return _mask_hwpx(src, kinds, mode, out_dir)
     if ext == ".hwp":
         return _mask_hwp(src, kinds, mode, out_dir)
+    if ext == ".xlsx":
+        return _mask_xlsx(src, kinds, mode, out_dir)
     if ext == ".pdf":
         return _mask_pdf(src, kinds, out_dir)
     if ext in IMAGE_EXTS:
@@ -181,6 +191,40 @@ def _mask_hwp(src: Path, kinds, mode, out_dir) -> dict:
     dst = output_path(src, "_마스킹", ext="txt", out_dir=out_dir)
     dst.write_text(masked, encoding="utf-8")
     return _result(src, dst, findings, "HWP는 본문 텍스트만 마스킹해 .txt로 저장했어요. 서식을 유지하려면 한글에서 HWPX로 저장한 뒤 다시 넣어 주세요.")
+
+
+def _mask_xlsx(src: Path, kinds, mode, out_dir) -> dict:
+    """글자 칸과 메모만 가린다. 수식 칸은 계산식이라 그대로 둔다."""
+    from openpyxl import load_workbook
+
+    try:
+        wb = load_workbook(src)
+    except Exception as e:  # noqa: BLE001 - 암호 걸린 파일, 손상된 파일
+        raise AppError("엑셀 파일을 열 수 없어요. 암호가 걸렸거나 손상된 파일일 수 있어요.") from e
+    findings: list[Finding] = []
+    has_pictures = False
+    for ws in wb.worksheets:
+        has_pictures = has_pictures or bool(getattr(ws, "_images", None) or getattr(ws, "_charts", None))
+        for row in ws.iter_rows():
+            for cell in row:
+                if isinstance(cell.value, str) and not cell.value.startswith("="):
+                    masked, f = mask_text(cell.value, kinds, mode)
+                    if f:
+                        cell.value = masked
+                        findings += f
+                if cell.comment is not None:
+                    masked, f = mask_text(cell.comment.text, kinds, mode)
+                    if f:
+                        cell.comment.text = masked
+                        findings += f
+    wb.properties.creator = ""
+    wb.properties.lastModifiedBy = ""
+    dst = output_path(src, "_마스킹", out_dir=out_dir)
+    wb.save(dst)
+    note = "숫자로 저장된 칸(앞자리 0이 빠진 전화번호 등)과 수식은 그대로예요."
+    if has_pictures:
+        note += " 그림·차트는 결과 파일에서 빠질 수 있어요."
+    return _result(src, dst, findings, note)
 
 
 PDF_RENDER_SCALE = 200 / 72  # 200dpi

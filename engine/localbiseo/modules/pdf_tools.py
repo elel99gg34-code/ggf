@@ -114,7 +114,7 @@ def rotate(path: str, degrees: int, pages: str | None) -> dict:
     return {"dst": str(dst), "rotated": len(targets)}
 
 
-def compress(path: str, quality: int = 60, max_px: int = 1600) -> dict:
+def compress(path: str, quality: int = 60, max_px: int = 1600, out_dir: str | None = None) -> dict:
     from pypdf import PdfWriter
 
     src = Path(path)
@@ -140,7 +140,7 @@ def compress(path: str, quality: int = 60, max_px: int = 1600) -> dict:
         writer.compress_identical_objects(remove_duplicates=True, remove_unreferenced=True)
     except TypeError:  # pypdf 5 이하
         writer.compress_identical_objects(remove_identicals=True, remove_orphans=True)
-    dst = output_path(src, "_압축")
+    dst = output_path(src, "_압축", out_dir=out_dir)
     with dst.open("wb") as f:
         writer.write(f)
     before, after = src.stat().st_size, dst.stat().st_size

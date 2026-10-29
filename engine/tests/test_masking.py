@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import io
 import zipfile
+from pathlib import Path
 
 import pytest
 
@@ -216,3 +217,61 @@ def test_api_mask_text_and_files(client, tmp_path, wait_job):
     assert job["status"] == "done"
     results = job["result"]["results"]
     assert results[0]["count"] == 1 and "error" in results[1]
+
+
+def test_custom_always_and_never_words():
+    from localbiseo.modules.masking.detect import custom_words
+
+    text = "로컬상회 프로젝트 담당 010-1234-5678, 회사 대표번호 02-345-6789, 코드명 블루문"
+    with custom_words(always=["로컬상회", "블루문", "a"], never=["02-345-6789"]):
+        masked, findings = mask_text(text)
+    assert masked == "로*** 프로젝트 담당 010-****-5678, 회사 대표번호 02-345-6789, 코드명 블**"
+    assert sorted(f.kind for f in findings) == ["custom", "custom", "phone"]
+    # 문맥을 벗어나면 원래대로
+    assert mask_text(text)[0].startswith("로컬상회")
+
+
+def test_custom_words_never_reclassified():
+    from localbiseo.modules.masking.detect import custom_words
+
+    # 가리지 않을 번호가 계좌 등 다른 종류로 다시 잡히지 않는다.
+    with custom_words(never=["02-1234-5678"]):
+        assert detect("입금 문의 02-1234-5678") == []
+
+
+def test_xlsx_masks_text_cells_keeps_formulas(tmp_path):
+    from openpyxl import Workbook, load_workbook
+    from openpyxl.comments import Comment
+
+    src = tmp_path / "고객명단.xlsx"
+    wb = Workbook()
+    ws = wb.active
+    ws.append(["이름", "연락처", "주민번호", "금액"])
+    ws.append(["성명: 홍길동", "010-1234-5678", "900101-1234567", 15000])
+    ws.append(["합계", "", "", "=SUM(D2:D2)"])
+    ws["A2"].comment = Comment("메일 hong@example.com", "작성자")
+    wb.properties.creator = "김철수"
+    wb.save(src)
+    r = mask_file(src, None, "partial", always=["홍길동"])
+    out = load_workbook(r["dst"])
+    ws = out.active
+    assert ws["A2"].value == "성명: 홍**"
+    assert ws["B2"].value == "010-****-5678" and ws["C2"].value == "900101-1******"
+    assert ws["D3"].value == "=SUM(D2:D2)" and ws["D2"].value == 15000
+    assert "hong@" not in ws["A2"].comment.text
+    assert out.properties.creator in (None, "")
+    assert r["count"] == 4
+
+
+def test_api_masking_report(client, tmp_path, wait_job):
+    a, b = tmp_path / "a.txt", tmp_path / "b.txt"
+    a.write_text("전화 010-1234-5678 메일 x@example.com", encoding="utf-8")
+    b.write_text("없음", encoding="utf-8")
+    out = tmp_path / "결과"
+    job = wait_job(client.post("/mask/files", json={"paths": [str(a), str(b)], "out_dir": str(out), "report": True, "never": ["x@example.com"]}).json())
+    report = Path(job["result"]["report"])
+    assert report.parent == out
+    rows = report.read_text(encoding="utf-8-sig").splitlines()
+    assert rows[0].startswith("원본 파일,결과 파일,가린 개수,전화번호")
+    assert rows[1].startswith("a.txt,a_마스킹.txt,1,1")
+    assert "010" not in report.read_text(encoding="utf-8-sig")

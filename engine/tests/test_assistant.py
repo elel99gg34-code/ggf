@@ -137,9 +137,13 @@ def test_clipboard_masks_sensitive(client):
 
 def test_focus_report(client, app):
     s = client.post("/focus/start", json={"label": "기획서", "planned_minutes": 25}).json()
-    # 시작 시각을 30분 전으로 당겨서 기록
-    app.state.ctx.db.execute("UPDATE focus_sessions SET started_at=? WHERE id=?", ((datetime.now() - timedelta(minutes=30)).isoformat(timespec="seconds"), s["id"]))
     client.post(f"/focus/{s['id']}/stop", json={"completed": True})
+    # 오늘 09:00~09:30에 한 것으로 고친다. (자정 직후에 돌려도 '오늘'에 들어가도록)
+    nine = datetime.combine(date.today(), datetime.min.time()) + timedelta(hours=9)
+    app.state.ctx.db.execute(
+        "UPDATE focus_sessions SET started_at=?, ended_at=? WHERE id=?",
+        (nine.isoformat(timespec="seconds"), (nine + timedelta(minutes=30)).isoformat(timespec="seconds"), s["id"]),
+    )
     today = client.get("/focus/today").json()
     assert today["minutes"] == 30 and today["completed"] == 1
     rep = client.get("/focus/report", params={"week": date.today().isoformat()}).json()
@@ -169,9 +173,28 @@ def test_transcript_from_text_and_export(client, tmp_path):
         assert out.exists() and out.stat().st_size > 0
     md = (tmp_path / "m.md").read_text(encoding="utf-8")
     assert "## 요약" in md and "## 할 일" in md and "010-****-5678" in md and "010-1234-5678" not in md
+    assert "## 결정 사항" in md and "- 목표 금액은 300만 원으로 정했습니다." in md
+    ins = client.get(f"/transcripts/{t['id']}/insights").json()
+    assert ins["decisions"] == [
+        "목표 금액은 300만 원으로 정했습니다.",
+        "리워드는 슈퍼얼리버드 29,000원과 얼리버드 39,000원 두 가지로 확정했습니다.",
+    ]  # 할 일로 뽑힌 '공유하기로 했습니다'와 '다시 논의하겠습니다'는 빠진다
     upd = client.put(f"/transcripts/{t['id']}", json={"speakers": {"0": "민수"}, "title": "새 제목"}).json()
     assert upd["title"] == "새 제목"
     assert client.get("/search", params={"q": "슈퍼얼리버드"}).json()["results"][0]["kind"] == "transcript"
+
+
+def test_decisions_skip_undecided_and_keywords():
+    from localbiseo.modules.transcribe.summary import decisions, keywords
+
+    text = (
+        "상세페이지는 파란색 시안으로 확정했습니다. 배송은 아직 정하지 못했어요. 포장은 다음에 결정하죠. "
+        "광고비는 대표님이 승인하셨습니다. 가격을 올릴지 결정해야 할까요? 리워드 구성은 리워드 두 개로. "
+        "상세페이지 문구, 상세페이지 사진, 리워드 마감은 다음 달입니다."
+    )
+    assert decisions(text) == ["상세페이지는 파란색 시안으로 확정했습니다.", "광고비는 대표님이 승인하셨습니다."]
+    words = [k["word"] for k in keywords(text)]
+    assert words[:2] == ["상세페이지", "리워드"] and "다음" not in words
 
 
 def test_srt_timestamps():

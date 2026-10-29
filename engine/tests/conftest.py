@@ -31,6 +31,7 @@ def isolated_home(tmp_path, monkeypatch, signing_key):
     home.mkdir()
     monkeypatch.setenv("LOCALBISEO_HOME", str(home))
     monkeypatch.setenv("LOCALBISEO_LICENSE_PUBKEY", str(signing_key[1]))
+    monkeypatch.setenv("LOCALBISEO_WATCH_INTERVAL", "0")  # 자동 처리는 테스트가 직접 tick()으로 돌린다
     return home
 
 

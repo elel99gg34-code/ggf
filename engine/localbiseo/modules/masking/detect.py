@@ -2,8 +2,10 @@
 from __future__ import annotations
 
 import re
+from contextlib import contextmanager
+from contextvars import ContextVar
 from dataclasses import dataclass
-from typing import Callable, Iterable
+from typing import Callable, Iterable, Iterator
 
 from ...core.korean import looks_like_name
 
@@ -20,10 +22,11 @@ KIND_LABELS = {
     "address": "주소",
     "bizno": "사업자번호",
     "ip": "IP 주소",
+    "custom": "지정한 말",
 }
-DEFAULT_KINDS = [k for k in KIND_LABELS if k not in ("bizno", "ip")]
+DEFAULT_KINDS = [k for k in KIND_LABELS if k not in ("bizno", "ip", "custom")]
 # 겹칠 때 먼저 차지하는 순서
-PRIORITY = ["rrn", "card", "driver", "passport", "bizno", "phone", "account", "email", "plate", "address", "name", "ip"]
+PRIORITY = ["custom", "rrn", "card", "driver", "passport", "bizno", "phone", "account", "email", "plate", "address", "name", "ip"]
 MODES = ("partial", "full", "tag")
 
 
@@ -92,6 +95,24 @@ ADDRESS_RE = re.compile(
 )
 
 
+# 사용자가 정한 '항상 가릴 말'과 '가리지 않을 말'. 작업 스레드마다 따로 잡힌다.
+_CUSTOM: ContextVar[tuple[tuple[str, ...], tuple[str, ...]]] = ContextVar("mask_custom", default=((), ()))
+
+
+def clean_words(words: Iterable[str] | None) -> tuple[str, ...]:
+    """두 글자 이상인 말만, 긴 것부터 (짧은 말이 긴 말의 일부를 먼저 차지하지 않도록)."""
+    return tuple(sorted({w.strip() for w in words or [] if len(w.strip()) >= 2}, key=len, reverse=True))
+
+
+@contextmanager
+def custom_words(always: Iterable[str] | None = None, never: Iterable[str] | None = None) -> Iterator[None]:
+    token = _CUSTOM.set((clean_words(always), clean_words(never)))
+    try:
+        yield
+    finally:
+        _CUSTOM.reset(token)
+
+
 def _digits(s: str) -> str:
     return re.sub(r"\D", "", s)
 
@@ -126,6 +147,9 @@ def bizno_checksum_ok(number: str) -> bool:
 
 
 def _candidates(text: str) -> Iterable[Finding]:
+    for word in _CUSTOM.get()[0]:
+        for m in re.finditer(re.escape(word), text):
+            yield Finding("custom", m.start(), m.end(), m.group(0))
     for m in RRN_RE.finditer(text):
         month, day, sep = int(m.group(2)), int(m.group(3)), m.group(4)
         if not (1 <= month <= 12 and 1 <= day <= 31):
@@ -179,8 +203,14 @@ def _candidates(text: str) -> Iterable[Finding]:
 
 def detect(text: str, kinds: Iterable[str] | None = None) -> list[Finding]:
     enabled = set(kinds) if kinds is not None else set(DEFAULT_KINDS)
+    always, never = _CUSTOM.get()
+    if always:
+        enabled.add("custom")
+    # '가리지 않을 말'과 겹치는 후보는 처음부터 뺀다. (다른 종류로 다시 잡히지 않도록)
+    keep_out = [(m.start(), m.end()) for w in never for m in re.finditer(re.escape(w), text)]
+    found = [f for f in set(_candidates(text)) if not any(f.start < e and s < f.end for s, e in keep_out)]
     rank = {k: i for i, k in enumerate(PRIORITY)}
-    cands = sorted(set(_candidates(text)), key=lambda f: (rank[f.kind], -(f.end - f.start), f.start))
+    cands = sorted(found, key=lambda f: (rank[f.kind], -(f.end - f.start), f.start))
     taken: list[Finding] = []
     for f in cands:
         if any(f.start < t.end and t.start < f.end for t in taken):
@@ -250,6 +280,8 @@ def mask_value(f: Finding, mode: str = "partial") -> str:
         return "".join(out)
     if k == "ip":
         return _star_groups(v, lambda gi, n: gi == n - 1)
+    if k == "custom":
+        return v[0] + re.sub(r"[0-9A-Za-z가-힣]", "*", v[1:])
     return re.sub(r"\S", "*", v)
 
 

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import secrets
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -17,7 +18,7 @@ from .core import license
 from .core.errors import AppError, LicenseRequired
 from .core.jobs import JobManager
 from .modules import (
-    actions, clipboard, dedupe, focus, media, notes, papers, pdf_tools, rename, schedule, screen_ocr, search_api, system,
+    actions, automation, clipboard, dedupe, focus, media, notes, papers, pdf_tools, rename, schedule, screen_ocr, search_api, system,
     translate, writing,
 )
 from .modules.masking import api as masking
@@ -35,7 +36,7 @@ OPEN_PATHS = {"/health"}
 LICENSE_FREE_PATHS = {"/health", "/license", "/system/status", "/system/selftest", "/docs", "/openapi.json"}
 
 ROUTERS = [
-    system.router, masking.router, transcribe.router, media.router, actions.router, schedule.router, notes.router,
+    system.router, automation.router, masking.router, transcribe.router, media.router, actions.router, schedule.router, notes.router,
     clipboard.router, screen_ocr.router, papers.router, translate.router, writing.router, rename.router, dedupe.router,
     pdf_tools.router, focus.router, search_api.router,
 ]
@@ -45,10 +46,13 @@ def create_app(token: str | None = None, data_dir: Path | None = None, extra_ori
     root = data_dir or default_data_dir()
     root.mkdir(parents=True, exist_ok=True)
     ctx = AppContext(db=Database(root / "localbiseo.db"), jobs=JobManager(), data_dir=root)
+    ctx.watcher = automation.Watcher(ctx, interval=float(os.environ.get("LOCALBISEO_WATCH_INTERVAL", "5")))
 
     @asynccontextmanager
     async def lifespan(_: FastAPI):
+        ctx.watcher.start()
         yield
+        ctx.watcher.stop()
         ctx.jobs.shutdown()
         ctx.db.close()
 

@@ -75,13 +75,15 @@ def to_vtt(segments: list[dict], speakers: dict | None = None) -> str:
     return "\n".join(blocks)
 
 
-def to_md(t: dict, actions: list[dict] | None = None) -> str:
+def to_md(t: dict, actions: list[dict] | None = None, decided: list[str] | None = None) -> str:
     out = [f"# {t.get('title') or '회의록'}", ""]
     if t.get("created_at"):
         out += [f"- 작성: {t['created_at'][:16].replace('T', ' ')}", ""]
     summary = t.get("summary") or []
     if summary:
         out += ["## 요약", *[f"- {p}" for p in summary], ""]
+    if decided:
+        out += ["## 결정 사항", *[f"- {d}" for d in decided], ""]
     if actions:
         out.append("## 할 일")
         for a in actions:
@@ -95,7 +97,7 @@ def to_md(t: dict, actions: list[dict] | None = None) -> str:
     return "\n".join(out)
 
 
-def to_docx(t: dict, path: Path, actions: list[dict] | None = None) -> None:
+def to_docx(t: dict, path: Path, actions: list[dict] | None = None, decided: list[str] | None = None) -> None:
     import docx
     from docx.shared import Pt, RGBColor
 
@@ -111,6 +113,10 @@ def to_docx(t: dict, path: Path, actions: list[dict] | None = None) -> None:
         doc.add_heading("요약", level=2)
         for p in summary:
             doc.add_paragraph(p, style="List Bullet")
+    if decided:
+        doc.add_heading("결정 사항", level=2)
+        for d in decided:
+            doc.add_paragraph(d, style="List Bullet")
     if actions:
         doc.add_heading("할 일", level=2)
         for a in actions:

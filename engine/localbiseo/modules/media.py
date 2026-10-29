@@ -5,7 +5,7 @@ import re
 from pathlib import Path
 
 from fastapi import APIRouter
-from PIL import Image, ImageColor, ImageDraw, ImageOps
+from PIL import Image, ImageColor, ImageDraw, ImageFilter, ImageOps
 from pydantic import BaseModel, Field
 
 from ..core import ffmpeg, fonts, optional
@@ -24,6 +24,10 @@ PRESETS = {
     "insta_square": {"label": "인스타 정사각 (1080×1080)", "width": 1080, "height": 1080, "mode": "crop"},
     "insta_portrait": {"label": "인스타 세로 (1080×1350)", "width": 1080, "height": 1350, "mode": "crop"},
     "thumb_500": {"label": "썸네일 (500×500)", "width": 500, "height": 500, "mode": "crop"},
+    "youtube_thumb": {"label": "유튜브 썸네일 (1280×720)", "width": 1280, "height": 720, "mode": "crop"},
+    "blog_966": {"label": "블로그 본문 (가로 966)", "width": 966, "height": None, "mode": "width"},
+    "delivery_menu": {"label": "배달앱 메뉴 (800×600)", "width": 800, "height": 600, "mode": "crop"},
+    "kakao_profile": {"label": "카카오 채널 프로필 (640×640)", "width": 640, "height": 640, "mode": "crop"},
 }
 IMAGE_EXTS = {".png", ".jpg", ".jpeg", ".webp", ".bmp", ".gif", ".tif", ".tiff"}
 
@@ -44,6 +48,7 @@ class ImageOpts(BaseModel):
     mode: str = "fit"  # fit | pad | crop | width | none
     background: str = "#ffffff"
     remove_bg: bool = False
+    enhance: bool = False  # 어두운 사진 밝기·대비 자동 보정과 살짝 선명하게
     watermark: Watermark | None = None
     format: str = "jpg"  # jpg | png | webp | same
     quality: int = 90
@@ -105,6 +110,16 @@ def _watermark(img: Image.Image, wm: Watermark) -> Image.Image:
     return Image.alpha_composite(base, layer)
 
 
+def enhance(img: Image.Image) -> Image.Image:
+    """휴대폰으로 찍은 상품 사진을 밝고 또렷하게: 양끝 1%를 잘라 대비를 펴고 살짝 선명하게 한다."""
+    alpha = img.getchannel("A") if img.mode == "RGBA" else None
+    rgb = ImageOps.autocontrast(img.convert("RGB"), cutoff=1, preserve_tone=True)
+    rgb = rgb.filter(ImageFilter.UnsharpMask(radius=1.6, percent=60, threshold=3))
+    if alpha is not None:
+        rgb.putalpha(alpha)
+    return rgb
+
+
 def _remove_bg(img: Image.Image) -> Image.Image:
     optional.require("rembg")
     from rembg import remove
@@ -116,6 +131,8 @@ def process_image(src: Path, o: ImageOpts) -> Path:
     img = Image.open(src)
     img = ImageOps.exif_transpose(img)
     img = img.convert("RGBA") if img.mode not in ("RGB", "RGBA") else img
+    if o.enhance:
+        img = enhance(img)
     if o.remove_bg:
         img = _remove_bg(img)
     w, h, mode = o.width, o.height, o.mode

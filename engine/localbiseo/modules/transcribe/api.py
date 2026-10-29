@@ -18,7 +18,7 @@ from ..masking.detect import mask_text
 from ..notes import add_todo, find_open_todo
 from ..schedule import parse_events
 from . import export, stt
-from .summary import summarize
+from .summary import decisions, keywords, summarize
 
 router = APIRouter(tags=["회의록"])
 
@@ -167,7 +167,13 @@ def read(tid: int, ctx: Ctx):
 def insights(tid: int, ctx: Ctx):
     t = get_transcript(ctx.db, tid)
     text = "\n".join(s["text"] for s in t["segments"])
-    return {"actions": extract_actions(text), "events": [e.to_dict() for e in parse_events(text)]}
+    actions = extract_actions(text)
+    return {
+        "actions": actions,
+        "events": [e.to_dict() for e in parse_events(text)],
+        "decisions": decisions(text, actions),
+        "keywords": keywords(text),
+    }
 
 
 @router.put("/transcripts/{tid}")
@@ -217,9 +223,13 @@ def export_api(tid: int, body: ExportIn, ctx: Ctx):
     if body.format not in export.FORMATS:
         raise AppError(f"형식은 {', '.join(export.FORMATS)} 중 하나예요.")
     t = get_transcript(ctx.db, tid)
-    actions = extract_actions("\n".join(s["text"] for s in t["segments"])) if body.include_actions else None
+    text = "\n".join(s["text"] for s in t["segments"])
+    all_actions = extract_actions(text)
+    decided = decisions(text, all_actions)
+    actions = all_actions if body.include_actions else None
     if body.masked:
         t = _masked_copy(t)
+        decided = [mask_text(d)[0] for d in decided]
         if actions:
             actions = [{**a, "text": mask_text(a["text"])[0]} for a in actions]
     if body.out_path:
@@ -229,11 +239,11 @@ def export_api(tid: int, body: ExportIn, ctx: Ctx):
         path = sub_dir("exports") / f"{safe}{'_마스킹' if body.masked else ''}.{body.format}"
     path.parent.mkdir(parents=True, exist_ok=True)
     if body.format == "docx":
-        export.to_docx(t, path, actions)
+        export.to_docx(t, path, actions, decided)
     else:
         content = {
             "txt": lambda: export.to_txt(t, body.timestamps),
-            "md": lambda: export.to_md(t, actions),
+            "md": lambda: export.to_md(t, actions, decided),
             "srt": lambda: export.to_srt(t["segments"], t["speakers"]),
             "vtt": lambda: export.to_vtt(t["segments"], t["speakers"]),
         }[body.format]()
