@@ -8,6 +8,7 @@ import { runFocusWatcher } from "./lib/focusTimer";
 import { installDropListener, listen } from "./lib/platform";
 import { ALL_ITEMS, NAV } from "./nav";
 import Actions from "./pages/Actions";
+import Automation from "./pages/Automation";
 import Clipboard from "./pages/Clipboard";
 import Dedupe from "./pages/Dedupe";
 import Focus from "./pages/Focus";
@@ -22,14 +23,15 @@ import Rename from "./pages/Rename";
 import Schedule from "./pages/Schedule";
 import Search from "./pages/Search";
 import Settings from "./pages/Settings";
+import Tools from "./pages/Tools";
 import Transcribe from "./pages/Transcribe";
 import Translate from "./pages/Translate";
 import Writing from "./pages/Writing";
 
 const PAGES: Record<string, ComponentType> = {
-  home: Home, transcribe: Transcribe, mask: Mask, media: Media, actions: Actions, schedule: Schedule, notes: Notes,
+  home: Home, auto: Automation, transcribe: Transcribe, mask: Mask, media: Media, actions: Actions, schedule: Schedule, notes: Notes,
   clipboard: Clipboard, ocr: Ocr, papers: Papers, translate: Translate, writing: Writing, rename: Rename, dedupe: Dedupe,
-  pdf: Pdf, focus: Focus, search: Search, settings: Settings,
+  pdf: Pdf, focus: Focus, search: Search, tools: Tools, settings: Settings,
 };
 
 function pageFromHash(): string {

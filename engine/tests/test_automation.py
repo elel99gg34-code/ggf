@@ -164,3 +164,14 @@ def test_watcher_idle_without_license(app, tmp_path):
     now = time.time()
     w.tick(now=now)
     assert w.tick(now=now + 10) == []
+
+
+def test_mask_rule_uses_saved_words(client, app, tmp_path):
+    inbox = tmp_path / "in"
+    inbox.mkdir()
+    client.put("/system/settings", json={"mask_always": ["블루문"], "mask_never": ["02-345-6789"]})
+    a = client.post("/automations", json={"folder": str(inbox), "action": "mask"}).json()
+    (inbox / "a.txt").write_text("블루문 담당 010-1234-5678 / 대표 02-345-6789", encoding="utf-8")
+    client.post(f"/automations/{a['id']}/run", json={})
+    _wait_all(app)
+    assert (inbox / "처리됨" / "a_마스킹.txt").read_text(encoding="utf-8") == "블** 담당 010-****-5678 / 대표 02-345-6789"

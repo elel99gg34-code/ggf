@@ -30,6 +30,7 @@ function ImageBatch({ info }: { info: PresetsResp | null }) {
   const [quality, setQuality] = useState(90);
   const [bg, setBg] = useState("#ffffff");
   const [removeBg, setRemoveBg] = useState(false);
+  const [enhance, setEnhance] = useState(false);
   const [wm, setWm] = useState({ text: "", position: "bottom-right", opacity: 0.35, size: 0.05, color: "#ffffff" });
   const job = useJob<{ results: { src: string; dst?: string; error?: string }[] }>();
   const run = () =>
@@ -42,6 +43,7 @@ function ImageBatch({ info }: { info: PresetsResp | null }) {
         quality,
         background: bg,
         remove_bg: removeBg,
+        enhance,
         watermark: wm.text ? wm : null,
       }),
     );
@@ -103,6 +105,7 @@ function ImageBatch({ info }: { info: PresetsResp | null }) {
             <input type="color" value={bg} onChange={(e) => setBg(e.target.value)} />
           </Field>
         </div>
+        <Toggle checked={enhance} onChange={setEnhance} label="자동 보정 (어두운 사진 밝게·또렷하게)" />
         <Toggle checked={removeBg} onChange={setRemoveBg} label={`배경 지우기${info && !info.rembg ? " (구성요소 필요)" : ""}`} />
         {removeBg && <NeedsComponent keys={["rembg"]} />}
         <Field label="워터마크 글자">

@@ -57,7 +57,10 @@ class Action:
 def _mask(job: JobContext, db: Database, src: Path, out_dir: Path, opt: dict) -> dict:
     from .masking.files import mask_file
 
-    r = mask_file(src, opt.get("kinds"), opt.get("mode", "partial"), str(out_dir), opt.get("faces", True), opt.get("always"), opt.get("never"))
+    # 규칙에 따로 적지 않았으면 '개인정보 가리기' 화면에 저장해 둔 단어를 쓴다.
+    always = opt["always"] if "always" in opt else db.get_setting("mask_always", [])
+    never = opt["never"] if "never" in opt else db.get_setting("mask_never", [])
+    r = mask_file(src, opt.get("kinds"), opt.get("mode", "partial"), str(out_dir), opt.get("faces", True), always, never)
     msg = f"{r['count']}곳 가림" if r["count"] else "가릴 곳이 없었어요"
     return {"dst": r["dst"], "message": msg}
 

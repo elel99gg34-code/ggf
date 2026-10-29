@@ -16,7 +16,7 @@ from ..core.errors import NotFound
 
 router = APIRouter(tags=["시스템"])
 
-PUBLIC_SETTINGS = {"clipboard_enabled", "clipboard_sensitive", "default_out_dir", "whisper_model", "theme", "focus_minutes", "break_minutes", "user_name", "company"}
+PUBLIC_SETTINGS = {"clipboard_enabled", "clipboard_sensitive", "default_out_dir", "whisper_model", "theme", "focus_minutes", "break_minutes", "user_name", "company", "mask_always", "mask_never"}
 
 
 class LicenseIn(BaseModel):
@@ -98,6 +98,15 @@ def selftest():
     except (OSError, subprocess.SubprocessError) as e:
         checks["ffmpeg"] = f"오류: {e}"
     checks["korean_font"] = "ok" if fonts.korean_font_path() else "없음"
+    try:  # 기본 구성. 빠지면 작은 도구의 QR 만들기가 안 된다.
+        import io
+
+        import segno
+
+        segno.make("localbiseo").save(io.BytesIO(), kind="png")
+        checks["qr"] = "ok"
+    except Exception as e:  # noqa: BLE001
+        checks["qr"] = f"오류: {type(e).__name__}: {e}"
     return {"ok": all(v in ("ok", "없음") for v in checks.values()), "checks": checks}
 
 

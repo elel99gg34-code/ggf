@@ -1,4 +1,4 @@
-import { CalendarPlus, Download, ListChecks, Mic, Sparkles, Trash2 } from "lucide-react";
+import { CalendarPlus, CircleCheckBig, Download, ListChecks, Mic, Sparkles, Tags, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { NeedsComponent, useSystem } from "../components/system";
 import { Badge, Button, Card, Empty, ErrorBox, Field, JobBar, Page, PathLink, PathPicker, Tabs, Toggle, useToast } from "../components/ui";
@@ -11,7 +11,7 @@ type Transcript = { id: number; title: string; source_path: string | null; durat
 type Item = { id: number; title: string; duration: number | null; created_at: string };
 type ActionItem = { text: string; assignee: string | null; due: string | null };
 type Ev = { title: string; start: string; end: string | null; all_day: boolean; source: string };
-type Insights = { actions: ActionItem[]; events: Ev[] };
+type Insights = { actions: ActionItem[]; events: Ev[]; decisions: string[]; keywords: { word: string; count: number }[] };
 type Models = { available: boolean; diarize_available: boolean; sizes: { key: string; label: string }[]; installed: string[] };
 
 const AUDIO = [{ name: "녹음·영상", extensions: ["mp3", "m4a", "wav", "aac", "flac", "ogg", "wma", "mp4", "mov", "mkv", "webm", "avi"] }];
@@ -253,6 +253,20 @@ function Detail({ id, onBack }: { id: number; onBack: () => void }) {
               </Field>
             )}
           </Card>
+          {!!ins.data?.decisions.length && (
+            <Card title={<><CircleCheckBig size={16} /> 결정 사항 {ins.data.decisions.length}</>}>
+              <ul className="bullets">
+                {ins.data.decisions.map((d, i) => <li key={i}>{d}</li>)}
+              </ul>
+            </Card>
+          )}
+          {!!ins.data?.keywords.length && (
+            <Card title={<><Tags size={16} /> 주요 낱말</>}>
+              <div className="row wrap">
+                {ins.data.keywords.map((k) => <Badge key={k.word} tone="accent">{k.word} {k.count}</Badge>)}
+              </div>
+            </Card>
+          )}
           <Card title={<><ListChecks size={16} /> 할 일 {ins.data?.actions.length ?? 0}</>} right={ins.data?.actions.length ? <Button small onClick={addTodos}>할 일에 넣기</Button> : null}>
             <ul className="list compact">
               {ins.data?.actions.map((a, i) => (

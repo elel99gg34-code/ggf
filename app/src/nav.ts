@@ -1,6 +1,6 @@
 import {
-  CalendarPlus, ClipboardList, Copy, FilePen, FileText, House, Images, Languages, ListChecks, Mic, NotebookPen, Receipt,
-  ScanText, Search, Settings, ShieldCheck, SpellCheck, Timer, type LucideIcon,
+  CalendarPlus, ClipboardList, Copy, FilePen, FileText, FolderSync, House, Images, Languages, ListChecks, Mic, NotebookPen, Receipt,
+  ScanText, Search, Settings, ShieldCheck, SpellCheck, Timer, Wrench, type LucideIcon,
 } from "lucide-react";
 
 export type NavItem = { key: string; label: string; icon: LucideIcon; desc: string; keywords?: string };
@@ -11,6 +11,7 @@ export const NAV: NavGroup[] = [
   {
     title: "핵심 기능",
     items: [
+      { key: "auto", label: "자동 처리", icon: FolderSync, desc: "폴더에 넣기만 하면 가리기·규격·장부 정리까지 알아서", keywords: "폴더 감시 자동화 워크플로 규칙" },
       { key: "transcribe", label: "회의록", icon: Mic, desc: "녹음을 글로 바꾸고 요약·할 일·일정까지", keywords: "녹음 받아쓰기 STT 강의 요약" },
       { key: "mask", label: "개인정보 가리기", icon: ShieldCheck, desc: "문서·이미지 속 주민번호·전화번호 자동 가림", keywords: "마스킹 비식별 주민번호 hwp pdf" },
       { key: "media", label: "이미지·영상", icon: Images, desc: "상품 이미지 규격·워터마크, 영상 무음 컷·자막", keywords: "스마트스토어 쿠팡 썸네일 배경제거 자막" },
@@ -31,6 +32,7 @@ export const NAV: NavGroup[] = [
       { key: "dedupe", label: "중복 정리", icon: Copy, desc: "똑같은 파일·비슷한 사진 찾기", keywords: "용량 정리" },
       { key: "pdf", label: "PDF 도구", icon: FileText, desc: "합치기, 나누기, 압축, 회전, 이미지 변환", keywords: "병합 분할" },
       { key: "focus", label: "집중 타이머", icon: Timer, desc: "뽀모도로와 주간 리포트", keywords: "뽀모도로 시간관리" },
+      { key: "tools", label: "작은 도구", icon: Wrench, desc: "글자 수, 금액 한글, 날짜·영업일, QR, 비밀번호 등 10가지", keywords: "계산기 부가세 디데이 큐알 한영 단위 평수 사업자번호 엑셀 합치기" },
       { key: "search", label: "통합 검색", icon: Search, desc: "메모·회의록·클립보드·문서를 한 번에", keywords: "찾기" },
     ],
   },

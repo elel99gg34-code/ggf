@@ -259,7 +259,8 @@ def test_expired_key_stops_working(client, app, issue):
 
 def test_selftest_reports_components(client):
     r = client.get("/system/selftest").json()
-    assert set(r["checks"]) >= {"stt", "translate", "face", "ocr", "ffmpeg", "korean_font"}
+    assert set(r["checks"]) >= {"stt", "translate", "face", "ocr", "ffmpeg", "korean_font", "qr"}
+    assert r["checks"]["qr"] == "ok"
     assert all(v == "ok" or v in ("없음", "한국어 데이터 없음", "얼굴 검출기 없음") or v.startswith("오류") for v in r["checks"].values())
 
 
