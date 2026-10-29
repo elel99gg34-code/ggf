@@ -18,6 +18,7 @@ dependencies = [
   "openpyxl>=3.1",
   "olefile>=0.47",
   "cryptography>=42",
+  "segno>=1.6",  # QR 코드 (순수 파이썬)
 ]
 
 [project.optional-dependencies]

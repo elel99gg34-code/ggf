@@ -18,8 +18,8 @@ from .core import license
 from .core.errors import AppError, LicenseRequired
 from .core.jobs import JobManager
 from .modules import (
-    actions, automation, clipboard, dedupe, focus, media, notes, papers, pdf_tools, rename, schedule, screen_ocr, search_api, system,
-    translate, writing,
+    actions, automation, clipboard, dedupe, focus, media, notes, papers, pdf_tools, rename, schedule, screen_ocr, search_api,
+    smalltools, system, translate, writing,
 )
 from .modules.masking import api as masking
 from .modules.transcribe import api as transcribe
@@ -38,7 +38,7 @@ LICENSE_FREE_PATHS = {"/health", "/license", "/system/status", "/system/selftest
 ROUTERS = [
     system.router, automation.router, masking.router, transcribe.router, media.router, actions.router, schedule.router, notes.router,
     clipboard.router, screen_ocr.router, papers.router, translate.router, writing.router, rename.router, dedupe.router,
-    pdf_tools.router, focus.router, search_api.router,
+    pdf_tools.router, focus.router, search_api.router, smalltools.router,
 ]
 
 

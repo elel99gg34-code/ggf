@@ -16,6 +16,7 @@
 | pypdfium2 / PDFium | Apache-2.0·BSD-3 / BSD-3 | PDF 렌더링·텍스트 |
 | python-docx, openpyxl, olefile | MIT, MIT, BSD-2 | 워드, 엑셀, HWP |
 | cryptography | Apache-2.0 / BSD | 라이선스 서명 확인 |
+| segno | BSD-3 | QR 코드 만들기 |
 | 나눔고딕 | SIL OFL 1.1 | 워터마크 글꼴 (함께 배포 가능, 단독 판매 불가) |
 
 ## 선택 구성요소
