@@ -5,8 +5,8 @@ const IT = {
   io: { n: '철광석', c: '#94a3b8', sh: 'o', v: 1 },
   co: { n: '구리광석', c: '#f97316', sh: 'o', v: 1 },
   coal: { n: '석탄', c: '#18181b', sh: 'o', v: 2 },
-  ip: { n: '철판', c: '#e2e8f0', sh: 's', v: 4 },
-  cp: { n: '구리판', c: '#fb923c', sh: 's', v: 4 },
+  ip: { n: '철판', c: '#e2e8f0', sh: 's', v: 5 },
+  cp: { n: '구리판', c: '#fb923c', sh: 's', v: 5 },
   gear: { n: '톱니', e: '⚙️', v: 12 },
   wire: { n: '구리선', e: '➰', v: 3 },
   circ: { n: '회로기판', e: '💾', v: 45 },
@@ -71,7 +71,7 @@ GAME({
 });
 /* ---------- 상태 ---------- */
 function newGame() {
-  S = { v: 1, money: 650, earned: 0, ci: 0, sold: {}, unl: { belt: 1, miner: 1, furnace: 1, seller: 1 }, recs: {}, up: { belt: 0, mine: 0, craft: 0, price: 0 } };
+  S = { v: 1, money: 800, earned: 0, ci: 0, sold: {}, unl: { belt: 1, miner: 1, furnace: 1, seller: 1 }, recs: {}, up: { belt: 0, mine: 0, craft: 0, price: 0 } };
   S.ore = U.grid(COLS, ROWS, 0);
   S.b = U.grid(COLS, ROWS, null);
   const blob = (k, cx, cy, n) => { const q = [[cx, cy]]; let c = 0; while (q.length && c < n) { const [x, y] = q.splice(U.randi(0, q.length - 1), 1)[0]; if (x < 0 || y < 0 || x >= COLS || y >= ROWS || S.ore[y][x]) continue; S.ore[y][x] = k; c++; for (const [dx, dy] of DIRS) q.push([x + dx, y + dy]); } };
@@ -113,7 +113,8 @@ function input(g) {
     const b = at(hx, hy);
     if (S.tool === 'del') { demolish(g, hx, hy); return; }
     if (b && !(S.tool === 'belt' && b.t === 'belt')) { S.sel = b.t === 'asm' ? { x: hx, y: hy } : null; g.sfx.click(); if (S.tool !== 'belt') S.drag = null; return; }
-    if (S.tool === 'sel') { S.sel = null; S.drag = null; return; }
+    S.sel = null;
+    if (S.tool === 'sel') { S.drag = null; return; }
     place(g, hx, hy, S.dir);
   } else if (m.down && S.drag) {
     if (hx !== S.drag.x || hy !== S.drag.y) {
@@ -227,7 +228,7 @@ function pushOut(x, y, b) {
   if (accept(x + dx, y + dy, b.out[0], [x, y])) b.out.shift();
 }
 function sim(g, dt) {
-  const bs = beltSpd(), ms = 0.55 * (1 + S.up.mine * 0.4), cs = 1 + S.up.craft * 0.35;
+  const bs = beltSpd(), ms = 0.7 * (1 + S.up.mine * 0.4), cs = 1 + S.up.craft * 0.35;
   for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) {
     const b = S.b[y][x]; if (!b) continue;
     if (b.anim > 0) b.anim -= dt;
