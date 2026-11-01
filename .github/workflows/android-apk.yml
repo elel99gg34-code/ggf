@@ -1,0 +1,67 @@
+name: 맘케어 APK 빌드
+
+on:
+  push:
+    branches: [ "main", "claude/blissful-bardeen-h8xzm0" ]
+    paths:
+      - "app/**"
+      - "build.gradle.kts"
+      - "settings.gradle.kts"
+      - "gradle.properties"
+      - ".github/workflows/android-apk.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-apk-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
+
+      - name: APK 빌드
+        run: gradle :app:assembleDebug --stacktrace
+
+      - name: 단위 테스트
+        run: gradle :app:testDebugUnitTest
+
+      - name: 파일 이름 정리
+        run: cp app/build/outputs/apk/debug/app-debug.apk momcare.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: momcare-apk
+          path: momcare.apk
+
+      - name: 최신 버전 릴리스에 올리기
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: momcare-latest
+          target_commitish: ${{ github.sha }}
+          name: 맘케어 최신 버전
+          make_latest: true
+          files: momcare.apk
+          body: |
+            ## 맘케어 설치 방법 (안드로이드)
+            1. 아래 **momcare.apk** 를 눌러 내려받아요.
+            2. "출처를 알 수 없는 앱 설치"를 허용해요. (Chrome 또는 파일 앱)
+            3. 설치 후 실행하고 가족 비밀번호를 입력해요.
+
+            새 버전이 올라오면 같은 링크에서 받아 설치하면 기존 기록을 유지한 채 업데이트돼요.
+
+            빌드: ${{ github.sha }} (#${{ github.run_number }})

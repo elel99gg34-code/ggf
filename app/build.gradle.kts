@@ -13,8 +13,19 @@ android {
         applicationId = "com.momcare.app"
         minSdk = 26
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0.0"
+        // GitHub Actions 빌드 번호를 버전 코드로 사용 → 새 APK 가 기존 앱 위에 업데이트 설치됨
+        versionCode = System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull() ?: 1
+        versionName = "1.0." + (System.getenv("GITHUB_RUN_NUMBER") ?: "0")
+    }
+
+    signingConfigs {
+        // 가족 배포용 고정 디버그 서명 키 (업데이트 시 서명이 바뀌지 않도록). 스토어 배포용 키가 아님.
+        getByName("debug") {
+            storeFile = file("keystore/momcare-debug.jks")
+            storePassword = "android"
+            keyAlias = "momcare"
+            keyPassword = "android"
+        }
     }
 
     buildTypes {
