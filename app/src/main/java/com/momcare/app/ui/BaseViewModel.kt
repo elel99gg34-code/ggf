@@ -32,6 +32,9 @@ abstract class BaseViewModel(app: Application) : AndroidViewModel(app) {
     protected fun <T> Flow<T>.asState(initial: T): StateFlow<T> =
         stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), initial)
 
+    /** 확장 함수(다른 파일)에서 사용할 수 있는 공개 버전 */
+    fun <T> Flow<T>.stateInVm(initial: T): StateFlow<T> = asState(initial)
+
     @OptIn(ExperimentalCoroutinesApi::class)
     protected fun <T> forChild(initial: T, source: (Long) -> Flow<T>): StateFlow<T> =
         selectedChildId.flatMapLatest { source(it) }.asState(initial)

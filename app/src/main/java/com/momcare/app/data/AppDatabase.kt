@@ -18,7 +18,9 @@ import kotlinx.coroutines.flow.asStateFlow
         MealPlan::class, Expense::class, FamilyEvent::class, Allergy::class,
         EmergencyContact::class, MoodLog::class, EpdsResult::class, SelfCareDay::class,
         GearItem::class, SchoolItem::class, StickerLog::class, Reward::class,
-        CounselProgress::class, CounselAlarm::class, CounselCheckin::class, CounselJournal::class
+        CounselProgress::class, CounselAlarm::class, CounselCheckin::class, CounselJournal::class,
+        Contraction::class, KickSession::class, HandoverNote::class, Supply::class,
+        ChecklistItem::class, Habit::class, HabitLog::class, BookLog::class, Recipe::class
     ],
     version = 1,
     exportSchema = false
@@ -50,6 +52,13 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun schoolDao(): SchoolDao
     abstract fun rewardDao(): RewardDao
     abstract fun counselDao(): CounselDao
+    abstract fun pregnancyDao(): PregnancyDao
+    abstract fun handoverDao(): HandoverDao
+    abstract fun supplyDao(): SupplyDao
+    abstract fun checklistDao(): ChecklistDao
+    abstract fun habitDao(): HabitDao
+    abstract fun bookDao(): BookDao
+    abstract fun recipeDao(): RecipeDao
 
     companion object {
         const val NAME = "momcare.db"
@@ -90,13 +99,42 @@ class Prefs(context: Context) {
         _unlocked.value = on
     }
 
-    /** 기저귀 관련 기능 표시 여부 (기본: 숨김, 설정에서 켤 수 있음) */
+    // ── 기능 표시(비공개) 설정: 모두 기본값 false = 숨김 ──
+
+    private val _showChild = MutableStateFlow(sp.getBoolean(KEY_SHOW_CHILD, false))
+    /** 아이·육아 관련 기능 표시 */
+    val showChild: StateFlow<Boolean> = _showChild.asStateFlow()
+
+    private val _showPregnancy = MutableStateFlow(sp.getBoolean(KEY_SHOW_PREGNANCY, false))
+    /** 임신·출산 관련 기능 표시 */
+    val showPregnancy: StateFlow<Boolean> = _showPregnancy.asStateFlow()
+
     private val _showDiaper = MutableStateFlow(sp.getBoolean(KEY_SHOW_DIAPER, false))
+    /** 기저귀 관련 기능 표시 (아이 기능이 켜져 있을 때만 의미 있음) */
     val showDiaper: StateFlow<Boolean> = _showDiaper.asStateFlow()
+
+    fun setShowChild(on: Boolean) {
+        sp.edit().putBoolean(KEY_SHOW_CHILD, on).apply()
+        _showChild.value = on
+    }
+
+    fun setShowPregnancy(on: Boolean) {
+        sp.edit().putBoolean(KEY_SHOW_PREGNANCY, on).apply()
+        _showPregnancy.value = on
+    }
 
     fun setShowDiaper(on: Boolean) {
         sp.edit().putBoolean(KEY_SHOW_DIAPER, on).apply()
         _showDiaper.value = on
+    }
+
+    /** 출산 예정일 (0 이면 미설정) */
+    private val _dueDate = MutableStateFlow(sp.getLong(KEY_DUE_DATE, 0L))
+    val dueDate: StateFlow<Long> = _dueDate.asStateFlow()
+
+    fun setDueDate(ms: Long) {
+        sp.edit().putLong(KEY_DUE_DATE, ms).apply()
+        _dueDate.value = ms
     }
 
     fun setSelectedChild(id: Long) {
@@ -137,6 +175,9 @@ class Prefs(context: Context) {
         private const val KEY_CELSIUS = "use_celsius"
         private const val KEY_UNLOCKED = "app_unlocked"
         private const val KEY_SHOW_DIAPER = "show_diaper"
+        private const val KEY_SHOW_CHILD = "show_child"
+        private const val KEY_SHOW_PREGNANCY = "show_pregnancy"
+        private const val KEY_DUE_DATE = "due_date"
     }
 }
 
@@ -144,4 +185,7 @@ class Prefs(context: Context) {
 class AppContainer(context: Context) {
     val db: AppDatabase = AppDatabase.build(context)
     val prefs: Prefs = Prefs(context)
+    val session = com.momcare.app.data.remote.SessionStore(context)
+    val api = com.momcare.app.data.remote.ApiClient { session.serverUrl.value }
+    val backup = com.momcare.app.data.remote.BackupManager(context)
 }

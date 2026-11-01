@@ -377,7 +377,8 @@ fun AppTextField(
     singleLine: Boolean = true,
     keyboard: KeyboardType = KeyboardType.Text,
     suffix: String? = null,
-    minLines: Int = 1
+    minLines: Int = 1,
+    isPassword: Boolean = false
 ) {
     OutlinedTextField(
         value = value, onValueChange = onChange,
@@ -385,7 +386,9 @@ fun AppTextField(
         modifier = modifier.fillMaxWidth(),
         singleLine = singleLine,
         minLines = if (singleLine) 1 else minLines,
-        keyboardOptions = KeyboardOptions(keyboardType = keyboard),
+        keyboardOptions = KeyboardOptions(keyboardType = if (isPassword) KeyboardType.Password else keyboard),
+        visualTransformation = if (isPassword) androidx.compose.ui.text.input.PasswordVisualTransformation()
+            else androidx.compose.ui.text.input.VisualTransformation.None,
         suffix = suffix?.let { { Text(it) } },
         shape = MaterialTheme.shapes.small
     )
