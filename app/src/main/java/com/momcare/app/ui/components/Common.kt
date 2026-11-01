@@ -389,7 +389,7 @@ fun AppTextField(
         keyboardOptions = KeyboardOptions(keyboardType = if (isPassword) KeyboardType.Password else keyboard),
         visualTransformation = if (isPassword) androidx.compose.ui.text.input.PasswordVisualTransformation()
             else androidx.compose.ui.text.input.VisualTransformation.None,
-        suffix = suffix?.let { { Text(it) } },
+        suffix = if (suffix != null) { { Text(suffix) } } else null,
         shape = MaterialTheme.shapes.small
     )
 }

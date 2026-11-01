@@ -52,15 +52,15 @@ class AuthViewModel(app: Application) : BaseViewModel(app) {
 
     fun clearError() { _state.value = _state.value.copy(error = null) }
 
-    fun login(email: String, password: String) = run(email, password) {
+    fun login(email: String, password: String) = authenticate(email, password) {
         container.api.login(email.trim(), password)
     }
 
-    fun signup(email: String, password: String, nickname: String) = run(email, password) {
+    fun signup(email: String, password: String, nickname: String) = authenticate(email, password) {
         container.api.signup(email.trim(), password, nickname.trim())
     }
 
-    private fun run(email: String, password: String, call: suspend () -> com.momcare.app.data.remote.Session) {
+    private fun authenticate(email: String, password: String, call: suspend () -> com.momcare.app.data.remote.Session) {
         if (_state.value.loading) return
         _state.value = AuthUiState(loading = true)
         viewModelScope.launch {
@@ -213,5 +213,3 @@ private fun PasswordField(value: String, label: String, error: String? = null, o
     )
 }
 
-@Suppress("unused")
-private val authSpacing = Arrangement.spacedBy(12.dp)

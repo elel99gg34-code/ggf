@@ -777,7 +777,7 @@ fun RecipeScreen(nav: NavController, vm: RecipeViewModel = viewModel()) {
         ListScreen(padding) {
             item { AppTextField(query, { query = it }, "레시피·재료 검색") }
             item { ChipSelector(listOf("") + RecipeContent.categories, category, { it.ifEmpty { "전체" } }, { category = it }) }
-            if (months != null) item { com.momcare.app.ui.components.SwitchRow("${child.name}(${months}개월)이 먹을 수 있는 것만", onlyAge, { onlyAge = it }) }
+            if (months != null) item { com.momcare.app.ui.components.SwitchRow("${child?.name ?: "아이"}(${months}개월)이 먹을 수 있는 것만", onlyAge, { onlyAge = it }) }
             if (shown.isEmpty()) item { EmptyState("🍳", "조건에 맞는 레시피가 없어요") }
             items(shown, key = { it.id }) { r ->
                 ItemCard(

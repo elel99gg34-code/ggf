@@ -1,0 +1,23 @@
+# Render 블루프린트 (배포는 사용자가 직접 Render 대시보드에서 연결해야 함)
+services:
+  - type: web
+    name: momcare-server
+    runtime: docker
+    rootDir: server
+    plan: starter
+    healthCheckPath: /health
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: JWT_SECRET
+        generateValue: true
+      - key: MAX_BACKUP_MB
+        value: "25"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: momcare-db
+          property: connectionString
+
+databases:
+  - name: momcare-db
+    plan: basic-256mb
