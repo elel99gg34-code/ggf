@@ -7,6 +7,7 @@
 - 전체 기능 목록: [`docs/FEATURES.md`](docs/FEATURES.md)
 - 구조와 설계: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
 - 서버 API: [`server/README.md`](server/README.md)
+- **휴대폰 설치 방법(QR): [`docs/INSTALL.md`](docs/INSTALL.md)** · [APK 바로 받기](https://github.com/elel99gg34-code/ggf/releases/download/momcare-latest/momcare.apk)
 
 ## 기능 요약 (44개 화면 기능)
 
