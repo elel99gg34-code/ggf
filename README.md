@@ -37,7 +37,8 @@
 3. 첫 실행 시 가족 비밀번호를 입력한다.
 4. 육아·임신 기능이 필요하면 **설정 → 기능 표시**에서 켠다.
 
-> 이 코드를 작성한 클라우드 환경에서는 Android SDK를 내려받을 수 없어 **앱 빌드는 검증하지 못했다.** 서버는 이 환경에서 빌드와 테스트를 마쳤다.
+> **휴대폰에 바로 설치하려면** Android Studio 없이 [`docs/INSTALL.md`](docs/INSTALL.md)의 QR 코드나 [APK 링크](https://github.com/elel99gg34-code/ggf/releases/download/momcare-latest/momcare.apk)를 쓴다.
+> 앱은 코드가 바뀔 때마다 GitHub Actions(`.github/workflows/android-apk.yml`)에서 자동으로 빌드·단위 테스트를 거쳐 `momcare-latest` 릴리스에 올라간다.
 
 ### 서버 (로컬)
 ```bash
