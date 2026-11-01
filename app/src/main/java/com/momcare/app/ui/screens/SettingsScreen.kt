@@ -251,7 +251,7 @@ fun SettingsScreen(nav: NavController, vm: SettingsViewModel = viewModel()) {
             // ── 보안 ──
             SectionCard(title = "앱 잠금", emoji = "🔐") {
                 Text("가족 비밀번호로 잠금이 해제된 상태예요.", style = MaterialTheme.typography.bodySmall)
-                TextButton(onClick = { confirmLock = true }) { Text("다시 잠그기 (다음 실행 시 비밀번호 필요)") }
+                TextButton(onClick = { confirmLock = true }) { Text("지금 다시 잠그기") }
             }
 
             SectionCard(title = "앱 정보", emoji = "ℹ️") {
@@ -282,7 +282,7 @@ fun SettingsScreen(nav: NavController, vm: SettingsViewModel = viewModel()) {
             { confirmRestore = false }, { vm.restoreFromServer() }, confirmText = "복원")
     }
     if (confirmLock) {
-        ConfirmDialog("앱을 다시 잠글까요?", "다음에 앱을 열 때 가족 비밀번호를 입력해야 해요.",
+        ConfirmDialog("앱을 다시 잠글까요?", "바로 잠금 화면으로 바뀌고, 가족 비밀번호를 다시 입력해야 열 수 있어요.",
             { confirmLock = false }, { vm.lockAgain() }, confirmText = "잠그기")
     }
     if (changePw) {

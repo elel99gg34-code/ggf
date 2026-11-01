@@ -23,7 +23,8 @@ import kotlinx.coroutines.flow.asStateFlow
         ChecklistItem::class, Habit::class, HabitLog::class, BookLog::class, Recipe::class
     ],
     version = 1,
-    exportSchema = false
+    // 스키마를 app/schemas 에 내보내 이후 버전에서 마이그레이션(AutoMigration) 작성에 사용
+    exportSchema = true
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun childDao(): ChildDao
@@ -64,8 +65,9 @@ abstract class AppDatabase : RoomDatabase() {
         const val NAME = "momcare.db"
 
         fun build(context: Context): AppDatabase =
+            // 엄마의 기록이 지워지지 않도록 파괴적 마이그레이션은 쓰지 않는다.
+            // 버전을 올릴 때는 반드시 Migration 또는 AutoMigration 을 추가할 것.
             Room.databaseBuilder(context.applicationContext, AppDatabase::class.java, NAME)
-                .fallbackToDestructiveMigration()
                 .build()
     }
 }

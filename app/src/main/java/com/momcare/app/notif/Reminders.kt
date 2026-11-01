@@ -20,6 +20,8 @@ import com.momcare.app.R
 import com.momcare.app.content.CounselContent
 import com.momcare.app.data.CounselAlarm
 import com.momcare.app.data.CounselCheckin
+import com.momcare.app.ui.nav.Features
+import com.momcare.app.ui.nav.Visibility
 import com.momcare.app.util.Dt
 import java.util.concurrent.TimeUnit
 
@@ -63,9 +65,14 @@ object Reminders {
 
     // ───────── 매일 반복 알림 (투약 등) ─────────
 
+    /**
+     * @param fromWorker 알림 워커 안에서 다음 날을 예약할 때 true.
+     *   실행 중인 자기 자신을 REPLACE 로 취소하지 않도록 APPEND_OR_REPLACE 로 이어 붙인다.
+     */
     fun scheduleDaily(
         ctx: Context, key: String, title: String, text: String,
-        hour: Int, minute: Int, untilMillis: Long = 0L, route: String = ""
+        hour: Int, minute: Int, untilMillis: Long = 0L, route: String = "",
+        fromWorker: Boolean = false
     ) {
         val next = Dt.nextOccurrence(hour, minute, 127) ?: return
         if (untilMillis > 0 && next > untilMillis) return
@@ -83,8 +90,11 @@ object Reminders {
             .setInputData(data)
             .addTag(key)
             .build()
-        WorkManager.getInstance(ctx).enqueueUniqueWork(key, ExistingWorkPolicy.REPLACE, req)
+        WorkManager.getInstance(ctx).enqueueUniqueWork(key, policy(fromWorker), req)
     }
+
+    private fun policy(fromWorker: Boolean) =
+        if (fromWorker) ExistingWorkPolicy.APPEND_OR_REPLACE else ExistingWorkPolicy.REPLACE
 
     fun cancel(ctx: Context, key: String) {
         WorkManager.getInstance(ctx).cancelUniqueWork(key)
@@ -97,8 +107,8 @@ object Reminders {
 
     // ───────── 상담 스킬 알람 ─────────
 
-    fun scheduleCounselAlarm(ctx: Context, alarm: CounselAlarm) {
-        cancel(ctx, counselKey(alarm.id))
+    fun scheduleCounselAlarm(ctx: Context, alarm: CounselAlarm, fromWorker: Boolean = false) {
+        if (!fromWorker) cancel(ctx, counselKey(alarm.id))
         if (!alarm.enabled) return
         val next = Dt.nextOccurrence(alarm.hour, alarm.minute, alarm.daysMask) ?: return
         val data = Data.Builder().putLong("alarmId", alarm.id).build()
@@ -107,7 +117,7 @@ object Reminders {
             .setInputData(data)
             .addTag(counselKey(alarm.id))
             .build()
-        WorkManager.getInstance(ctx).enqueueUniqueWork(counselKey(alarm.id), ExistingWorkPolicy.REPLACE, req)
+        WorkManager.getInstance(ctx).enqueueUniqueWork(counselKey(alarm.id), policy(fromWorker), req)
     }
 
     /** 앱 시작 시 저장된 모든 알람을 다시 등록 */
@@ -136,6 +146,10 @@ object Reminders {
     ) {
         val nmc = NotificationManagerCompat.from(ctx)
         if (!nmc.areNotificationsEnabled()) return
+        // 비공개(숨김) 상태인 기능의 알림은 표시하지 않는다
+        val prefs = (ctx.applicationContext as MomCareApp).container.prefs
+        val visibility = Visibility(prefs.showChild.value, prefs.showPregnancy.value, prefs.showDiaper.value)
+        if (route.isNotBlank() && !Features.isAllowed(route, visibility)) return
         val intent = Intent(ctx, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
             putExtra(EXTRA_ROUTE, route)
@@ -151,6 +165,15 @@ object Reminders {
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_REMINDER)
             .setContentIntent(pi)
+            // 잠금화면에서는 내용을 숨기고 앱 이름만 보여준다
+            .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
+            .setPublicVersion(
+                NotificationCompat.Builder(ctx, channel)
+                    .setSmallIcon(R.drawable.ic_launcher_foreground)
+                    .setContentTitle("맘케어 알림")
+                    .setContentText("잠금을 해제하면 내용을 볼 수 있어요")
+                    .build()
+            )
         if (bigText != null) builder.setStyle(NotificationCompat.BigTextStyle().bigText(bigText))
         nmc.notify(id, builder.build())
     }
@@ -178,7 +201,7 @@ class DailyWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx,
 
         Reminders.show(applicationContext, key.hashCode(), Reminders.CHANNEL_GENERAL, title, text, route)
         // 다음 날 같은 시각에 다시 예약 (체인 방식)
-        Reminders.scheduleDaily(applicationContext, key, title, text, hour, minute, until, route)
+        Reminders.scheduleDaily(applicationContext, key, title, text, hour, minute, until, route, fromWorker = true)
         return Result.success()
     }
 }
@@ -216,7 +239,7 @@ class CounselAlarmWorker(ctx: Context, params: WorkerParameters) : CoroutineWork
             route = "counsel_skill/${chosen.id}",
             bigText = big
         )
-        Reminders.scheduleCounselAlarm(applicationContext, alarm)
+        Reminders.scheduleCounselAlarm(applicationContext, alarm, fromWorker = true)
         return Result.success()
     }
 }
