@@ -1,0 +1,21 @@
+name: Build Windows installer
+on:
+  push:
+    branches: [main, "claude/**"]
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -r requirements.txt pyinstaller pytest
+      - run: python -m pytest -q tests
+      - run: pyinstaller --onefile --windowed --name PatternClicker --paths app app/main.py
+      - run: choco install innosetup -y --no-progress
+      - run: '& "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer\setup.iss'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PatternClicker-Setup
+          path: dist-installer/PatternClicker-Setup.exe
