@@ -1,16 +1,20 @@
 # 패턴 클릭 도우미
 
-정해둔 패턴(클릭 위치 / 키 입력 / 대기시간)을 반복 실행해주는 Windows 오토클릭 보조 도구.
+마우스 동작을 녹화해서 그대로 반복 재생해주는 Windows 보조 도구.
 
 ## 사용법
-- **F8**: 현재 마우스 위치를 클릭 단계로 추가
-- **F6**: 시작 / **F7**: 정지 (비상정지)
-- 패턴은 JSON으로 저장/불러오기 가능
-- 대기시간 편차(±%)로 간격을 조금씩 랜덤하게 줄 수 있음
+1. **＋ 패턴 추가(녹화)** → 5초 카운트다운 뒤 녹화 시작
+   - 클릭 위치, 버튼(좌/우/가운데), **길게 누르기**, **가만히 있는 시간**까지 전부 기록
+   - 이 도구 창 안에서 한 클릭은 기록하지 않음
+2. **종료(F7)** → 이름 입력 후 저장. 타임라인(클릭 수·시점·누른 시간)이 표시됨
+3. 목록에서 패턴 선택 → **반복 시작(F6)** → 녹화한 타이밍 그대로 반복
+   - 반복 횟수(0=무한), 반복 사이 대기, 시작 전 대기 설정 가능
+4. **F7**: 녹화/재생 중 언제든 정지 (재생 중 정지하면 눌린 버튼도 자동으로 뗌)
 
-## 설치 exe 만들기
-GitHub Actions(`Build Windows installer`)가 `PatternClicker-Setup.exe`를 빌드해서 Artifacts로 올려줌.
-로컬 빌드: `pip install -r requirements.txt pyinstaller` → `pyinstaller --onefile --windowed --name PatternClicker --paths app app/main.py` → Inno Setup으로 `installer/setup.iss` 컴파일.
+패턴은 JSON으로 저장/불러오기 가능.
+
+## 설치 exe
+GitHub Actions(`Build Windows installer`)가 `PatternClicker-Setup.exe`를 빌드해 Artifacts로 올려줌.
 
 ## 개발
-`python -m pytest tests` (엔진 로직 테스트), 실행은 `python app/main.py`.
+`python -m pytest tests` (엔진 테스트), 실행은 `python app/main.py`.
